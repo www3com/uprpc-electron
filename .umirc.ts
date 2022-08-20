@@ -7,4 +7,5 @@ export default {
     routes: [
         {path: '/', component: 'index'}
     ],
+    theme: { '@primary-color': '#fa541c' }
 };

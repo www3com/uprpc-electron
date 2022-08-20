@@ -4,10 +4,9 @@ import React from "react";
 import {Allotment} from "allotment";
 import Request from "@/pages/components/Request";
 import Response from "@/pages/components/Response";
-
+import {ApiOutlined, SaveOutlined} from "@ant-design/icons";
 
 const {Header, Content} = Layout;
-
 export default () => {
     return (
         <Layout style={{height: '100%', backgroundColor: 'white', padding:'0px 10px'}}>
@@ -16,8 +15,8 @@ export default () => {
                     <Col flex="auto"><Input/></Col>
                     <Col flex="160px">
                         <Space>
-                            <Button type='primary'>发送</Button>
-                            <Button>保存</Button>
+                            <Button type='primary' icon={<ApiOutlined />} >Send</Button>
+                            <Button icon={<SaveOutlined/>}>Save</Button>
                         </Space>
                     </Col>
                 </Row>

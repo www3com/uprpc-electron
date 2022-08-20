@@ -2,7 +2,6 @@ import React from "react";
 import {inject, observer} from "mobx-react";
 import {Table, Tabs} from "antd";
 import AceEditor from "react-ace";
-import "allotment/dist/style.css";
 import "ace-builds/src-noconflict/mode-json";
 import "ace-builds/src-noconflict/ext-language_tools"
 
@@ -35,7 +34,7 @@ const file = ({store}: any) => {
         }
     ];
 
-    return (<Tabs style={{height: "100%"}}>
+    return (<Tabs style={{height: "100%"}} animated={false}>
         <Tabs.TabPane tab='Response' key='response'>
             <AceEditor
                 style={{background: "#fff"}}
@@ -47,8 +46,6 @@ const file = ({store}: any) => {
                 fontSize={13}
                 cursorStart={2}
                 highlightActiveLine={false}
-                // onChange={onChangeData}
-                // commands={commands}
                 showPrintMargin={false}
                 showGutter={false}
                 // value={data}

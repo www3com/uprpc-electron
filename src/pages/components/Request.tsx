@@ -2,17 +2,13 @@ import React, {useState} from "react";
 import {inject, observer} from "mobx-react";
 import {Button, Table, Tabs} from "antd";
 import AceEditor from "react-ace";
-import "allotment/dist/style.css";
 import "ace-builds/src-noconflict/mode-json";
 import "ace-builds/src-noconflict/ext-language_tools"
-
-
 const request = ({store}: any) => {
-
     const dataSource = [
         {
             key: '1',
-            name: '胡彦斌',
+            name: '胡彦斌1',
             age: 32,
             address: '西湖区湖底公园1号',
         },
@@ -43,7 +39,7 @@ const request = ({store}: any) => {
     ];
 
 
-    return (<Tabs style={{height: "100%"}}>
+    return (<Tabs style={{height: "100%"}} animated={false}>
         <Tabs.TabPane tab='Params' key='params'>
             <AceEditor
                 style={{background: "#fff"}}
@@ -54,8 +50,6 @@ const request = ({store}: any) => {
                 name="inputs"
                 fontSize={13}
                 cursorStart={2}
-                // onChange={onChangeData}
-                // commands={commands}
                 showPrintMargin={false}
                 showGutter
                 // value={data}

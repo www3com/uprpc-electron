@@ -1,37 +1,25 @@
-import {ConfigProvider, Layout, Tabs} from "antd";
+import {ConfigProvider} from "antd";
 import zhCN from 'antd/lib/locale/zh_CN';
 import {Provider} from "mobx-react";
 import {Rpc} from "@/stores/rpc";
 import FileTree from "@/pages/components/File";
 import {Allotment} from "allotment";
 import "allotment/dist/style.css";
-import Editor from "@/pages/components/Editor";
 import React from "react";
+import Tabs from "@/pages/components/Tabs";
 
 const store = new Rpc()
 export default function HomePage() {
-
-    const onEdit = (targetKey: React.MouseEvent | React.KeyboardEvent | string, action: 'add' | 'remove') => {
-        store.remove(targetKey)
-    };
     return (
         <Provider store={store}>
             <ConfigProvider locale={zhCN}>
-                <Allotment defaultSizes={[40, 240]}>
-                    <Allotment.Pane minSize={200} maxSize={400}>
+                <Allotment defaultSizes={[50, 220]}>
+                    <Allotment.Pane minSize={260} maxSize={600}>
                         <FileTree/>
                     </Allotment.Pane>
-                    <Tabs hideAdd type="editable-card" onEdit={onEdit} style={{height: "100%"}}>
-                        {store.tabs.map((value: { id: number, title: string }) => {
-                            return (<Tabs.TabPane tab={value.title} key={value.id} style={{height: "100%"}}>
-                                <Editor/>
-                            </Tabs.TabPane>)
-                        })}
-                    </Tabs>
+                    <Tabs/>
                 </Allotment>
-
             </ConfigProvider>
         </Provider>
-
     );
 }

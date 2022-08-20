@@ -4,7 +4,7 @@ import {makeAutoObservable} from "mobx";
 export class Rpc {
     tabs = [
         {id: 1, title: 'New Tab'},
-        {id: 2, title: '我的页面'}
+        {id: 2, title: '我的页面3'}
     ]
 
     constructor() {
