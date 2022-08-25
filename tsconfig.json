@@ -1,6 +1,3 @@
 {
-  "compilerOptions": {
-    "strictNullChecks": false,
-  },
   "extends": "./src/.umi/tsconfig.json"
 }

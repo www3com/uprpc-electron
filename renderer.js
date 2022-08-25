@@ -5,4 +5,4 @@
 // selectively enable features needed in the rendering
 // process.
 
-const t = require('./test.js')
+const t = require('./test.ts')

@@ -1,11 +1,10 @@
 import React from "react";
-import {inject, observer} from "mobx-react";
 import {Table, Tabs} from "antd";
 import AceEditor from "react-ace";
 import "ace-builds/src-noconflict/mode-json";
 import "ace-builds/src-noconflict/ext-language_tools"
 
-const file = ({store}: any) => {
+export default () => {
     const dataSource = [
         {
             key: '1',
@@ -65,5 +64,3 @@ const file = ({store}: any) => {
         </Tabs.TabPane>
     </Tabs>)
 }
-
-export default inject('store')(observer(file))
