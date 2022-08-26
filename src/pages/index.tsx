@@ -1,13 +1,12 @@
 import {ConfigProvider} from "antd";
 import zhCN from 'antd/lib/locale/zh_CN';
-import {Provider} from "mobx-react";
 import FileTree from "@/pages/components/File";
 import {Allotment} from "allotment";
 import "allotment/dist/style.css";
 import React from "react";
 import Tabs from "@/pages/components/Tabs";
 
-import store, {context} from '../stores/rpc'
+import store, {context} from '../stores/store'
 
 
 export default function HomePage() {

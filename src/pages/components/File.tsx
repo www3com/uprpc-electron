@@ -9,7 +9,7 @@ import {
     PlusOutlined,
     SettingOutlined, SmileOutlined
 } from "@ant-design/icons";
-import {context} from "@/stores/rpc";
+import {context} from "@/stores/store";
 
 const file = () => {
     let {store} = useContext(context)

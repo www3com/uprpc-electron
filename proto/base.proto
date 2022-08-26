@@ -1,0 +1,14 @@
+// Copyright 2021 Victory Fintech Co. Ltd.
+syntax = "proto3";
+
+package base;
+
+option java_multiple_files = true;
+option java_package = "com.vdx.base";
+option go_package = "gitlab.com/victoryfintech/ex-proto/public/domain/base";
+
+// Similar to BigDecimal
+message Decimal {
+  int64 unscaled_value = 1;
+  int32 scale = 2;
+}
