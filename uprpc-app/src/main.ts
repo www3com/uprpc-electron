@@ -1,7 +1,8 @@
 // Modules to control application life and create native browser window
+import {init} from './rpc'
+
 const {app, BrowserWindow} = require('electron')
 const path = require('path')
-const {init} = require('./rpc')
 
 function createWindow() {
     // Create the browser window.

@@ -14,8 +14,8 @@ export default function HomePage() {
     return (
         <context.Provider value={{store: new store()}}>
             <ConfigProvider locale={zhCN}>
-                <Allotment defaultSizes={[50, 220]}>
-                    <Allotment.Pane minSize={260} maxSize={600}>
+                <Allotment defaultSizes={[75, 220]}>
+                    <Allotment.Pane minSize={320} maxSize={600}>
                         <FileTree/>
                     </Allotment.Pane>
                     <Tabs/>

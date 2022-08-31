@@ -12,6 +12,8 @@ interface requestProps {
 
 export default ({value, onChange}: requestProps) => {
 
+    console.log("value: ", value)
+
     const [body, setBody] = useState(value?.body);
     const [metadata, setMetadata] = useState(value?.metadata);
 
@@ -42,7 +44,7 @@ export default ({value, onChange}: requestProps) => {
                 showPrintMargin={false}
                 showGutter
                 onChange={aceChange}
-                defaultValue={value?.body}
+                defaultValue={JSON.stringify(value, null, 2)}
                 setOptions={{
                     useWorker: true,
                     displayIndentGuides: true

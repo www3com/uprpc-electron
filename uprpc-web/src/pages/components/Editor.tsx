@@ -5,14 +5,31 @@ import {Allotment} from "allotment";
 import Request from "@/pages/components/Request";
 import Response from "@/pages/components/Response";
 import {ApiOutlined, SaveOutlined} from "@ant-design/icons";
-import {context, EditorProp, RequestProp, ResponseProp} from "@/stores/store";
+import {context, RequestProp, ResponseProp} from "@/stores/store";
 
 const {Header, Content} = Layout;
-export default (editor: EditorProp) => {
+export default (editor: any) => {
+
     let {store} = useContext(context)
+    const getMethod = () => {
+        for (let file of store.files) {
+            for (let service of file.services) {
+                for (let method of service.methods) {
+                    if (method.id == editor.methodId) {
+                        return method;
+                    }
+                }
+            }
+        }
+        return {}
+    }
+
     const [form] = Form.useForm();
-    const [req, setReq] = useState(editor.request)
-    const [res, setRes] = useState(editor.response)
+    let method = getMethod()
+    console.log('me', method)
+    const [req, setReq] = useState(method.request)
+    const [res, setRes] = useState(method.response)
+
     const reqChange = (value: RequestProp) => {
 
     }
@@ -52,8 +69,8 @@ export default (editor: EditorProp) => {
             </Header>
             <Content>
                 <Allotment vertical={true}>
-                    <Request value={editor.request} onChange={reqChange}/>
-                    <Response value={editor.response} onChange={resChange}/>
+                    <Request value={method.request} onChange={reqChange}/>
+                    <Response value={method.response} onChange={resChange}/>
                 </Allotment>
             </Content>
 

@@ -1,0 +1,8 @@
+appId: "haha.app"
+asar: false
+win:
+  target: portable
+electronDownload:
+  # version: 0.0.2
+  # isVerifyChecksum: false
+  platform: win32

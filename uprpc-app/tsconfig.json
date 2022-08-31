@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "noImplicitAny": true,
+    "outDir": "dist",
+    "paths": { },
+    "removeComments": false,
+    "sourceMap": true,
+    "strict": true,
+    "suppressImplicitAnyIndexErrors": true,
+    "target": "esnext"
+  },
+//  "include": [
+//    "ipc.ts",
+//    "electron-app.ts",
+//    "electron-main.ts",
+//    "preload.ts",
+//    "renderer.d.ts",
+//  ],
+  "exclude": [
+    "node_modules",
+    "umi",
+  ]
+}

@@ -4,7 +4,7 @@ import {Button, Select, Space, Table, Tabs} from "antd";
 import "allotment/dist/style.css";
 import Editor from "@/pages/components/Editor";
 import {EyeOutlined} from "@ant-design/icons";
-import {context, EditorProp} from '../../stores/store'
+import {context} from '../../stores/store'
 
 const tabs = () => {
     let {store} = useContext(context)
@@ -21,10 +21,12 @@ const tabs = () => {
     </Space>;
 
     return (<Tabs hideAdd type="editable-card" onEdit={onEdit} style={{height: "100%"}} size='small'
+                  onTabClick={(key: string) => store.selectTab(key)}
+                  activeKey={store.selectedTab}
                   tabBarExtraContent={extra}>
-        {store.tabs.map((value: EditorProp) => {
-            return (<Tabs.TabPane tab={value.title} key={value.id} style={{height: "100%"}}>
-                <Editor {...value}/>
+        {store.tabs.map((value: any) => {
+            return (<Tabs.TabPane tab={value.title} key={value.key} style={{height: "100%"}}>
+                <Editor methodId={value.key}/>
             </Tabs.TabPane>)
         })}
     </Tabs>)
