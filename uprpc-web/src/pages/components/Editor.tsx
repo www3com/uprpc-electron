@@ -4,7 +4,7 @@ import React, {useContext, useState} from "react";
 import {Allotment} from "allotment";
 import Request from "@/pages/components/Request";
 import Response from "@/pages/components/Response";
-import {ApiOutlined, SaveOutlined} from "@ant-design/icons";
+import {ApiOutlined, SaveOutlined, SendOutlined} from "@ant-design/icons";
 import {context, RequestProp, ResponseProp} from "@/stores/store";
 
 const {Header, Content} = Layout;
@@ -61,7 +61,7 @@ export default (editor: any) => {
                     </Col>
                     <Col flex="160px">
                         <Space>
-                            <Button type='primary' icon={<ApiOutlined/>} onClick={onSend}>Send</Button>
+                            <Button type='primary' icon={<SendOutlined />} onClick={onSend}>Send</Button>
                             <Button icon={<SaveOutlined/>} onClick={onSave}>Save</Button>
                         </Space>
                     </Col>

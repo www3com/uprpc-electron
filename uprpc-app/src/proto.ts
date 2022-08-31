@@ -1,13 +1,11 @@
-import {Root, OneOf, Type, Enum, Field, MapField, Method, Service, Namespace, load} from 'protobufjs'
+import {Root, OneOf, Type, Enum, Field, MapField,  Service,  load} from 'protobufjs'
 import {v4} from 'uuid';
-import {basename} from 'path';
 
 const MAX_STACK_SIZE = 3;
 
 type StackDepth = {
     [type: string]: number;
 };
-
 
 export async function parser(path: string) {
     let root = new Root();
@@ -29,7 +27,6 @@ export async function parser(path: string) {
     return parsedServices;
 }
 
-
 function parseService(root: Root, namespace: string, services: any) {
     let parsedServices = []
     for (let key in services) {
@@ -45,7 +42,6 @@ function parseService(root: Root, namespace: string, services: any) {
 
     return parsedServices;
 }
-
 
 function parseMethod(root: Root, methods: any) {
     let parsedMethods = [];
@@ -71,7 +67,6 @@ function parseTypeFields(type: Type, stackDepth: StackDepth = {}): object {
     stackDepth[type.name]++;
 
     const fieldsData: { [key: string]: any } = {};
-
     return type.fieldsArray.reduce((data, field) => {
         field.resolve();
 
@@ -106,7 +101,6 @@ function parseField(field: Field, stackDepth?: StackDepth): any {
 
         if (mockPropertyValue === null) {
             const resolvedType = field.resolvedType;
-
             if (resolvedType instanceof Type) {
                 if (resolvedType.oneofs) {
                     mockPropertyValue = pickOneOf(resolvedType.oneofsArray);
@@ -134,7 +128,6 @@ function parseField(field: Field, stackDepth?: StackDepth): any {
     }
 
     const mockPropertyValue = parseScalar(field.type, field.name);
-
     if (mockPropertyValue === null) {
         const resolvedField = field.resolve();
 
@@ -150,7 +143,6 @@ function pickOneOf(oneofs: OneOf[]) {
         return fields;
     }, {});
 }
-
 
 function parseScalar(type: string, fieldName: string): any {
     switch (type) {
@@ -193,10 +185,8 @@ function parseScalar(type: string, fieldName: string): any {
 
 function interpretMockViaFieldName(fieldName: string): string {
     const fieldNameLower = fieldName.toLowerCase();
-
     if (fieldNameLower.startsWith('id') || fieldNameLower.endsWith('id')) {
         return v4();
     }
-
     return '';
 }

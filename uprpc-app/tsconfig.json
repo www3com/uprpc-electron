@@ -14,13 +14,6 @@
     "suppressImplicitAnyIndexErrors": true,
     "target": "esnext"
   },
-//  "include": [
-//    "ipc.ts",
-//    "electron-app.ts",
-//    "electron-main.ts",
-//    "preload.ts",
-//    "renderer.d.ts",
-//  ],
   "exclude": [
     "node_modules",
     "umi",

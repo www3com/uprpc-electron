@@ -1,5 +1,6 @@
 import {makeAutoObservable} from "mobx";
 import React, {createContext} from "react";
+import paths from "@/pages/components/Paths";
 
 const TAB_TYPE_RPC = "rpc";
 
@@ -47,11 +48,14 @@ export default class Rpc {
     }];
 
     selectedTab = '1';
+    pathsDrawerVisible = false;
+    paths: string[] = ['222'];
 
     * init(): any {
         let files = yield window.rpc.getFiles()
         this.files = JSON.parse(files)
-        console.log(this.files)
+        let paths = yield window.rpc.getPaths()
+        this.paths = paths
     }
 
     selectTab(key: string) {
@@ -80,7 +84,7 @@ export default class Rpc {
         this.tabs.forEach((item, index) => {
             if (item.key == key) {
                 this.tabs.splice(index, 1);
-                let pos = index  < this.tabs.length ? index : this.tabs.length - 1;
+                let pos = index < this.tabs.length ? index : this.tabs.length - 1;
                 this.selectedTab = this.tabs[pos].key
             }
         })
@@ -93,9 +97,23 @@ export default class Rpc {
     }
 
     * importFile(): any {
-        let res = yield window.rpc.importFile()
-        console.log('import file ', res)
-        return res;
+        return yield window.rpc.importFile()
+    }
+
+    showPaths(visible: boolean) {
+        this.pathsDrawerVisible = visible
+    }
+
+    * addPath(): any {
+        let res = yield window.rpc.addPath()
+        if (res.success) {
+            this.paths = res.paths;
+        }
+    }
+
+    * removePath(path: string) {
+        yield window.rpc.removePath(path)
+        this.paths = yield window.rpc.getPaths()
     }
 }
 
