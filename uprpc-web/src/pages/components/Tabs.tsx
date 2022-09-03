@@ -1,10 +1,10 @@
 import React, {useContext} from "react";
 import {observer} from "mobx-react-lite";
-import {Button, Select, Space, Table, Tabs} from "antd";
+import {Button, Select, Space, Tabs} from "antd";
 import "allotment/dist/style.css";
 import Editor from "@/pages/components/Editor";
 import {EyeOutlined} from "@ant-design/icons";
-import {context} from '../../stores/store'
+import {context} from '@/stores/store'
 
 const tabs = () => {
     let {store} = useContext(context)
@@ -24,7 +24,7 @@ const tabs = () => {
                   onTabClick={(key: string) => store.selectTab(key)}
                   activeKey={store.selectedTab}
                   tabBarExtraContent={extra}>
-        {store.tabs.map((value: any) => {
+        {store.openTabs.map((value: any) => {
             return (<Tabs.TabPane tab={value.title} key={value.key} style={{height: "100%"}}>
                 <Editor methodId={value.key}/>
             </Tabs.TabPane>)

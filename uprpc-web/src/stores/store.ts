@@ -1,61 +1,39 @@
 import {makeAutoObservable} from "mobx";
-import React, {createContext} from "react";
-import paths from "@/pages/components/Paths";
-
-const TAB_TYPE_RPC = "rpc";
-
-declare global {  //设置全局属性
-    interface Window {  //window对象属性
-        rpc: any;   //加入对象
-    }
-}
-
-export interface MetadataProp {
-    key: string,
-    value: string,
-    method: string
-}
-
-export interface RequestProp {
-    body: string
-    metadata: MetadataProp[]
-}
-
-export interface ResponseProp {
-    body: string
-    metadata: MetadataProp[]
-}
-
-export interface File {
-    id: string,
-    name: string,
-    type: string,
-    children: any
-}
+import {createContext} from "react";
+import {FullMethod, Proto, Response, Tab} from "@/types/types";
 
 export default class Rpc {
     constructor() {
+        console.log('init rpc store')
         makeAutoObservable(this)
         this.init()
     }
 
-    files: any = [];
-
-    tabs = [{
-        key: '1',
-        title: 'New Tab',
-        type: 'file'
-    }];
-
+    protos: Proto[] = [];
+    fullMethods: FullMethod[] = [];
+    openTabs: Tab[] = [{key: '1', title: 'New Tab', type: 'file'}];
     selectedTab = '1';
     pathsDrawerVisible = false;
-    paths: string[] = ['222'];
+    paths: string[] = [];
+    responses: any = {};
 
     * init(): any {
-        let files = yield window.rpc.getFiles()
-        this.files = JSON.parse(files)
-        let paths = yield window.rpc.getPaths()
-        this.paths = paths
+        window.rpc.handleResponse((event: any, value: any) => this.handleResponse(value))
+        this.paths = yield window.rpc.getPaths()
+        this.protos = JSON.parse(yield window.rpc.getFiles())
+        this.protos.forEach((proto) => {
+            proto.services.forEach((service) => {
+                service.methods.forEach((method) => {
+                    this.fullMethods.push({
+                        host: proto.host,
+                        path: proto.path,
+                        namespace: service.namespace,
+                        service: service.name,
+                        ...method
+                    })
+                })
+            })
+        })
     }
 
     selectTab(key: string) {
@@ -63,36 +41,36 @@ export default class Rpc {
     }
 
     openTab(key: string, title: string, type: string) {
-        if (this.tabs.length == 1 && this.tabs[0].key === '1') {
-            this.tabs.splice(0, 1);
+        if (this.openTabs.length == 1 && this.openTabs[0].key === '1') {
+            this.openTabs.splice(0, 1);
         }
-        for (let tab of this.tabs) {
+        for (let tab of this.openTabs) {
             if (tab.key === key) {
                 this.selectedTab = key
                 return;
             }
         }
-        this.tabs.push({key: key, title: title, type: type})
+        this.openTabs.push({key: key, title: title, type: type})
         this.selectedTab = key
     }
 
-
     remove(key: any) {
-        if (this.tabs.length == 1) {
+        if (this.openTabs.length == 1) {
             return
         }
-        this.tabs.forEach((item, index) => {
+        this.openTabs.forEach((item, index) => {
             if (item.key == key) {
-                this.tabs.splice(index, 1);
-                let pos = index < this.tabs.length ? index : this.tabs.length - 1;
-                this.selectedTab = this.tabs[pos].key
+                this.openTabs.splice(index, 1);
+                let pos = index < this.openTabs.length ? index : this.openTabs.length - 1;
+                this.selectedTab = this.openTabs[pos].key
             }
         })
 
     }
 
-    * send(editor: any): any {
-        let s = yield window.rpc.send(JSON.stringify(editor))
+    * send(method: any): any {
+        console.log("request parameter: ", method)
+        let s = yield window.rpc.send(JSON.stringify(method))
         console.log(s)
     }
 
@@ -115,7 +93,15 @@ export default class Rpc {
         yield window.rpc.removePath(path)
         this.paths = yield window.rpc.getPaths()
     }
+
+    handleResponse(response: Response) {
+        this.responses[response.id] = response.responseBody;
+        console.log("处理数据：", response.responseBody, this.responses)
+    }
+
+
 }
 
+export const store = new Rpc();
 
-export const context = createContext({store: new Rpc()});
+export const context = createContext({store: store});

@@ -3,20 +3,21 @@ import {Table, Tabs} from "antd";
 import AceEditor from "react-ace";
 import "ace-builds/src-noconflict/mode-json";
 import "ace-builds/src-noconflict/ext-language_tools"
-import {ResponseProp} from "@/stores/store";
 
 interface responseProps {
-    value?: ResponseProp,
-    onChange?: (value: ResponseProp) => void
+    body: string,
+    metadata?: [],
+    onChange?: (body: string, metadata: []) => void
 }
 
-export default ({value, onChange}: responseProps) => {
+export default ({body, metadata, onChange}: responseProps) => {
 
     const columns = [
         {title: 'Key', dataIndex: 'key', key: 'key'},
         {title: 'Value', dataIndex: 'value', key: 'value'}
     ];
 
+    console.log('response compo,' , body)
     return (<Tabs style={{height: "100%"}} animated={false}>
         <Tabs.TabPane tab='Response' key='response'>
             <AceEditor
@@ -31,7 +32,7 @@ export default ({value, onChange}: responseProps) => {
                 highlightActiveLine={false}
                 showPrintMargin={false}
                 showGutter={false}
-                value={value?.body}
+                value={body}
                 setOptions={{
                     showLineNumbers: false,
                     highlightGutterLine: false,
@@ -44,7 +45,7 @@ export default ({value, onChange}: responseProps) => {
             />
         </Tabs.TabPane>
         <Tabs.TabPane tab='Metadata' key='metadata'>
-            <Table size='small' bordered={true} pagination={false} dataSource={value?.metadata} columns={columns}/>
+            <Table size='small' bordered={true} pagination={false} columns={columns}/>
         </Tabs.TabPane>
     </Tabs>)
 }

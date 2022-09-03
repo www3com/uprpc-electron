@@ -3,22 +3,20 @@ import {Button, Table, Tabs} from "antd";
 import AceEditor from "react-ace";
 import "ace-builds/src-noconflict/mode-json";
 import "ace-builds/src-noconflict/ext-language_tools"
-import {RequestProp} from "@/stores/store";
 
 interface requestProps {
-    value?: RequestProp,
-    onChange?: (value: RequestProp) => void
+    body: string,
+    metadata?: [],
+    onChange?: (body: string, metadata: []) => void
 }
 
-export default ({value, onChange}: requestProps) => {
+export default ({body, metadata, onChange}: requestProps) => {
 
-    console.log("value: ", value)
-
-    const [body, setBody] = useState(value?.body);
-    const [metadata, setMetadata] = useState(value?.metadata);
+    const [bodyState, setBodyState] = useState(body);
+    const [metadataState, setMetadataState] = useState(metadata);
 
     const aceChange = (v: string) => {
-        setBody(v)
+        setBodyState(v)
     }
 
     const columns = [
@@ -44,7 +42,7 @@ export default ({value, onChange}: requestProps) => {
                 showPrintMargin={false}
                 showGutter
                 onChange={aceChange}
-                defaultValue={JSON.stringify(value, null, 2)}
+                defaultValue={body}
                 setOptions={{
                     useWorker: true,
                     displayIndentGuides: true
@@ -53,7 +51,7 @@ export default ({value, onChange}: requestProps) => {
             />
         </Tabs.TabPane>
         <Tabs.TabPane tab='Metadata' key='metadata'>
-            <Table size='small' bordered={true} pagination={false} dataSource={value?.metadata  } columns={columns}/>
+            <Table size='small' bordered={true} pagination={false} dataSource={metadata} columns={columns}/>
         </Tabs.TabPane>
     </Tabs>)
 }

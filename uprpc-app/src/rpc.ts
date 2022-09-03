@@ -1,6 +1,7 @@
 import {addFile, getFiles, getPaths, savePaths} from './store';
-import {ipcMain} from 'electron';
+import {BrowserWindow, ipcMain} from 'electron';
 import * as electron from "electron";
+import {send} from "./proto";
 
 const {parser} = require('./proto')
 
@@ -8,9 +9,7 @@ async function importFile() {
     const result = await electron.dialog.showOpenDialog({
         title: "Import File",
         properties: ["openFile", 'multiSelections'],
-        filters: [
-            {name: 'proto', extensions: ['proto']},
-        ],
+        filters: [{name: 'proto', extensions: ['proto']}],
     })
 
     if (result.canceled) {
@@ -19,8 +18,8 @@ async function importFile() {
 
     for (let path of result.filePaths) {
         try {
-            let services = await parser(path);
-            addFile(path, services)
+            let proto = await parser(path);
+            addFile(proto)
         } catch (e: any) {
             return {success: false, message: e.message}
         }
@@ -64,10 +63,11 @@ function removePath(path: string) {
 }
 
 
-export function init() {
+export function init(window: BrowserWindow) {
     ipcMain.handle("importFile", (event: any) => importFile())
     ipcMain.handle("getFiles", (event: any) => listFiles())
     ipcMain.handle("addPath", (event: any) => addPath())
     ipcMain.handle("removePath", (event: any, path) => removePath(path))
     ipcMain.handle("getPaths", (event: any) => getPaths())
+    ipcMain.handle("send", (event: any, method) => send(window, method))
 }

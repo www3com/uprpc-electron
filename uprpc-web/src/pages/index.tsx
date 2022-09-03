@@ -6,13 +6,12 @@ import "allotment/dist/style.css";
 import React from "react";
 import Tabs from "@/pages/components/Tabs";
 
-import store, {context} from '../stores/store'
-
+import {store, context} from '@/stores/store'
 
 export default function HomePage() {
 
     return (
-        <context.Provider value={{store: new store()}}>
+        <context.Provider value={{store: store}}>
             <ConfigProvider locale={zhCN}>
                 <Allotment defaultSizes={[75, 220]}>
                     <Allotment.Pane minSize={320} maxSize={600}>

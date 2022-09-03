@@ -11,4 +11,5 @@ contextBridge.exposeInMainWorld('rpc', {
     addPath: () => ipcRenderer.invoke('addPath'),
     removePath: (path: string) => ipcRenderer.invoke('removePath', path),
     getPaths: () => ipcRenderer.invoke('getPaths'),
+    handleResponse: (callback: any) => ipcRenderer.on('updateResponse', callback)
 })

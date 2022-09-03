@@ -19,30 +19,31 @@ import {
 } from "@ant-design/icons";
 import {context} from "@/stores/store";
 import Paths from "@/pages/components/Paths";
+import {Proto} from "@/types/types";
 
 const file = () => {
     let {store} = useContext(context);
     const [hidden, setHidden] = useState(true);
 
-    const parse = (files: any) => {
+    const parse = (protos: Proto[]) => {
         let treeData = [];
-        for (let f of files) {
-            let fileItem: any = {key: f.id, title: f.name, icon: <FileOutlined/>, children: []};
+        for (let proto of protos) {
+            let item: any = {key: proto.id, title: proto.name, icon: <FileOutlined/>, children: []};
 
-            for (let service of f.services) {
+            for (let service of proto.services) {
                 let methods = [];
                 for (let m of service.methods) {
                     methods.push({key: m.id, title: m.name, icon: <ApiOutlined/>})
                 }
 
-                fileItem.children.push({
+                item.children.push({
                     key: service.id,
                     title: service.name,
                     icon: <DatabaseOutlined/>,
                     children: methods
                 })
             }
-            treeData.push(fileItem)
+            treeData.push(item)
         }
         return treeData;
     }
@@ -122,7 +123,7 @@ const file = () => {
                             onSelect={onSelect}
                             switcherIcon={<DownOutlined/>}
                             defaultExpandedKeys={['0-0-0']}
-                            treeData={parse(store.files)}
+                            treeData={parse(store.protos)}
                         />
 
                     </Tabs.TabPane>

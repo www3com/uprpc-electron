@@ -1,3 +1,6 @@
+import {Proto} from "./types";
+
+
 const Store = require('electron-store');
 const uuid = require('uuid')
 const FILES_KEY = "files";
@@ -17,21 +20,15 @@ export function getFiles() {
     return files == null ? [] : files;
 }
 
-export function addFile(path: string, services: any) {
+export function addFile(proto: Proto) {
     let localFiles = getFiles()
     for (let i = 0; i < localFiles.length; i++) {
-        if (localFiles[i].path === path) {
+        if (localFiles[i].path === proto.path) {
             localFiles.splice(i, 1)
             break
         }
     }
-
-    localFiles.push({
-        id: uuid.v4(),
-        name: basename(path),
-        path: path,
-        services: services
-    })
+    localFiles.push(proto)
     store.set(FILES_KEY, localFiles)
 }
 
