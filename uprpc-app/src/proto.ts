@@ -1,63 +1,54 @@
-import {Root, OneOf, Type, Enum, Field, MapField, Service as ProtoService} from 'protobufjs'
+import {Root, OneOf, Type, Enum, Field, MapField, Service as ProtoService, load} from 'protobufjs'
 import {v4} from 'uuid';
-import {load} from '@grpc/proto-loader';
-// import {credentials, loadPackageDefinition} from '@grpc/grpc-js';
+import {loadSync} from '@grpc/proto-loader';
+import {credentials, GrpcObject, loadPackageDefinition} from '@grpc/grpc-js';
 import {BrowserWindow} from "electron";
 import {basename} from "path";
-import {FullMethod, Method, Proto, Service, StackDepth} from "./types";
-import {loadPackageDefinition} from "@grpc/grpc-js";
+import {Method, Proto, Service, StackDepth} from "./types";
 
 const MAX_STACK_SIZE = 3;
 
 
 export async function send(window: BrowserWindow, params: string) {
-    // let fullMethod: FullMethod = JSON.parse(params);
-    // debugger
-    // let packageDefinition = loadSync(
-    //     [fullMethod.path],
-    //     {
-    //         keepCase: true,
-    //         longs: String,
-    //         enums: String,
-    //         defaults: true,
-    //         oneofs: true,
-    //         includeDirs: ['/Users/jason/dev/grpc/proto']
-    //     });
-    //
-    //
-    // let grpcObject = loadPackageDefinition(packageDefinition);
-    //
-    // let service;
-    // if (fullMethod.namespace == '') {
-    //     service = grpcObject[fullMethod.service];
-    // } else {
-    //     service = grpcObject[fullMethod.namespace][fullMethod.service]
-    // }
-    //
-    // let client = new service(fullMethod.host, credentials.createInsecure());
-    // debugger
-    // client[fullMethod.name]({"ownerId": 3}, (err: any, response: any) => {
-    //         if (err != null) {
-    //             console.log(err)
-    //         }
-    //         window.webContents.send('updateResponse', {id: fullMethod.id, responseBody: response})
-    //         console.log(response)
-    //     }
-    // );
+    let req = JSON.parse(params);
+    debugger
+    let packageDefinition = loadSync(
+        [req.path],
+        {
+            keepCase: true,
+            longs: String,
+            enums: String,
+            defaults: true,
+            oneofs: true,
+            includeDirs: ['/Users/jason/dev/grpc/proto']
+        });
+
+
+    let grpcObject = loadPackageDefinition(packageDefinition);
+
+    let service;
+    if (req.namespace == '') {
+        service = grpcObject[req.service];
+    } else {
+        service = grpcObject[req.namespace][req.service]
+    }
+
+    let client = new service(req.host, credentials.createInsecure());
+    client[req.method](req.requestBody, (err: any, response: any) => {
+            if (err != null) {
+                console.log(err)
+            }
+            window.webContents.send('updateResponse', {id: req.id, responseBody: response})
+            console.log(response)
+        }
+    );
 }
 
 export async function parser(path: string): Promise<Proto> {
-    let root1 = new Root();
-    let root = await load(path,      {
-                keepCase: true,
-                longs: String,
-                enums: String,
-                defaults: true,
-                oneofs: true,
-                includeDirs: ['/Users/jason/dev/grpc/proto']
-            })
+    let root = new Root();
+    await load(path, root)
 
-    const protoAST = loadPackageDefinition(root);
+
     let parsedServices = [];
     for (let key in root.nested) {
         let node = root.nested[key]
@@ -68,7 +59,7 @@ export async function parser(path: string): Promise<Proto> {
             // @ts-ignore
             parsedServices.push(...parseService(root, key, node.nested))
         } else if (node.constructor.name === 'Service') {
-            parsedServices.push(...parseService(root1, key, {key: node}))
+            parsedServices.push(...parseService(root, key, {key: node}))
         }
     }
 
