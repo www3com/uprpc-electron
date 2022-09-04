@@ -21,8 +21,8 @@ function registerService(server, grpcDefinition) {
 }
 
 // 简单gRPC调用
-function sayHelloSimple(req, callback) {
-  callback(null, { message: "Hello " + req.request.name });
+function sayHelloSimple(call, callback) {
+  callback(null, { message: "Hello " + call.request.name });
 }
 
 async function start() {
@@ -34,7 +34,7 @@ async function start() {
 
   await new Promise((resolve, reject) => {
     server.bindAsync(
-      `0.0.0.0:50051`,
+      `0.0.0.0:9000`,
       grpc.ServerCredentials.createInsecure(),
       (err, result) => (err ? reject(err) : resolve(result))
     );

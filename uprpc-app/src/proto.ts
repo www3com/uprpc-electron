@@ -20,7 +20,7 @@ export async function send(window: BrowserWindow, params: string) {
             enums: String,
             defaults: true,
             oneofs: true,
-            includeDirs: ['/Users/steven/workspace/gitlab/ex-proto/base-api/src/main/proto']
+            includeDirs: ['../uprpc-server/proto/']
         });
 
 

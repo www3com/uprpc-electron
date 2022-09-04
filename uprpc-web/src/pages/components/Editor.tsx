@@ -36,6 +36,7 @@ const editor = ({methodId}: { methodId: string }) => {
     // const [requestBody, setRequestBody] = useState(method.requestBody)
     // const [responseBody, setResponseBody] = useState(store.responses[methodId])
     const [host, setHost] = useState(method.host);
+    const [reqBody, setReqBody] = useState(method.requestBody);
     // const reqChange = (value: RequestProp) => {
     //
     // }
@@ -53,7 +54,11 @@ const editor = ({methodId}: { methodId: string }) => {
     }
 
     const getValue = () => {
-        return {...method, host: host, requestBody: method.requestBody, responseBody: store.responses[methodId]}
+        try {
+            let param = JSON.parse(reqBody);
+            return {...method, host: host, requestBody: param, responseBody: store.responses[methodId]}
+        } catch (e) {
+        }
     }
 
     const columns = [
@@ -78,7 +83,7 @@ const editor = ({methodId}: { methodId: string }) => {
             </Header>
             <Content>
                 <Allotment vertical={true}>
-                    <Request body={JSON.stringify(method.requestBody, null, 2)}/>
+                    <Request body={JSON.stringify(method.requestBody, null, 2)} onChange={(v) => setReqBody(v)}/>
 
                     <Response body={JSON.stringify(store.responses[methodId], null, "\t")}/>
 
