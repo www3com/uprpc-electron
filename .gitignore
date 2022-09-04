@@ -1,3 +1,5 @@
 /node_modules
 uprpc-app/dist
 uprpc-app/node_modules
+Uprpc-mock/dist
+uprpc-mock/node_modules

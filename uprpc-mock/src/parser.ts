@@ -10,17 +10,23 @@ import {
     MapField,
     OneOf,
     Service
-} from 'protobufjs'
+} from 'protobufjs';
+import {v4} from 'uuid';
 
-var PROTO_PATH = '/Users/jason/WebstormProjects/grpc-new/protos/helloworld.proto';
+import path = require("path");
+
+var PROTO_PATH = path.join(__dirname, '../proto/user.proto');
 
 main()
 
 async function main() {
+    console.log("Parse proto path: ", PROTO_PATH)
     let root = await load(PROTO_PATH, new Root());
 
     let services = parser(root, "", root.nested)
-    console.log(JSON.stringify(services))
+    console.log("-----------------------");
+    console.log(JSON.stringify(services));
+    console.log("-----------------------");
 }
 
 function parser(root: Root, namespaceName: string, children: any): any {
@@ -44,14 +50,14 @@ function parseService(root: Root, namespaceName: string, service: Service) {
         let method = service.methods[methodName];
         let reqType = root.lookupType(method.requestType);
         parsedMethods.push({
-            // id: v4(),
+            id: v4(),
             name: methodName,
             requestBody: parseTypeFields(reqType)
         });
     }
 
     return {
-        // id: v4(),
+        id: v4(),
         name: service.name,
         namespace: namespaceName,
         methods: parsedMethods
@@ -113,22 +119,22 @@ function pickOneOf(oneofs: OneOf[]) {
 
 function parseScalar(type: string) {
     let map = {
-        'string': 'str',
+        'string': '',
         'number': 1,
         'bool': true,
-        'int32': 2,
-        'int64': 5,
-        'uint32': 4,
-        'uint64': 5,
-        'sint32': 100,
-        'sint64': 1000,
-        'fixed32': 2000,
-        'fixed64': 3000,
-        'sfixed32': 4000,
-        'sfixed64': 5000,
-        'double': 1.2,
-        'float': 1.1,
-        'bytes': new Buffer("")
+        'int32': 3200,
+        'int64': 6400,
+        'uint32': 32000,
+        'uint64': 64000,
+        'sint32': 320,
+        'sint64': 640,
+        'fixed32': 3200,
+        'fixed64': 64000,
+        'sfixed32': 320,
+        'sfixed64': 640,
+        'double': 3.141592,
+        'float': 5.512322,
+        'bytes': Buffer.from([])
     }
     return map[type]
 }
