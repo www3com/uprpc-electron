@@ -1,9 +1,9 @@
 import {addFile, getFiles, getPaths, savePaths} from './store';
 import {BrowserWindow, ipcMain} from 'electron';
 import * as electron from "electron";
-import {send} from "./proto";
+import {send} from "./proto/client";
 
-const {parser} = require('./proto')
+const {loadProto} = require('./proto/parser')
 
 async function importFile() {
     const result = await electron.dialog.showOpenDialog({
@@ -18,7 +18,7 @@ async function importFile() {
 
     for (let path of result.filePaths) {
         try {
-            let proto = await parser(path);
+            let proto = await loadProto(path);
             addFile(proto)
         } catch (e: any) {
             return {success: false, message: e.message}
