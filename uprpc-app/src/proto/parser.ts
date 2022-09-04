@@ -113,24 +113,25 @@ function pickOneOf(oneofs: OneOf[]) {
     }, {});
 }
 
+
 function parseScalar(type: string) {
     let map = {
-        'string': 'str',
+        'string': '',
         'number': 1,
         'bool': true,
-        'int32': 2,
-        'int64': 5,
-        'uint32': 4,
-        'uint64': 5,
-        'sint32': 100,
-        'sint64': 1000,
-        'fixed32': 2000,
-        'fixed64': 3000,
-        'sfixed32': 4000,
-        'sfixed64': 5000,
-        'double': 1.2,
-        'float': 1.1,
-        'bytes': new Buffer("")
+        'int32': 3200,
+        'int64': 6400,
+        'uint32': 32000,
+        'uint64': 64000,
+        'sint32': 320,
+        'sint64': 640,
+        'fixed32': 3200,
+        'fixed64': 64000,
+        'sfixed32': 320,
+        'sfixed64': 640,
+        'double': 3.141592,
+        'float': 5.512322,
+        'bytes': Buffer.from([])
     }
     return map[type]
 }
