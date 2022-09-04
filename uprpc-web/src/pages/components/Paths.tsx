@@ -8,8 +8,6 @@ import {context} from '@/stores/store'
 
 const paths = () => {
     let {store} = useContext(context)
-
-
     return (
         <Drawer title='Import Paths' placement='left' width={500} visible={store.pathsDrawerVisible}
                 onClose={() => store.showPaths(false)} style={{padding: 5}}
