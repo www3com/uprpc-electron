@@ -16,6 +16,7 @@ export default ({body, metadata, onChange}: requestProps) => {
     const [metadataState, setMetadataState] = useState(metadata);
 
     const aceChange = (v: string) => {
+        setBodyState(v);
         onChange(v, metadataState)
     }
 

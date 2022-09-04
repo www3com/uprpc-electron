@@ -34,7 +34,7 @@ async function start() {
 
   await new Promise((resolve, reject) => {
     server.bindAsync(
-      `0.0.0.0:9000`,
+      `0.0.0.0:9005`,
       grpc.ServerCredentials.createInsecure(),
       (err, result) => (err ? reject(err) : resolve(result))
     );

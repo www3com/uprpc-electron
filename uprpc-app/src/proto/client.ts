@@ -14,7 +14,7 @@ export async function send(window: BrowserWindow, params: string) {
             enums: String,
             defaults: true,
             oneofs: true,
-            includeDirs: ['/Users/jason/dev/grpc/proto']
+            includeDirs: ['../uprpc-server/proto']
         });
 
 
@@ -28,7 +28,7 @@ export async function send(window: BrowserWindow, params: string) {
     }
 
     let client = new service(req.host, credentials.createInsecure());
-    client[req.method](req.requestBody, (err: any, response: any) => {
+    client[req.name](req.requestBody, (err: any, response: any) => {
             if (err != null) {
                 console.log(err)
             }
