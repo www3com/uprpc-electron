@@ -14,7 +14,7 @@ export async function send(window: BrowserWindow, params: string) {
             enums: String,
             defaults: true,
             oneofs: true,
-            includeDirs: ['../uprpc-server/proto']
+            includeDirs: ['../uprpc-mock/proto']
         });
 
 
