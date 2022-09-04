@@ -12,11 +12,9 @@ interface requestProps {
 
 export default ({body, metadata, onChange}: requestProps) => {
 
-    // const [bodyState, setBodyState] = useState(body);
     const [metadataState, setMetadataState] = useState(metadata);
 
     const aceChange = (v: string) => {
-        setBodyState(v);
         onChange(v, metadataState)
     }
 
