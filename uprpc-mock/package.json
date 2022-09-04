@@ -10,7 +10,6 @@
     "parser": "tsc && node dist/parser.js"
   },
   "devDependencies": {
-    "@types/electron": "^1.6.10",
     "@types/node": "^18.7.13",
     "typescript": "^4.8.2"
   },
