@@ -51,7 +51,7 @@ message ListUserReply {
 service UserService {
 
   // get user
-  rpc saveUser(SaveUserRequest) returns(SaveUserReply);
+  rpc saveUser(SaveUserRequest) returns(stream SaveUserReply);
   // query user list
   rpc listUser (ListUserRequest) returns (ListUserReply);
 }

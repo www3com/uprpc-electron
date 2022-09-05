@@ -52,7 +52,9 @@ function parseService(root: Root, namespaceName: string, service: Service) {
         parsedMethods.push({
             id: v4(),
             name: methodName,
-            requestBody: parseTypeFields(reqType)
+            requestStream: !!method.requestStream,
+            requestBody: parseTypeFields(reqType),
+            responseStream: !!method.responseStream,
         });
     }
 
