@@ -1,4 +1,4 @@
-import { bind } from "./binder";
+import * as router from "./router";
 
 const { app, BrowserWindow } = require("electron");
 const path = require("path");
@@ -16,7 +16,7 @@ function createWindow() {
   // mainWindow.loadFile('./dist/index.html')
   mainWindow.loadURL("http://localhost:8000");
   mainWindow.webContents.openDevTools();
-  bind(mainWindow);
+  router.register(mainWindow);
 }
 
 app.whenReady().then(() => {
