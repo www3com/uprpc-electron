@@ -1,6 +1,6 @@
 import { loadSync } from "@grpc/proto-loader";
 import { credentials, GrpcObject, loadPackageDefinition } from "@grpc/grpc-js";
-import { FullMethod } from "../types";
+import { FullMethod } from "@/types";
 
 let aliveClient = {};
 let aliveSessions = {};

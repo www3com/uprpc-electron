@@ -1,4 +1,6 @@
 {
+  "extends": "../tsconfig.json", // 首先导入 ⑤
+  "references": [{ "path": "../uprpc-lib" }], // 因为 client 引用了 common, 故需要将 common 引入进来
   "compilerOptions": {
     "baseUrl": ".",
     "emitDecoratorMetadata": true,
@@ -7,7 +9,9 @@
     "moduleResolution": "node",
     "noImplicitAny": true,
     "outDir": "dist",
-    "paths": { },
+    "paths": {
+      "@/*": ["./src/*", "../uprpc-lib/src/*"]
+     },
     "removeComments": false,
     "sourceMap": true,
     "strict": true,
