@@ -4,7 +4,10 @@ import {
   GrpcObject,
   Server,
   ServerCredentials,
+  Metadata,
+  MetadataValue,
 } from "@grpc/grpc-js";
+import { clearLine } from "readline";
 
 const protoDir = __dirname + "/../proto/helloworld.proto";
 
@@ -20,6 +23,7 @@ export class HelloWorldService {
     });
     this.grpcDefinition = loadPackageDefinition(packageDefinition);
   }
+
   registerService(server: Server) {
     server.addService(this.grpcDefinition.helloworld.Greeter.service, {
       sayHelloSimple: this.sayHelloSimple,
@@ -30,7 +34,20 @@ export class HelloWorldService {
   }
   // 简单gRPC调用
   sayHelloSimple(call: any, callback: any) {
-    callback(null, { message: "Hello " + call.request.name });
+    // parse request metadata
+    let callId = call.metadata.get("callId");
+    console.log("callId=", callId);
+    let err = null;
+    if (callId[0] != 9000) {
+      err = new Error("error,code:9000");
+    }
+
+    let metadata = new Metadata();
+    // keys that end with '-bin' must have Buffer values
+    metadata.add("code-bin", Buffer.from("9500"));
+    metadata.add("data", "sss");
+    callback(err, { message: "Hello " + call.request.name }, metadata);
+    callback(err, { message: "Hello " + call.request.name }, metadata);
   }
   // 简单gRPC调用
   sayHelloServer(call: any, callback: any) {
@@ -45,9 +62,16 @@ export class HelloWorldService {
     call.on("data", function (data: any) {
       console.log("客户端receive:", data);
       call.write({ message: "start send to client:" + data.name });
+      let metadata = new Metadata();
       for (var i = 0; i < 100; i++) {
         call.write({ message: "send to client data:" + i });
       }
+
+      // keys that end with '-bin' must have Buffer values
+      metadata.add("code-bin", Buffer.from("9500"));
+      metadata.add("data", "sss");
+      call.sendMetadata(metadata);
+      call.end(metadata);
     });
     call.on("end", function () {
       console.log("服务器发送end,客户端关闭");

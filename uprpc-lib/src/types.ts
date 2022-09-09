@@ -1,21 +1,40 @@
-export type StackDepth = {
-  [type: string]: number;
-};
+declare global {
+  //设置全局属性
+  interface Window {
+    //window对象属性
+    rpc: any; //加入对象
+  }
+}
+
+// 请求信息
+export interface RequestData {
+  id: string;
+  host: string;
+  body: string;
+  metadata?: any;
+}
+
+// 响应信息
+export interface ResponseData {
+  id: string;
+  body?: string;
+  metadata?: any;
+}
+
+export enum Mode {
+  Unary,
+  ClientStream,
+  ServerStream,
+  BidirectionalStream,
+}
 
 export interface Method {
   id: string;
   name: string;
-  requestBody: any;
-  requestMetadata?: any;
-  responseBody?: any;
-  responseMetadata?: any;
-}
-
-export interface FullMethod extends Method {
-  host: string;
-  path: string;
-  namespace: string;
-  service: string;
+  mode: Mode;
+  requestBody: string;
+  requestConf?: any;
+  responseConf?: any;
 }
 
 export interface Service {
@@ -30,24 +49,17 @@ export interface Proto {
   name: string;
   path: string;
   host: string;
-  services?: Service[];
+  services: Service[];
 }
 
-///////////////////////////////////////////
-// method call request & reponse
-export interface CallRequest {
-  id: string;
-  tabId: string;
-  methodId: string;
-  host: string;
-  requestBody: any;
-  requestMetadata?: any;
+export interface ResponseCache {
+  metadata?: any;
+  body: string;
+  streams: string[];
 }
 
-export interface CallResponse {
-  id: string;
-  tabId: string;
-  methodId: string;
-  responseBody?: any;
-  responseMetadata?: any;
+export interface Tab {
+  key: string;
+  title: string;
+  type: string;
 }
