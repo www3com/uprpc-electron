@@ -21,7 +21,7 @@ export default ({method, responseCache, onChange}: responseProps) => {
 
     return (
         <Tabs style={{height: "100%"}} animated={false}>
-            <Tabs.TabPane tab='Response Stream' key='response'>
+            <Tabs.TabPane tab={method.mode==Mode.ServerStream || method.mode == Mode.BidirectionalStream? 'Response Stream' : 'Response'} key='response'>
                 {method.mode == Mode.ServerStream || method.mode == Mode.BidirectionalStream ?
                     <Stream value={responseCache?.streams}/> :
                     <AceEditor

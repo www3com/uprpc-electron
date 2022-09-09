@@ -1,28 +1,24 @@
 import React, {Key, useContext, useState} from "react";
 import {observer} from "mobx-react-lite";
-import {Button, Col, Input, Layout, notification, Row, Space, Tabs, Tooltip, Tree, TreeDataNode} from "antd";
+import { Col, Input, Layout, notification, Row, Space, Tabs, Tooltip, Tree, TreeDataNode} from "antd";
 import {
     ApiOutlined,
     CloseCircleOutlined,
-    CreditCardOutlined,
     DatabaseOutlined,
     DownOutlined,
     FileOutlined, FilterOutlined,
-    FolderAddOutlined, FolderOpenOutlined, FolderOutlined,
+    FolderOutlined,
     HddOutlined,
-    ImportOutlined,
-    LinkOutlined,
     PlusCircleOutlined,
-    ReloadOutlined, SearchOutlined,
-    SettingOutlined,
-    SyncOutlined
+    ReloadOutlined,
+    SettingOutlined
 } from "@ant-design/icons";
-import {context} from "@/stores/store";
+import {context} from "@/stores/context";
 import Paths from "@/pages/components/Paths";
-import {Proto, Tab} from "@/types/types";
+import {Proto} from "@/types/types";
 
 const file = () => {
-    let {store} = useContext(context);
+    let {tabStore, protoStore, pathsStore} = useContext(context);
     const [hidden, setHidden] = useState(true);
 
     const parse = (protos: Proto[]) => {
@@ -51,7 +47,7 @@ const file = () => {
 
     const onSelect = (selectedKeys: Key[], e: any) => {
         if (e.node.pos.split('-').length != 4) return
-        store.openTab({
+        tabStore.openTab({
             key: selectedKeys[0].toString(),
             pos: e.node.pos,
             title: e.node.title,
@@ -60,7 +56,7 @@ const file = () => {
     }
 
     const onImport = async () => {
-        const result = await store.importFile()
+        const result = await protoStore.importFile()
         debugger
         if (!result.success) {
             notification.open({
@@ -102,7 +98,7 @@ const file = () => {
                             </Tooltip>
                             <Tooltip title='Import Paths'>
                                 <a style={{color: '#000000D9', fontSize: 16}}
-                                   onClick={() => store.showPaths(!store.pathsDrawerVisible)}><FolderOutlined/></a>
+                                   onClick={() => pathsStore.showPaths(!pathsStore.pathsDrawerVisible)}><FolderOutlined/></a>
                             </Tooltip>
                             <Tooltip title='Reload'>
                                 <a style={{color: '#000000D9', fontSize: 16}}><ReloadOutlined/></a>
@@ -126,7 +122,7 @@ const file = () => {
                             onSelect={onSelect}
                             switcherIcon={<DownOutlined/>}
                             defaultExpandedKeys={['0-0-0']}
-                            treeData={parse(store.protos)}
+                            treeData={parse(protoStore.protos)}
                         />
 
                     </Tabs.TabPane>

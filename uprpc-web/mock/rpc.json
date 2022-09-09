@@ -1,0 +1,41 @@
+{
+  "files": [
+    {
+      "id": "52af310c-e408-4d9a-9f02-657d23194b02",
+      "name": "fee_service.proto",
+      "path": "/Users/jason/dev/grpc/proto/fee_service.proto",
+      "host": "127.0.0.1:9005",
+      "services": [
+        {
+          "id": "3ebf7203-828e-46e9-8b5e-a58339f13984",
+          "name": "FeeService",
+          "namespace": "fee",
+          "methods": [
+            {
+              "id": "efbb20fa-9fc4-42e7-91ec-7d9c6319e102",
+              "name": "GetFeeRate",
+              "mode": 1,
+              "requestBody": {
+                "ownerId": 5
+              }
+            },
+            {
+              "id": "64f973c8-8b8b-4200-ab4d-3e22558def63",
+              "name": "ListFeeRate",
+              "mode": 4,
+              "requestBody": {
+                "ownerIds": [
+                  5
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "paths": [
+    "/Users/jason/dev/grpc/proto",
+    "/Users/jason"
+  ]
+}

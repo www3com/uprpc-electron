@@ -4,12 +4,12 @@ import {Button, Select, Space, Tabs} from "antd";
 import "allotment/dist/style.css";
 import Editor from "@/pages/components/Editor";
 import {EyeOutlined} from "@ant-design/icons";
-import {context} from '@/stores/store'
+import {context} from '@/stores/context'
 
 const tabs = () => {
-    let {store} = useContext(context)
+    let {tabStore} = useContext(context)
     const onEdit = (targetKey: React.MouseEvent | React.KeyboardEvent | string, action: 'add' | 'remove') => {
-        store.remove(targetKey)
+        tabStore.remove(targetKey)
     };
 
     const extra = <Space size={0} style={{marginRight: 10}}>
@@ -21,10 +21,10 @@ const tabs = () => {
     </Space>;
 
     return (<Tabs hideAdd type="editable-card" onEdit={onEdit} style={{height: "100%"}} size='small'
-                  onTabClick={(key: string) => store.selectTab(key)}
-                  activeKey={store.selectedTab}
+                  onTabClick={(key: string) => tabStore.selectTab(key)}
+                  activeKey={tabStore.selectedTab}
                   tabBarExtraContent={extra}>
-        {store.openTabs.map((value: any) => {
+        {tabStore.openTabs.map((value: any) => {
             return (<Tabs.TabPane tab={value.title} key={value.key} style={{height: "100%"}}>
                 <Editor pos={value.pos}/>
             </Tabs.TabPane>)

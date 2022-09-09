@@ -9,12 +9,13 @@ import {SendOutlined} from "@ant-design/icons";
 import {Method, Mode, RequestCache} from "@/types/types";
 
 interface requestProps {
+    run: boolean,
     method: Method,
     requestCache?: RequestCache,
     onChange?: (method: Method) => void
 }
 
-export default ({method, requestCache, onChange}: requestProps) => {
+export default ({run, method, requestCache, onChange}: requestProps) => {
 
     const aceChange = (value: string) => {
         if (onChange) {
@@ -31,11 +32,13 @@ export default ({method, requestCache, onChange}: requestProps) => {
         }
     ];
 
+    let body = JSON.stringify(method.requestBody, null, '\t');
+    let pushButton = run && (method.mode == Mode.ClientStream || method.mode == Mode.BidirectionalStream) ?
+        <Button icon={<SendOutlined/>}>Push</Button> : '';
     return (
         <Allotment>
             <Tabs style={{height: "100%"}} animated={false}
-                  tabBarExtraContent={<div style={{paddingRight: 10}}><Button icon={<SendOutlined/>}>Push</Button>
-                  </div>}>
+                  tabBarExtraContent={<div style={{paddingRight: 10}}>{pushButton}</div>}>
                 <Tabs.TabPane tab='Params' key='params'>
                     <AceEditor
                         style={{background: "#fff"}}
@@ -49,7 +52,7 @@ export default ({method, requestCache, onChange}: requestProps) => {
                         showPrintMargin={false}
                         showGutter
                         onChange={aceChange}
-                        defaultValue={method.requestBody}
+                        defaultValue={body}
                         setOptions={{
                             useWorker: true,
                             displayIndentGuides: true
@@ -62,7 +65,7 @@ export default ({method, requestCache, onChange}: requestProps) => {
                            columns={columns}/>
                 </Tabs.TabPane>
             </Tabs>
-            <Allotment.Pane visible={method.mode == Mode.ClientStream}>
+            <Allotment.Pane visible={method.mode == Mode.ClientStream || method.mode == Mode.BidirectionalStream}>
                 <Card title='Request Stream' size={"small"} bordered={false}
                       bodyStyle={{height: '100%', overflow: "auto"}}>
                     <Stream value={requestCache?.streams}/>
