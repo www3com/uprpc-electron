@@ -1,7 +1,6 @@
 import { loadSync } from "@grpc/proto-loader";
-
 import { credentials, GrpcObject, loadPackageDefinition, Metadata, ServiceError } from "@grpc/grpc-js";
-import { RequestData, ResponseData, MethodInfo, Mode } from "@/types";
+import { RequestData, ResponseData, MethodInfo, Mode } from "../types";
 import * as store from "../storage/store";
 
 let aliveClient = {};
@@ -23,15 +22,15 @@ export async function send(request: RequestData, callback: (response: ResponseDa
             break;
         }
         case Mode.ClientStream: {
-            invokeClientStream(client, request, callback);
+            invokeClientStream(client, methodInfo, request, callback);
             break;
         }
         case Mode.ServerStream: {
-            invokeServerStream(client, request, callback);
+            invokeServerStream(client, methodInfo, request, callback);
             break;
         }
         case Mode.BidirectionalStream: {
-            invokeBidirectionalStream(client, request, callback);
+            invokeBidirectionalStream(client, methodInfo, request, callback);
             break;
         }
         default: {
@@ -78,12 +77,12 @@ function invokeUnary(
 ) {
     let metadata = new Metadata();
     metadata.add("callId", "123");
-    let call = client[methodInfo.name](request.body, metadata, (err: ServiceError, response: any) => {
+    client[methodInfo.name](request.body, metadata, (err: ServiceError, response: any) => {
         if (err != null) {
             let codeBin = err.metadata.get("code-bin");
             console.log("received error:", err.code, err.message, codeBin.toString());
         }
-        callback(methodInfo, response, err);
+        callback(response, err);
     });
 }
 

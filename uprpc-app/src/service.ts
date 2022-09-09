@@ -2,7 +2,7 @@ import * as store from "./storage/store";
 import { BrowserWindow, ipcMain } from "electron";
 import * as electron from "electron";
 import * as client from "./rpc/client";
-import { RequestData, ResponseData } from "@/types";
+import { RequestData, ResponseData } from "./types";
 
 const { loadProto } = require("./proto/parser");
 

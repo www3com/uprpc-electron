@@ -1,4 +1,4 @@
-import { Proto, Service, Method, MethodInfo } from "@/types";
+import { Proto, Service, Method, MethodInfo } from "../types";
 
 const Store = require("electron-store");
 const uuid = require("uuid");
