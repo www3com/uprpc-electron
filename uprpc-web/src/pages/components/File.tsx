@@ -19,7 +19,7 @@ import {
 } from "@ant-design/icons";
 import {context} from "@/stores/store";
 import Paths from "@/pages/components/Paths";
-import {Proto} from "@/types/types";
+import {Proto, Tab} from "@/types/types";
 
 const file = () => {
     let {store} = useContext(context);
@@ -50,11 +50,13 @@ const file = () => {
 
 
     const onSelect = (selectedKeys: Key[], e: any) => {
-        let pos = e.node.pos.split('-')
-        if (pos.length != 4) {
-            return
-        }
-        store.openTab(selectedKeys[0].toString(), e.node.title, 'file')
+        if (e.node.pos.split('-').length != 4) return
+        store.openTab({
+            key: selectedKeys[0].toString(),
+            pos: e.node.pos,
+            title: e.node.title,
+            type: "file"
+        });
     }
 
     const onImport = async () => {
@@ -95,7 +97,8 @@ const file = () => {
                     <Col flex="100px">
                         <Space size={8} style={{paddingRight: 10}}>
                             <Tooltip title='Import Protos'>
-                                <a style={{color: '#000000D9', fontSize: 16}} onClick={onImport}><PlusCircleOutlined/></a>
+                                <a style={{color: '#000000D9', fontSize: 16}}
+                                   onClick={onImport}><PlusCircleOutlined/></a>
                             </Tooltip>
                             <Tooltip title='Import Paths'>
                                 <a style={{color: '#000000D9', fontSize: 16}}

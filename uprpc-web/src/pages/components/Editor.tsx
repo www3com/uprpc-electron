@@ -1,81 +1,59 @@
 import styles from "../style.less";
-import {Button, Col, Form, Input, Layout, Row, Space, Table, Tabs} from "antd";
+import {Button, Col, Input, Layout, Row, Space} from "antd";
 import React, {useContext, useState} from "react";
 import {Allotment} from "allotment";
-import {SaveOutlined, SendOutlined} from "@ant-design/icons";
+import {ApiOutlined, PlayCircleOutlined, SaveOutlined} from "@ant-design/icons";
 import {context} from "@/stores/store";
-import {FullMethod} from "@/types/types";
 import {observer} from "mobx-react-lite";
 import Response from "@/pages/components/Response";
 import Request from "@/pages/components/Request";
+import {Method, Mode} from "@/types/types";
 
 const {Header, Content} = Layout;
-const editor = ({methodId}: { methodId: string }) => {
 
+const editor = ({pos}: { pos: string }) => {
     let {store} = useContext(context)
-
-    const getMethod = (id: string): FullMethod => {
-        for (let fullMethod of store.fullMethods) {
-            if (fullMethod.id == id) {
-                return fullMethod;
-            }
-        }
-
-        return {
-            id: '',
-            name: '',
-            requestBody: '',
-            host: '127.0.0.1:9000',
-            path: '',
-            namespace: '',
-            service: '',
-        };
+    let defaultHost = "127.0.0.1:9000";
+    let defaultMethod: Method = {
+        id: '',
+        name: '',
+        mode: Mode.Unary,
+        requestBody: "",
     }
-    const method = getMethod(methodId)
+    if (pos.indexOf('-') > 0) {
+        let posArr = pos.split('-').map(Number);
+        let proto = store.protos[posArr[1]];
+        let service = proto.services[posArr[2]]
+        defaultHost = proto.host;
+        defaultMethod = service.methods[posArr[3]]
+    }
 
-    // const [requestBody, setRequestBody] = useState(method.requestBody)
-    // const [responseBody, setResponseBody] = useState(store.responses[methodId])
-    const [host, setHost] = useState(method.host);
-    const [reqBody, setReqBody] = useState(method.requestBody);
-    // const reqChange = (value: RequestProp) => {
-    //
-    // }
-    //
-    // const resChange = (response: ResponseProp) => {
-    //
-    // }
-    // console.log("editor, ", methodId,  responseBody)
+
+    const [host, setHost] = useState(defaultHost);
+    const [method, setMethod] = useState(defaultMethod);
 
     const onSend = () => {
-        store.send(getValue())
+        store.send({body: method.requestBody, host: host, id: method.id, metadata: undefined})
     }
+
     const onSave = () => {
 
     }
 
-    const getValue = () => {
-        try {
-            let param = JSON.parse(reqBody);
-            return {...method, host: host, requestBody: param, responseBody: store.responses[methodId]}
-        } catch (e) {
-        }
-    }
-
-    const columns = [
-        {title: 'Key', dataIndex: 'key', key: 'key'},
-        {title: 'Value', dataIndex: 'value', key: 'value'}
-    ];
+    let requestCache = store.requestCaches.get(method.id);
+    let responseCache = store.responseCaches.get(method.id);
     return (
         <Layout style={{height: '100%', backgroundColor: 'white', padding: '0px 10px'}}>
             <Header className={styles.header} style={{paddingBottom: 10}}>
                 <Row gutter={5}>
-                    <Col flex="auto">
-                        <Input defaultValue={method.host}
+                    <Col flex="auto" style={{paddingTop: 5}}>
+                        <Input addonBefore={<Space><ApiOutlined/>{method.mode}</Space>}
+                               defaultValue={host}
                                onChange={e => setHost(e.target.value)}/>
                     </Col>
                     <Col flex="160px">
                         <Space>
-                            <Button type='primary' icon={<SendOutlined/>} onClick={onSend}>Send</Button>
+                            <Button type='primary' icon={<PlayCircleOutlined/>} onClick={onSend}>Start</Button>
                             <Button icon={<SaveOutlined/>} onClick={onSave}>Save</Button>
                         </Space>
                     </Col>
@@ -83,10 +61,8 @@ const editor = ({methodId}: { methodId: string }) => {
             </Header>
             <Content>
                 <Allotment vertical={true}>
-                    <Request body={JSON.stringify(method.requestBody, null, 2)} onChange={(v) => setReqBody(v)}/>
-
-                    <Response body={JSON.stringify(store.responses[methodId], null, "\t")}/>
-
+                    <Request method={method} requestCache={requestCache} onChange={(v) => setMethod(v)}/>
+                    <Response method={method} responseCache={responseCache}/>
                 </Allotment>
             </Content>
         </Layout>
