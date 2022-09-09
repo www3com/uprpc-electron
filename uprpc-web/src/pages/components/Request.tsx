@@ -1,21 +1,25 @@
-import React, {useState} from "react";
-import {Button, Table, Tabs} from "antd";
+import React from "react";
+import {Button, Card, Table, Tabs} from "antd";
 import AceEditor from "react-ace";
 import "ace-builds/src-noconflict/mode-json";
 import "ace-builds/src-noconflict/ext-language_tools"
+import {Allotment} from "allotment";
+import Stream from "@/pages/components/Stream";
+import {SendOutlined} from "@ant-design/icons";
+import {Method, Mode, RequestCache} from "@/types/types";
 
 interface requestProps {
-    body: string,
-    metadata?: [],
-    onChange?: (body: string, metadata: []) => void
+    method: Method,
+    requestCache?: RequestCache,
+    onChange?: (method: Method) => void
 }
 
-export default ({body, metadata, onChange}: requestProps) => {
+export default ({method, requestCache, onChange}: requestProps) => {
 
-    const [metadataState, setMetadataState] = useState(metadata);
-
-    const aceChange = (v: string) => {
-        onChange(v, metadataState)
+    const aceChange = (value: string) => {
+        if (onChange) {
+            onChange({...method, requestBody: value})
+        }
     }
 
     const columns = [
@@ -27,30 +31,43 @@ export default ({body, metadata, onChange}: requestProps) => {
         }
     ];
 
-    return (<Tabs style={{height: "100%"}} animated={false}>
-        <Tabs.TabPane tab='Params' key='params'>
-            <AceEditor
-                style={{background: "#fff"}}
-                width={"100%"}
-                height='100%'
-                mode="json"
-                theme="textmate"
-                name="inputs"
-                fontSize={13}
-                cursorStart={2}
-                showPrintMargin={false}
-                showGutter
-                onChange={aceChange}
-                defaultValue={body}
-                setOptions={{
-                    useWorker: true,
-                    displayIndentGuides: true
-                }}
-                tabSize={2}
-            />
-        </Tabs.TabPane>
-        <Tabs.TabPane tab='Metadata' key='metadata'>
-            <Table size='small' bordered={true} pagination={false} dataSource={metadata} columns={columns}/>
-        </Tabs.TabPane>
-    </Tabs>)
+    return (
+        <Allotment>
+            <Tabs style={{height: "100%"}} animated={false}
+                  tabBarExtraContent={<div style={{paddingRight: 10}}><Button icon={<SendOutlined/>}>Push</Button>
+                  </div>}>
+                <Tabs.TabPane tab='Params' key='params'>
+                    <AceEditor
+                        style={{background: "#fff"}}
+                        width={"100%"}
+                        height='100%'
+                        mode="json"
+                        theme="textmate"
+                        name="inputs"
+                        fontSize={13}
+                        cursorStart={2}
+                        showPrintMargin={false}
+                        showGutter
+                        onChange={aceChange}
+                        defaultValue={method.requestBody}
+                        setOptions={{
+                            useWorker: true,
+                            displayIndentGuides: true
+                        }}
+                        tabSize={2}
+                    />
+                </Tabs.TabPane>
+                <Tabs.TabPane tab='Metadata' key='metadata'>
+                    <Table size='small' bordered={true} pagination={false} dataSource={method.requestConf}
+                           columns={columns}/>
+                </Tabs.TabPane>
+            </Tabs>
+            <Allotment.Pane visible={method.mode == Mode.ClientStream}>
+                <Card title='Request Stream' size={"small"} bordered={false}
+                      bodyStyle={{height: '100%', overflow: "auto"}}>
+                    <Stream value={requestCache?.streams}/>
+                </Card>
+            </Allotment.Pane>
+        </Allotment>
+    )
 }

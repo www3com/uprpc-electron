@@ -4,20 +4,35 @@ declare global {  //设置全局属性
     }
 }
 
+// 请求信息
+export interface RequestData {
+    id: string,
+    host: string,
+    body: string,
+    metadata?: any
+}
+
+// 响应信息
+export interface ResponseData {
+    id: string,
+    body?: string,
+    metadata?: any
+}
+
+export enum Mode {
+    Unary,
+    ClientStream,
+    ServerStream,
+    BidirectionalStream
+}
+
 export interface Method {
     id: string,
     name: string,
-    requestBody: any,
-    requestMetadata?: any,
-    responseBody?: any,
-    responseMetadata?: any
-}
-
-export interface FullMethod extends Method{
-    host: string,
-    path: string,
-    namespace: string,
-    service: string,
+    mode: Mode,
+    requestBody: string,
+    requestConf?: any,
+    responseConf?: any
 }
 
 export interface Service {
@@ -35,15 +50,19 @@ export interface Proto {
     services: Service[]
 }
 
+export interface RequestCache {
+    streams?: string[]
+}
+
+export interface ResponseCache {
+    metadata?: any,
+    body?: string,
+    streams?: string[]
+}
+
 export interface Tab {
     key: string,
     title: string,
-    type: string
-}
-
-
-export interface Response {
-    id: string,
-    responseBody: any,
-    responseMetadata: any
+    type: string,
+    pos: string
 }

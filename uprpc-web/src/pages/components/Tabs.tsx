@@ -26,7 +26,7 @@ const tabs = () => {
                   tabBarExtraContent={extra}>
         {store.openTabs.map((value: any) => {
             return (<Tabs.TabPane tab={value.title} key={value.key} style={{height: "100%"}}>
-                <Editor methodId={value.key}/>
+                <Editor pos={value.pos}/>
             </Tabs.TabPane>)
         })}
     </Tabs>)

@@ -3,49 +3,56 @@ import {Table, Tabs} from "antd";
 import AceEditor from "react-ace";
 import "ace-builds/src-noconflict/mode-json";
 import "ace-builds/src-noconflict/ext-language_tools"
+import Stream from "@/pages/components/Stream";
+import {Method, Mode, ResponseCache} from "@/types/types";
 
 interface responseProps {
-    body: string,
-    metadata?: [],
-    onChange?: (body: string, metadata: []) => void
+    method: Method,
+    responseCache?: ResponseCache,
+    onChange?: (responseCache: ResponseCache) => void
 }
 
-export default ({body, metadata, onChange}: responseProps) => {
+export default ({method, responseCache, onChange}: responseProps) => {
 
     const columns = [
         {title: 'Key', dataIndex: 'key', key: 'key'},
         {title: 'Value', dataIndex: 'value', key: 'value'}
     ];
 
-    console.log('response compo,' , body)
-    return (<Tabs style={{height: "100%"}} animated={false}>
-        <Tabs.TabPane tab='Response' key='response'>
-            <AceEditor
-                style={{background: "#fff"}}
-                width={"100%"}
-                height='100%'
-                mode="json"
-                theme="textmate"
-                name="inputs"
-                fontSize={13}
-                cursorStart={2}
-                highlightActiveLine={false}
-                showPrintMargin={false}
-                showGutter={false}
-                value={body}
-                setOptions={{
-                    showLineNumbers: false,
-                    highlightGutterLine: false,
-                    fixedWidthGutter: false,
-                    tabSize: 1,
-                    displayIndentGuides: false
-                }}
-                readOnly={true}
-                tabSize={2}
-            />
-        </Tabs.TabPane>
-        <Tabs.TabPane tab='Metadata' key='metadata'>
-            <Table size='small' bordered={true} pagination={false} columns={columns}/>
-        </Tabs.TabPane>
-    </Tabs>)
+    return (
+        <Tabs style={{height: "100%"}} animated={false}>
+            <Tabs.TabPane tab='Response Stream' key='response'>
+                {method.mode == Mode.ServerStream || method.mode == Mode.BidirectionalStream ?
+                    <Stream value={responseCache?.streams}/> :
+                    <AceEditor
+                        style={{background: "#fff"}}
+                        width={"100%"}
+                        height='100%'
+                        mode="json"
+                        theme="textmate"
+                        name="inputs"
+                        fontSize={13}
+                        cursorStart={2}
+                        highlightActiveLine={false}
+                        showPrintMargin={false}
+                        showGutter={false}
+                        value={responseCache?.body}
+                        setOptions={{
+                            showLineNumbers: false,
+                            highlightGutterLine: false,
+                            fixedWidthGutter: false,
+                            tabSize: 1,
+                            displayIndentGuides: false
+                        }}
+                        readOnly={true}
+                        tabSize={2}
+                    />}
+
+            </Tabs.TabPane>
+            <Tabs.TabPane tab='Metadata' key='metadata'>
+                <Table size='small' bordered={true} pagination={false} columns={columns}/>
+            </Tabs.TabPane>
+        </Tabs>
+
+    )
 }
