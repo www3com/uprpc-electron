@@ -2,7 +2,7 @@ import React, {Key, useContext, useState} from "react";
 import {observer} from "mobx-react-lite";
 import { Col, Input, Layout, notification, Row, Space, Tabs, Tooltip, Tree, TreeDataNode} from "antd";
 import {
-    ApiOutlined,
+    ApiOutlined, BlockOutlined,
     CloseCircleOutlined,
     DatabaseOutlined,
     DownOutlined,
@@ -29,7 +29,7 @@ const file = () => {
             for (let service of proto.services) {
                 let methods = [];
                 for (let m of service.methods) {
-                    methods.push({key: m.id, title: m.name, icon: <ApiOutlined/>})
+                    methods.push({key: m.id, title: m.name, icon: <BlockOutlined />})
                 }
 
                 item.children.push({

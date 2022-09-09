@@ -5,7 +5,7 @@ import "ace-builds/src-noconflict/mode-json";
 import "ace-builds/src-noconflict/ext-language_tools"
 import {Allotment} from "allotment";
 import Stream from "@/pages/components/Stream";
-import {SendOutlined} from "@ant-design/icons";
+import {ArrowRightOutlined, SendOutlined, VerticalAlignBottomOutlined} from "@ant-design/icons";
 import {Method, Mode, RequestCache} from "@/types/types";
 
 interface requestProps {
@@ -34,7 +34,7 @@ export default ({run, method, requestCache, onChange}: requestProps) => {
 
     let body = JSON.stringify(method.requestBody, null, '\t');
     let pushButton = run && (method.mode == Mode.ClientStream || method.mode == Mode.BidirectionalStream) ?
-        <Button icon={<SendOutlined/>}>Push</Button> : '';
+        <Button size='small' icon={<VerticalAlignBottomOutlined />}>Push</Button> : '';
     return (
         <Allotment>
             <Tabs style={{height: "100%"}} animated={false}
