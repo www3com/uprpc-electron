@@ -73,7 +73,6 @@ export async function send(window: BrowserWindow, params: string) {
 }
 
 function refreshResponse(window: BrowserWindow, req: any, response: any): void {
-  console.log(response);
   window.webContents.send("updateResponse", {
     id: req.id,
     responseBody: response,

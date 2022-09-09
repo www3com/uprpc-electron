@@ -1,5 +1,11 @@
 import { loadSync } from "@grpc/proto-loader";
-import { credentials, GrpcObject, loadPackageDefinition } from "@grpc/grpc-js";
+import {
+  credentials,
+  GrpcObject,
+  loadPackageDefinition,
+  Metadata,
+  ServiceError,
+} from "@grpc/grpc-js";
 import { FullMethod } from "@/types";
 
 let aliveClient = {};
@@ -13,6 +19,7 @@ export async function send(
   let client = getClient(method);
 
   invokeUnary(client, method, callback);
+  // invokeBidirectionalStream(client, method, callback);
 }
 
 function getClient(method: FullMethod) {
@@ -49,12 +56,24 @@ function invokeUnary(
   method: FullMethod,
   callback: (request: any, response: any, err?: Error) => void
 ) {
-  client[method.name](method.requestBody, (err: any, response: any) => {
-    if (err != null) {
-      console.log(err);
+  let metadata = new Metadata();
+  metadata.add("callId", "123");
+  let call = client[method.name](
+    method.requestBody,
+    metadata,
+    (err: ServiceError, response: any) => {
+      if (err != null) {
+        let codeBin = err.metadata.get("code-bin");
+        console.log(
+          "received error:",
+          err.code,
+          err.message,
+          codeBin.toString()
+        );
+      }
+      callback(method, response, err);
     }
-    callback(method, response, err);
-  });
+  );
 }
 
 function invokeServerStream(
@@ -102,6 +121,12 @@ function invokeBidirectionalStream(
     call.on("error", (e: Error) => {
       console.log("服务器发送end,客户端关闭");
       callback(req, null, e);
+    });
+    call.on("metadata", (metadata: any) => {
+      console.log("客户端 metadata:", metadata);
+    });
+    call.on("status", (status: any) => {
+      console.log("客户端 status:", status);
     });
     aliveSessions[req.name] = call;
   } else {
