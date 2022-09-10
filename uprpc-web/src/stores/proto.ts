@@ -23,7 +23,9 @@ export default class ProtoStore {
                 this.responseCaches.set(value.id, {
                     body: value.body,
                     metadata: value.metadata,
-                });
+                    // @ts-ignore
+                    streams: [value.body]
+                })
                 return;
             }
             // 对响应流处理
