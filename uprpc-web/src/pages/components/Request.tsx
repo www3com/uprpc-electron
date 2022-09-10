@@ -5,19 +5,19 @@ import "ace-builds/src-noconflict/mode-json";
 import "ace-builds/src-noconflict/ext-language_tools"
 import {Allotment} from "allotment";
 import Stream from "@/pages/components/Stream";
-import {VerticalAlignBottomOutlined} from "@ant-design/icons";
+import {CloudUploadOutlined} from "@ant-design/icons";
 import {Method, Mode, RequestCache} from "@/types/types";
 import styles from '../style.less';
 
 interface requestProps {
-    run: boolean,
+    running: boolean,
     method: Method,
     requestCache?: RequestCache,
     onChange?: (method: Method) => void,
     onPush: (body: string) => void
 }
 
-export default ({run, method, requestCache, onChange, onPush}: requestProps) => {
+export default ({running, method, requestCache, onChange, onPush}: requestProps) => {
 
     const [body, setBody] = useState(method.requestBody);
 
@@ -38,8 +38,8 @@ export default ({run, method, requestCache, onChange, onPush}: requestProps) => 
     ];
 
     let isStream = method.mode == Mode.ClientStream || method.mode == Mode.BidirectionalStream;
-    let pushButton = run && isStream ?
-        <Button size='small' icon={<VerticalAlignBottomOutlined/>} onClick={()=> onPush(body)}>Push</Button> : '';
+    let pushButton = running && isStream ?
+        <Button size='small' icon={<CloudUploadOutlined />} onClick={()=> onPush(body)}>Push</Button> : '';
     return (
         <Allotment>
             <Tabs style={{height: "100%"}} animated={false}
