@@ -17,6 +17,7 @@ const editor = ({pos}: { pos: string }) => {
     let defaultMethod: Method = {
         id: '',
         name: '',
+        pos:'',
         mode: Mode.Unary,
         requestBody: "",
     }
@@ -26,6 +27,7 @@ const editor = ({pos}: { pos: string }) => {
         let service = proto.services[posArr[2]]
         defaultHost = proto.host;
         defaultMethod = service.methods[posArr[3]]
+        defaultMethod.pos = pos;
     }
 
 
@@ -34,10 +36,10 @@ const editor = ({pos}: { pos: string }) => {
     const [run, setRun] = useState(false);
 
     const onSend = async () => {
-        // await protoStore.send({body: method.requestBody, host: host, id: method.id, metadata: undefined})
-        if (method.mode != Mode.Unary) {
-            setRun(true)
-        }
+        await protoStore.send({body: method.requestBody, host: host, id: method.id, pos: method.pos, metadata: undefined})
+        // if (method.mode != Mode.Unary) {
+        //     setRun(true)
+        // }
     }
 
     const onStop = async () => {
