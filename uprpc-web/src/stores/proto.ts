@@ -83,6 +83,7 @@ export default class ProtoStore {
     * stopStream(methodId: string) {
         console.log('request stop stream');
         yield window.rpc.stopStream(methodId);
+        this.runningCaches.set(methodId, false);
     }
 
     * save(method: Method) {

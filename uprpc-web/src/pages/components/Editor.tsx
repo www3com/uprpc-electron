@@ -22,7 +22,6 @@ const editor = ({pos}: EditorProp) => {
 
     const [host, setHost] = useState(proto.host);
     const [method, setMethod] = useState(initMethod);
-    const [run, setRun] = useState(false);
 
     const onRequestChange = (method: Method) => {
         tabStore.setDot(method.id)
@@ -53,14 +52,10 @@ const editor = ({pos}: EditorProp) => {
 
     const onSend = async () => {
         await protoStore.send(getRequestData())
-        if (method.mode != Mode.Unary) {
-            setRun(true)
-        }
     }
 
     const onStop = async () => {
         await protoStore.stopStream(method.id);
-        setRun(false);
     }
 
     let requestCache = protoStore.requestCaches.get(method.id);
@@ -77,7 +72,7 @@ const editor = ({pos}: EditorProp) => {
                     </Col>
                     <Col flex="160px">
                         <Space>
-                            {run ?
+                            {protoStore.runningCaches.get(method.id) ?
                                 <Button type='primary' icon={<PoweroffOutlined/>} onClick={onStop}>Stop</Button> :
                                 (method.mode == Mode.Unary ?
                                     <Button type='primary' icon={<SendOutlined/>} onClick={onSend}>Send</Button>
@@ -91,7 +86,7 @@ const editor = ({pos}: EditorProp) => {
             </Layout.Header>
             <Layout.Content>
                 <Allotment vertical={true}>
-                    <Request run={run}
+                    <Request run={protoStore.runningCaches.get(method.id)}
                              method={method}
                              requestCache={requestCache}
                              onChange={onRequestChange}
