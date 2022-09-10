@@ -26,6 +26,15 @@ export interface ResponseData {
     metadata?: any;
 }
 
+// 关闭流信息
+export interface CloseStreamData {
+    id: string;
+    metadata?: any;
+}
+
+export let isCloseStreamData = (prop: any): prop is CloseStreamData =>
+    typeof (prop as CloseStreamData)["js"] === "undefined";
+
 export enum Mode {
     Unary = 0,
     ClientStream = 1,
