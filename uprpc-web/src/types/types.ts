@@ -57,8 +57,8 @@ export interface RequestCache {
 
 export interface ResponseCache {
     metadata?: any,
-    body?: string,
-    streams?: string[]
+    body: string,
+    streams: string[]
 }
 
 export enum TabType {

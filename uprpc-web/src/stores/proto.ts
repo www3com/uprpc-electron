@@ -33,8 +33,9 @@ export default class ProtoStore {
             let streams = responseCache.streams;
             if (streams == null) return;
             if (streams.length > 20) {
-                streams.pop();
+                streams.splice(streams.length - 1, 1);
             }
+            streams.splice(0, 1, value.body);
             this.responseCaches.set(value.id, {...responseCache, streams: streams});
         });
     }
