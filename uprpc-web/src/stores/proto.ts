@@ -45,20 +45,21 @@ export default class ProtoStore {
         this.requestCaches.clear();
         this.responseCaches.clear();
         yield window.rpc.send(requestData)
-
     }
 
     * push(requestData: RequestData): any {
-        console.log("push request data", requestData)
-        let s = yield window.rpc.send(requestData)
+        console.log("push request data", requestData);
+        yield window.rpc.send(requestData);
     }
 
-    * stop() {
-        console.log('stop stream')
+    * stop(methodId: string) {
+        console.log('stop stream');
+        yield window.rpc.stop(methodId);
     }
 
     * save(method: Method) {
-        console.log('save method', method)
+        console.log('save method', method);
+        yield window.rpc.save(method);
     }
 
 }

@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
 import {Button, Card, Table, Tabs} from "antd";
 import AceEditor from "react-ace";
 import "ace-builds/src-noconflict/mode-json";
@@ -13,15 +13,18 @@ interface requestProps {
     method: Method,
     requestCache?: RequestCache,
     onChange?: (method: Method) => void,
-    onPush?: (body: string) => void
+    onPush: (body: string) => void
 }
 
 export default ({run, method, requestCache, onChange, onPush}: requestProps) => {
 
+    const [body, setBody] = useState(method.requestBody);
+
     const aceChange = (value: string) => {
         if (onChange) {
-            onChange({...method, requestBody: value})
+            onChange({...method, requestBody: value});
         }
+        setBody(value);
     }
 
     const columns = [
@@ -35,7 +38,7 @@ export default ({run, method, requestCache, onChange, onPush}: requestProps) => 
 
     let isStream = method.mode == Mode.ServerStream || method.mode == Mode.BidirectionalStream;
     let pushButton = run && isStream ?
-        <Button size='small' icon={<VerticalAlignBottomOutlined/>}>Push</Button> : '';
+        <Button size='small' icon={<VerticalAlignBottomOutlined/>} onClick={()=> onPush(body)}>Push</Button> : '';
     return (
         <Allotment>
             <Tabs style={{height: "100%"}} animated={false}

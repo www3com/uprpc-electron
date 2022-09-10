@@ -11,7 +11,8 @@ export interface RequestData {
     id: string,
     host: string,
     body: string,
-    metadata?: any
+    metadata?: any,
+    pos?: string
 }
 
 // 响应信息
