@@ -21,7 +21,7 @@ export async function loadProto(path: string) {
         id: v4(),
         name: basename(path),
         path: path,
-        host: '127.0.0.1:9005',
+        host: '127.0.0.1:9000',
         services: services
     };
 }
@@ -45,12 +45,13 @@ function parseService(root: Root, namespaceName: string, service: Service) {
     for (let methodName in service.methods) {
         let method = service.methods[methodName];
         let reqType = root.lookupType(method.requestType);
+
         parsedMethods.push({
             id: v4(),
             name: methodName,
-            requestStream: !!method.requestStream,
-            requestBody: parseTypeFields(reqType),
-            responseStream: !!method.responseStream,
+            // @ts-ignore
+            mode: method.responseStream << 1 | method.requestStream,
+            requestBody: JSON.stringify(parseTypeFields(reqType), null, '\t'),
         });
     }
 

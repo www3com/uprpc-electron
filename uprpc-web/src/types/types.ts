@@ -8,35 +8,33 @@ declare global {
 
 // 请求信息
 export interface RequestData {
-    id: string;
-    pos: string;
-    host: string;
-    body: any;
-    metadata?: any;
+    id: string,
+    host: string,
+    body: string,
+    metadata?: any
 }
 
 // 响应信息
 export interface ResponseData {
-    id: string;
-    body?: any;
-    metadata?: any;
+    id: string,
+    body?: string,
+    metadata?: any
 }
 
 export enum Mode {
-    Unary = 1,
-    ClientStream = 2,
-    ServerStream = 3,
-    BidirectionalStream = 4,
+    Unary = 0,
+    ClientStream = 1,
+    ServerStream = 2,
+    BidirectionalStream = 3
 }
 
 export interface Method {
-    id: string;
-    name: string;
-    mode: Mode;
-    pos: string;
-    requestBody: any;
-    requestConf?: any;
-    responseConf?: any;
+    id: string,
+    name: string,
+    mode: Mode,
+    requestBody: string,
+    requestMetadata?: any,
+    responseMetadata?: any
 }
 
 export interface Service {
@@ -64,11 +62,17 @@ export interface ResponseCache {
     streams?: string[];
 }
 
+export enum TabType {
+    Proto,
+    Env
+}
+
 export interface Tab {
-    key: string;
-    title: string;
-    type: string;
-    pos: string;
+    key: string,
+    title: string,
+    type?: TabType,
+    pos: string,
+    dot?: boolean
 }
 
 export const modeMap = {

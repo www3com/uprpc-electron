@@ -9,9 +9,8 @@ import Tabs from "@/pages/components/Tabs";
 import {pathsStore, tabStore, protoStore, context} from '@/stores/context'
 
 export default function HomePage() {
-
     return (
-        <context.Provider value={{pathsStore: pathsStore, tabStore: tabStore, protoStore: protoStore}}>
+        <context.Provider value={{pathsStore, tabStore, protoStore}}>
             <ConfigProvider locale={zhCN}>
                 <Allotment defaultSizes={[75, 220]}>
                     <Allotment.Pane minSize={320} maxSize={600}>

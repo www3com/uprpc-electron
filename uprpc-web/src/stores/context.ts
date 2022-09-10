@@ -7,4 +7,4 @@ export const pathsStore = new PathStore();
 export const tabStore = new TabStore();
 export const protoStore = new ProtoStore();
 
-export const context = createContext({pathsStore: pathsStore, tabStore: tabStore, protoStore: protoStore});
+export const context = createContext({pathsStore, tabStore, protoStore});

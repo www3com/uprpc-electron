@@ -1,5 +1,5 @@
 import {makeAutoObservable} from "mobx";
-import {Tab} from "@/types/types";
+import {Tab, TabType} from "@/types/types";
 
 export default class TabStore {
     constructor() {
@@ -8,13 +8,22 @@ export default class TabStore {
     }
 
     selectedTab = '1';
-    openTabs: Tab[] = [{key: '1', title: 'New Tab', type: 'file', pos: '0'}];
+    openTabs: Tab[] = [{key: '1', title: 'New Tab', type: TabType.Proto, pos: '0', dot: false}];
 
     selectTab(key: string) {
         this.selectedTab = key;
     }
 
-    openTab(tab: Tab) {
+    setDot(key: string) {
+        this.openTabs.forEach((item, index) => {
+            if (item.key == key) {
+                item.dot = true;
+                this.openTabs.splice(index, 1, item);
+            }
+        })
+    }
+
+    openTab(tab: Tab = {key: "", pos: "", title: "", type: TabType.Proto, dot: false}) {
         if (this.openTabs.length == 1 && this.openTabs[0].key === '1') {
             this.openTabs.splice(0, 1);
         }
@@ -29,7 +38,6 @@ export default class TabStore {
 
     remove(key: any) {
         if (this.openTabs.length == 1) return;
-
         this.openTabs.forEach((item, index) => {
             if (item.key == key) {
                 this.openTabs.splice(index, 1);
