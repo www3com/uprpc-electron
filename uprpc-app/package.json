@@ -5,7 +5,7 @@
   "author": "Jason",
   "license": "MIT",
   "scripts": {
-    "dev": "tsc && electron dist/main.js",
+    "dev": "tsc -b && electron dist/main.js",
     "electron:build": "tsc && electron-builder",
     "electron:build:debug": "DEBUG=electron-builder electron-builder",
     "start": "npm run dev"

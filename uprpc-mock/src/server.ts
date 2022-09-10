@@ -1,45 +1,21 @@
-import {loadSync} from "@grpc/proto-loader";
-import {loadPackageDefinition, Server, ServerCredentials} from "@grpc/grpc-js";
+import { loadSync } from "@grpc/proto-loader";
+import { loadPackageDefinition, Server, ServerCredentials } from "@grpc/grpc-js";
+import { HelloWorldService } from "./helloService";
 
-const protoDir = __dirname + "/../proto/helloworld.proto";
-
-
-function loadProto(protoPath: string) {
-    var packageDefinition = loadSync(protoPath, {
-        keepCase: true,
-        longs: String,
-        enums: String,
-        defaults: true,
-        oneofs: true,
-    });
-    return loadPackageDefinition(packageDefinition).helloworld;
-}
-
-function registerService(server: Server, grpcDefinition: any) {
-    server.addService(grpcDefinition.Greeter.service, {
-        sayHelloSimple: sayHelloSimple,
-    });
-}
-
-// 简单gRPC调用
-function sayHelloSimple(call: any, callback: any) {
-    callback(null, {message: "Hello " + call.request.name});
-}
+const host = "0.0.0.0:9000";
 
 export async function start() {
     var server = new Server();
 
     // load proto and register
-    let grpcDefinition = loadProto(protoDir);
-    registerService(server, grpcDefinition);
+    let helloService = new HelloWorldService();
+    helloService.registerService(server);
 
     await new Promise((resolve, reject) => {
-        server.bindAsync(
-            `0.0.0.0:9005`,
-            ServerCredentials.createInsecure(),
-            (err, result) => (err ? reject(err) : resolve(result))
+        server.bindAsync(host, ServerCredentials.createInsecure(), (err, result) =>
+            err ? reject(err) : resolve(result)
         );
     });
     server.start();
+    console.log("server started, listening at: ", host);
 }
-
