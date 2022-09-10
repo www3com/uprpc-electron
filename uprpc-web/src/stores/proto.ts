@@ -23,7 +23,9 @@ export default class ProtoStore {
             if (responseCache == null) {
                 this.responseCaches.set(value.id, {
                     body: value.body,
-                    metadata: value.metadata
+                    metadata: value.metadata,
+                    // @ts-ignore
+                    streams: [value.body]
                 })
                 return;
             }
