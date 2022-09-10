@@ -36,7 +36,7 @@ export default class TabStore {
         this.selectedTab = tab.key
     }
 
-    remove(key: any) {
+    remove(key: string) {
         if (this.openTabs.length == 1) return;
         this.openTabs.forEach((item, index) => {
             if (item.key == key) {

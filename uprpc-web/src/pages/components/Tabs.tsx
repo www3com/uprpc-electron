@@ -9,9 +9,12 @@ import {TabType} from "@/types/types";
 import Welcome from "@/pages/components/Welcome";
 
 const tabs = () => {
-    let {tabStore} = useContext(context)
+    let {tabStore, protoStore} = useContext(context)
     const onEdit = (targetKey: React.MouseEvent | React.KeyboardEvent | string, action: 'add' | 'remove') => {
-        tabStore.remove(targetKey)
+        if (typeof targetKey === "string") {
+            tabStore.remove(targetKey)
+            protoStore.removeCache(targetKey)
+        }
     };
 
     const extra = <Space size={0} style={{marginRight: 10}}>
@@ -28,20 +31,20 @@ const tabs = () => {
 
     return (
         <Tabs hideAdd type="editable-card" onEdit={onEdit} style={{height: "100%"}} size='small'
-                  onTabClick={(key: string) => tabStore.selectTab(key)}
-                  activeKey={tabStore.selectedTab}
-                  tabBarExtraContent={extra}>
-        {tabStore.openTabs.map((value) => {
-            return (<Tabs.TabPane
-                closable={value.closable}
-                tab={<Badge dot={value.dot} offset={[5, 8]}>{value.title}</Badge>}
-                key={value.key}
-                style={{height: "100%"}}>
-                {value.type == TabType.Welcome ? <Welcome/> : ''}
-                {value.type == TabType.Proto ? <Editor pos={value.params}/> : ''}
-            </Tabs.TabPane>)
-        })}
-    </Tabs>)
+              onTabClick={(key: string) => tabStore.selectTab(key)}
+              activeKey={tabStore.selectedTab}
+              tabBarExtraContent={extra}>
+            {tabStore.openTabs.map((value) => {
+                return (<Tabs.TabPane
+                    closable={value.closable}
+                    tab={<Badge dot={value.dot} offset={[5, 8]}>{value.title}</Badge>}
+                    key={value.key}
+                    style={{height: "100%"}}>
+                    {value.type == TabType.Welcome ? <Welcome/> : ''}
+                    {value.type == TabType.Proto ? <Editor pos={value.params}/> : ''}
+                </Tabs.TabPane>)
+            })}
+        </Tabs>)
 }
 
 export default observer(tabs)

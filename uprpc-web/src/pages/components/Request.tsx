@@ -37,7 +37,7 @@ export default ({run, method, requestCache, onChange, onPush}: requestProps) => 
         }
     ];
 
-    let isStream = method.mode == Mode.ServerStream || method.mode == Mode.BidirectionalStream;
+    let isStream = method.mode == Mode.ClientStream || method.mode == Mode.BidirectionalStream;
     let pushButton = run && isStream ?
         <Button size='small' icon={<VerticalAlignBottomOutlined/>} onClick={()=> onPush(body)}>Push</Button> : '';
     return (

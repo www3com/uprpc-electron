@@ -1,5 +1,5 @@
 import {makeAutoObservable} from "mobx";
-import {Method, Proto, RequestCache, RequestData, ResponseCache, ResponseData} from "@/types/types";
+import {Method, Mode, Proto, RequestCache, RequestData, ResponseCache, ResponseData} from "@/types/types";
 
 export default class ProtoStore {
     constructor() {
@@ -11,10 +11,18 @@ export default class ProtoStore {
     protos: Proto[] = [];
     requestCaches: Map<string, RequestCache> = new Map<string, RequestCache>();
     responseCaches: Map<string, ResponseCache> = new Map<string, ResponseCache>();
+    runningCaches: Map<string, boolean> = new Map<string, boolean>();
 
     * init(): any {
         this.protos = JSON.parse(yield window.rpc.getFiles())
+        this.onEndStream()
         this.onResponse();
+    }
+
+    onEndStream() {
+        window.rpc.handleEndStream((event: any, methodId: string) => {
+            this.runningCaches.set(methodId, false);
+        });
     }
 
     onResponse() {
@@ -36,15 +44,24 @@ export default class ProtoStore {
         });
     }
 
+
     * importFile(): any {
         return yield window.rpc.importFile();
     }
 
     * send(requestData: RequestData): any {
+        this.removeCache(requestData.id)
+        yield this.push(requestData);
+        if (requestData.methodMode != Mode.Unary) {
+            this.runningCaches.set(requestData.id, true);
+        }
+    }
+
+    removeCache(methodId: string) {
         // 清空缓存
-        this.requestCaches.clear();
-        this.responseCaches.clear();
-        this.push(requestData);
+        this.requestCaches.delete(methodId);
+        this.responseCaches.delete(methodId);
+        this.runningCaches.delete(methodId);
     }
 
     * push(requestData: RequestData): any {
@@ -63,9 +80,10 @@ export default class ProtoStore {
         yield window.rpc.send(requestData);
     }
 
-    * stop(methodId: string) {
-        console.log('stop stream');
-        // yield window.rpc.stop(methodId);
+    * stopStream(methodId: string) {
+        console.log('request stop stream');
+        yield window.rpc.stopStream(methodId);
+        this.runningCaches.set(methodId, false);
     }
 
     * save(method: Method) {
