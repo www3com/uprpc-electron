@@ -18,7 +18,7 @@ export interface RequestData {
 // 响应信息
 export interface ResponseData {
     id: string,
-    body?: string,
+    body: string,
     metadata?: any
 }
 

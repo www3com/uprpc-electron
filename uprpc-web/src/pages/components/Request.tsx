@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, { useState} from "react";
 import {Button, Card, Table, Tabs} from "antd";
 import AceEditor from "react-ace";
 import "ace-builds/src-noconflict/mode-json";
@@ -7,6 +7,7 @@ import {Allotment} from "allotment";
 import Stream from "@/pages/components/Stream";
 import {VerticalAlignBottomOutlined} from "@ant-design/icons";
 import {Method, Mode, RequestCache} from "@/types/types";
+import styles from '../style.less';
 
 interface requestProps {
     run: boolean,
@@ -69,9 +70,9 @@ export default ({run, method, requestCache, onChange, onPush}: requestProps) => 
                            columns={columns}/>
                 </Tabs.TabPane>
             </Tabs>
-            <Allotment.Pane visible={isStream}>
-                <Card title='Request Stream' size={"small"} bordered={false}
-                      bodyStyle={{height: '100%', overflow: "auto"}}>
+            <Allotment.Pane visible={isStream} className={styles.requestStreamHeight} >
+                <Card title='Request Stream' size={"small"} bordered={false} style={{height: '100%'}}
+                      bodyStyle={{height: 'calc(100% - 40px)', overflow: "auto", padding:0}}>
                     <Stream value={requestCache?.streams}/>
                 </Card>
             </Allotment.Pane>
