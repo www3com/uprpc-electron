@@ -9,7 +9,7 @@ let aliveSessions = {};
 export async function send(request: RequestData, callback: (response: ResponseData | null, err?: Error) => void) {
     let reqId: string = request.id;
 
-    let methodInfo = store.getMethodInfo(reqId);
+    let methodInfo = store.getMethodInfo(reqId, request.pos);
     if (methodInfo == null) {
         callback(null, new Error("the method is not exist"));
         return;

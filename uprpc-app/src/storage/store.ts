@@ -40,7 +40,7 @@ export function getPaths(): string[] {
     return paths == null ? [] : paths;
 }
 
-export function getMethodInfo(id: string): MethodInfo | null {
+export function getMethodInfo2(id: string): MethodInfo | null {
     let protos = getFiles();
     if (protos.length > 0) {
         protos.forEach((proto: Proto) => {
@@ -59,6 +59,25 @@ export function getMethodInfo(id: string): MethodInfo | null {
                 });
             });
         });
+    }
+    return null;
+}
+
+export function getMethodInfo(id: string, pos: string): MethodInfo | null {
+    let protos = getFiles();
+    let posArr = pos.split("-").map(Number);
+    let proto = protos[posArr[1]];
+    let service = proto.services[posArr[2]];
+    let method = service.methods[posArr[3]];
+    if (method.id == id) {
+        return {
+            id: id,
+            protoPath: proto.path,
+            namespace: service.namespace,
+            serviceName: service.name,
+            name: method.name,
+            mode: method.mode,
+        };
     }
     return null;
 }
