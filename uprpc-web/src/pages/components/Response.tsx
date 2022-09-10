@@ -19,10 +19,11 @@ export default ({method, responseCache, onChange}: responseProps) => {
         {title: 'Value', dataIndex: 'value', key: 'value'}
     ];
 
+    let isStream = method.mode==Mode.ServerStream || method.mode == Mode.BidirectionalStream;
     return (
         <Tabs style={{height: "100%"}} animated={false}>
-            <Tabs.TabPane tab={method.mode==Mode.ServerStream || method.mode == Mode.BidirectionalStream? 'Response Stream' : 'Response'} key='response'>
-                {method.mode == Mode.ServerStream || method.mode == Mode.BidirectionalStream ?
+            <Tabs.TabPane tab={isStream? 'Response Stream' : 'Response'} key='response'>
+                {isStream ?
                     <Stream value={responseCache?.streams}/> :
                     <AceEditor
                         style={{background: "#fff"}}

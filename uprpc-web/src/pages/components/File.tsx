@@ -1,12 +1,13 @@
 import React, {Key, useContext, useState} from "react";
 import {observer} from "mobx-react-lite";
-import { Col, Input, Layout, notification, Row, Space, Tabs, Tooltip, Tree, TreeDataNode} from "antd";
+import {Col, Input, Layout, notification, Row, Space, Tabs, Tooltip, Tree} from "antd";
 import {
-    ApiOutlined, BlockOutlined,
+    BlockOutlined,
     CloseCircleOutlined,
     DatabaseOutlined,
     DownOutlined,
-    FileOutlined, FilterOutlined,
+    FileOutlined,
+    FilterOutlined,
     FolderOutlined,
     HddOutlined,
     PlusCircleOutlined,
@@ -29,7 +30,7 @@ const file = () => {
             for (let service of proto.services) {
                 let methods = [];
                 for (let m of service.methods) {
-                    methods.push({key: m.id, title: m.name, icon: <BlockOutlined />})
+                    methods.push({key: m.id, title: m.name, icon: <BlockOutlined/>})
                 }
 
                 item.children.push({
@@ -50,8 +51,7 @@ const file = () => {
         tabStore.openTab({
             key: selectedKeys[0].toString(),
             pos: e.node.pos,
-            title: e.node.title,
-            type: "file"
+            title: e.node.title
         });
     }
 

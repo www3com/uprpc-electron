@@ -1,6 +1,6 @@
-import React, {useContext} from "react";
+import React, {useContext, useState} from "react";
 import {observer} from "mobx-react-lite";
-import {Button, Select, Space, Tabs} from "antd";
+import {Badge, Button, Select, Space, Tabs} from "antd";
 import "allotment/dist/style.css";
 import Editor from "@/pages/components/Editor";
 import {EyeOutlined} from "@ant-design/icons";
@@ -24,9 +24,12 @@ const tabs = () => {
                   onTabClick={(key: string) => tabStore.selectTab(key)}
                   activeKey={tabStore.selectedTab}
                   tabBarExtraContent={extra}>
-        {tabStore.openTabs.map((value: any) => {
-            return (<Tabs.TabPane tab={value.title} key={value.key} style={{height: "100%"}}>
-                <Editor pos={value.pos}/>
+        {tabStore.openTabs.map((value) => {
+            return (<Tabs.TabPane
+                tab={<Badge dot={value.dot} offset={[5, 8]}>{value.title}</Badge>}
+                key={value.key}
+                style={{height: "100%"}}>
+                <Editor pos={value.pos} onChange={() => tabStore.setDot(value.key)}/>
             </Tabs.TabPane>)
         })}
     </Tabs>)

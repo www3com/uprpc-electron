@@ -5,17 +5,18 @@ import "ace-builds/src-noconflict/mode-json";
 import "ace-builds/src-noconflict/ext-language_tools"
 import {Allotment} from "allotment";
 import Stream from "@/pages/components/Stream";
-import {ArrowRightOutlined, SendOutlined, VerticalAlignBottomOutlined} from "@ant-design/icons";
+import {VerticalAlignBottomOutlined} from "@ant-design/icons";
 import {Method, Mode, RequestCache} from "@/types/types";
 
 interface requestProps {
     run: boolean,
     method: Method,
     requestCache?: RequestCache,
-    onChange?: (method: Method) => void
+    onChange?: (method: Method) => void,
+    onPush?: (body: string) => void
 }
 
-export default ({run, method, requestCache, onChange}: requestProps) => {
+export default ({run, method, requestCache, onChange, onPush}: requestProps) => {
 
     const aceChange = (value: string) => {
         if (onChange) {
@@ -32,9 +33,9 @@ export default ({run, method, requestCache, onChange}: requestProps) => {
         }
     ];
 
-    let body = JSON.stringify(method.requestBody, null, '\t');
-    let pushButton = run && (method.mode == Mode.ClientStream || method.mode == Mode.BidirectionalStream) ?
-        <Button size='small' icon={<VerticalAlignBottomOutlined />}>Push</Button> : '';
+    let isStream = method.mode == Mode.ServerStream || method.mode == Mode.BidirectionalStream;
+    let pushButton = run && isStream ?
+        <Button size='small' icon={<VerticalAlignBottomOutlined/>}>Push</Button> : '';
     return (
         <Allotment>
             <Tabs style={{height: "100%"}} animated={false}
@@ -52,7 +53,7 @@ export default ({run, method, requestCache, onChange}: requestProps) => {
                         showPrintMargin={false}
                         showGutter
                         onChange={aceChange}
-                        defaultValue={body}
+                        defaultValue={method.requestBody}
                         setOptions={{
                             useWorker: true,
                             displayIndentGuides: true
@@ -61,11 +62,11 @@ export default ({run, method, requestCache, onChange}: requestProps) => {
                     />
                 </Tabs.TabPane>
                 <Tabs.TabPane tab='Metadata' key='metadata'>
-                    <Table size='small' bordered={true} pagination={false} dataSource={method.requestConf}
+                    <Table size='small' bordered={true} pagination={false} dataSource={method.requestMetadata}
                            columns={columns}/>
                 </Tabs.TabPane>
             </Tabs>
-            <Allotment.Pane visible={method.mode == Mode.ClientStream || method.mode == Mode.BidirectionalStream}>
+            <Allotment.Pane visible={isStream}>
                 <Card title='Request Stream' size={"small"} bordered={false}
                       bodyStyle={{height: '100%', overflow: "auto"}}>
                     <Stream value={requestCache?.streams}/>
