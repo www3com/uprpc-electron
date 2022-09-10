@@ -49,7 +49,6 @@ function getClient(methodInfo: MethodInfo, server: string) {
         enums: String,
         defaults: true,
         oneofs: true,
-        includeDirs: ["../uprpc-mock/proto"],
     });
 
     let grpcObject: GrpcObject = loadPackageDefinition(packageDefinition);
@@ -146,5 +145,5 @@ function invokeBidirectionalStream(
     } else {
         call = aliveSessions[methodInfo.name];
     }
-    call.write(request.body);
+    call.write(JSON.parse(request.body));
 }

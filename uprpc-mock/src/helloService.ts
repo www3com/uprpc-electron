@@ -47,19 +47,9 @@ export class HelloWorldService {
     }
     // 简单gRPC调用
     sayHelloDouble(call: any, callback: any) {
-        call.on("data", function (data: any) {
+        call.on("data", (data: any) => {
             console.log("客户端receive:", data);
-            call.write({ message: "start send to client:" + data.name });
-            let metadata = new Metadata();
-            for (var i = 0; i < 100; i++) {
-                call.write({ message: "send to client data:" + i });
-            }
-
-            // keys that end with '-bin' must have Buffer values
-            metadata.add("code-bin", Buffer.from("9500"));
-            metadata.add("data", "sss");
-            call.sendMetadata(metadata);
-            call.end(metadata);
+            call.write({ message: "you send to me:" + data.name });
         });
         call.on("end", function () {
             console.log("服务器发送end,客户端关闭");
