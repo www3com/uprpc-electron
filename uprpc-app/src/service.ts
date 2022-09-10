@@ -2,7 +2,7 @@ import * as store from "./storage/store";
 import { BrowserWindow, ipcMain } from "electron";
 import * as electron from "electron";
 import * as client from "./rpc/client";
-import { RequestData, ResponseData } from "./types";
+import { RequestData, ResponseData, CloseStreamData, isCloseStreamData } from "./types";
 
 const { loadProto } = require("./proto/parser");
 
@@ -80,9 +80,18 @@ export async function stopStream(window: BrowserWindow, id: string) {
     });
 }
 
-function returnResponse(window: BrowserWindow, req: RequestData, response: ResponseData | null, e?: Error): void {
-    window.webContents.send("updateResponse", {
-        id: req.id,
-        body: JSON.stringify(response ? response : e?.message, null, "\t"),
-    });
+function returnResponse(window: BrowserWindow, req: RequestData, res: any, e?: Error, closeStream?: boolean): void {
+    console.log("return response ", res);
+    if (closeStream) {
+        window.webContents.send("endStream", {
+            id: req.id,
+            body: e?.message,
+            metadata: JSON.stringify(res, null, "\t"),
+        });
+    } else {
+        window.webContents.send("updateResponse", {
+            id: req.id,
+            body: JSON.stringify(res ? res : e?.message, null, "\t"),
+        });
+    }
 }

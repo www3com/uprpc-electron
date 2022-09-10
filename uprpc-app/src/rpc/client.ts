@@ -75,10 +75,10 @@ function getClient(request: RequestData) {
 function invokeUnary(
     client: any,
     request: RequestData,
-    callback: (response: ResponseData | null, err?: Error) => void
+    callback: (response: any | null, err?: Error, closeStream?: boolean) => void
 ) {
     let metadata = new Metadata();
-    client[request.methodName](request.body, metadata, (err: ServiceError, response: any) => {
+    client[request.methodName](JSON.parse(request.body), metadata, (err: ServiceError, response: any) => {
         if (err != null) {
             let codeBin = err.metadata.get("code-bin");
             console.log("received error:", err.code, err.message, codeBin.toString());
@@ -90,35 +90,26 @@ function invokeUnary(
 function invokeServerStream(
     client: any,
     request: RequestData,
-    callback: (response: ResponseData | null, err?: Error) => void
+    callback: (response: any | null, err?: Error, closeStream?: boolean) => void
 ) {
-    client[request.methodName](request.body, (err: any, response: any) => {
-        if (err != null) {
-            console.log(err);
-        }
-        callback(response, err);
+    let call = getOrCreateSession(client, request, {
+        onData: (response: any) => {
+            console.log("客户端receive:", response);
+            callback(response);
+        },
+        onEnd: () => callback(null, undefined, true),
+        onError: (e: Error) => callback(null, undefined, true),
+        onMetadata: (metadata: any) => callback(null),
+        onStatus: (status: any) => callback(null),
     });
 }
 
 function invokeClientStream(
     client: any,
     request: RequestData,
-    callback: (response: ResponseData | null, err?: Error) => void
+    callback: (response: any | null, err?: Error, closeStream?: boolean) => void
 ) {
-    client[request.methodName](request.body, (err: any, response: any) => {
-        if (err != null) {
-            console.log(err);
-        }
-        callback(response, err);
-    });
-}
-
-function invokeBidirectionalStream(
-    client: any,
-    request: RequestData,
-    callback: (response: ResponseData | null, err?: Error) => void
-) {
-    let call = getOrCreateSession(client, request.id, {
+    let call = getOrCreateSession(client, request, {
         onData: (response: any) => {
             console.log("客户端receive:", response);
             callback(response);
@@ -131,24 +122,44 @@ function invokeBidirectionalStream(
     call.write(JSON.parse(request.body));
 }
 
-function getOrCreateSession(client: any, id: string, callOptions: CallOptions) {
+function invokeBidirectionalStream(
+    client: any,
+    request: RequestData,
+    callback: (response: any | null, err?: Error, closeStream?: boolean) => void
+) {
+    let call = getOrCreateSession(client, request, {
+        onData: (response: any) => {
+            console.log("客户端receive:", response);
+            callback(response);
+        },
+        onEnd: () => callback(null, undefined, true),
+        onError: (e: Error) => callback(null, undefined, true),
+        onMetadata: (metadata: any) => callback(null),
+        onStatus: (status: any) => callback(null),
+    });
+    call.write(JSON.parse(request.body));
+}
+
+function getOrCreateSession(client: any, request: RequestData, callOptions: CallOptions) {
     let call = null;
-    if (!aliveSessions[id]) {
-        call = client[id]();
+    if (!aliveSessions[request.id]) {
+        call = isClientStream(request.methodMode)
+            ? client[request.methodName]()
+            : client[request.methodName](request.body, (err: ServiceError, response: any) => callOptions?.onData);
         if (callOptions?.onData) {
             call.on("data", callOptions.onData);
         }
         if (callOptions?.onEnd) {
             call.on("end", () => {
                 console.log("服务器发送end,客户端关闭");
-                delete aliveSessions[id];
+                delete aliveSessions[request.id];
                 callOptions.onEnd ? callOptions.onEnd() : void 0;
             });
         }
         if (callOptions?.onError) {
             call.on("error", (e: Error) => {
                 console.log("发生异常,客户端关闭");
-                delete aliveSessions[id];
+                delete aliveSessions[request.id];
                 callOptions.onError ? callOptions.onError(e) : void 0;
             });
         }
@@ -158,11 +169,15 @@ function getOrCreateSession(client: any, id: string, callOptions: CallOptions) {
         if (callOptions?.onStatus) {
             call.on("status", callOptions.onStatus);
         }
-        aliveSessions[id] = call;
+        aliveSessions[request.id] = call;
     } else {
-        call = aliveSessions[id];
+        call = aliveSessions[request.id];
     }
     return call;
+}
+
+function isClientStream(mode: Mode): boolean {
+    return mode === Mode.BidirectionalStream;
 }
 
 interface CallOptions {
