@@ -22,6 +22,39 @@ const file = () => {
     let {tabStore, protoStore, pathsStore} = useContext(context);
     const [hidden, setHidden] = useState(true);
 
+    const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
+    const [searchValue, setSearchValue] = useState('');
+    const [autoExpandParent, setAutoExpandParent] = useState(true);
+
+    const onExpand = (newExpandedKeys: string[]) => {
+        // @ts-ignore
+        setExpandedKeys(newExpandedKeys);
+        setAutoExpandParent(false);
+    };
+
+    const getExpandedKeys = (value: string): string[] => {
+        let keys = [];
+        for (let proto of protoStore.protos) {
+            if (proto.name.indexOf(value) > -1) keys.push(proto.id)
+            for (let service of proto.services) {
+                if (service.name.indexOf(value) > -1) keys.push(service.id)
+                for (let method of service.methods) {
+                    if (method.name.indexOf(value) > -1) keys.push(method.id)
+                }
+            }
+        }
+        return keys;
+    }
+
+    const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const {value} = e.target;
+        let keys = getExpandedKeys(value);
+        console.log(keys)
+        setExpandedKeys(keys);
+        setSearchValue(value);
+        setAutoExpandParent(true);
+    };
+
     const parse = (protos: Proto[]) => {
         let treeData = [];
         for (let proto of protos) {
@@ -117,8 +150,12 @@ const file = () => {
                 <Tabs tabPosition='left' size='small' style={{height: '100%'}}>
                     <Tabs.TabPane tab={grpc} key="2" style={{height: "100%", overflow: 'auto', paddingLeft: 0}}>
                         <Input size='small' placeholder='Filter Methods' hidden={hidden}
-                               style={{marginBottom: 5}}></Input>
+                               onChange={onChange}
+                               style={{marginBottom: 5}}/>
                         <Tree.DirectoryTree
+                            onExpand={onExpand}
+                            expandedKeys={expandedKeys}
+                            autoExpandParent={autoExpandParent}
                             onSelect={onSelect}
                             switcherIcon={<DownOutlined/>}
                             defaultExpandedKeys={['0-0-0']}

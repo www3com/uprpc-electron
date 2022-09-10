@@ -14,9 +14,11 @@ import {
 import {v4} from 'uuid';
 import {basename} from "path";
 
+const EMPTY = '';
+
 export async function loadProto(path: string) {
     let root = await load(path, new Root());
-    let services = parse(root, "", root.nested);
+    let services = parse(root, EMPTY, root.nested);
     return {
         id: v4(),
         name: basename(path),
@@ -31,7 +33,7 @@ function parse(root: Root, namespaceName: string, children: any): any {
     for (let key in children) {
         let node = children[key]
         if (isNamespace(node)) {
-            services.push(...parse(root, namespaceName == "" ? key : namespaceName + '.' + key, node.nested))
+            services.push(...parse(root, namespaceName == EMPTY ? key : namespaceName.concat('.', key), node.nested))
         } else if (node instanceof Service) {
             services.push(parseService(root, namespaceName, node))
         }

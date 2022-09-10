@@ -9,15 +9,12 @@ import Response from "@/pages/components/Response";
 import Request from "@/pages/components/Request";
 import {Method, Mode, modeMap} from "@/types/types";
 
-const {Header, Content} = Layout;
-
 interface EditorProp {
-    pos: string,
-    onChange?: (methodId: string) => void
+    pos: string
 }
 
-const editor = ({pos, onChange}: EditorProp) => {
-    let {protoStore} = useContext(context)
+const editor = ({pos}: EditorProp) => {
+    let {protoStore, tabStore} = useContext(context)
     const init = () => {
         let fullMethod = {host: '127.0.0.1:9000', method: {id: '1', name: '', mode: Mode.Unary, requestBody: '{}'}}
         if (pos.indexOf('-') > 0) {
@@ -34,13 +31,12 @@ const editor = ({pos, onChange}: EditorProp) => {
     const [run, setRun] = useState(false);
 
     const onRequestChange = (method: Method) => {
-        if (onChange) {
-            onChange(method.id);
-        }
+        tabStore.setDot(method.id)
         setFullMethod({...fullMethod, method: method});
     }
 
     const onHostChange = (host: string) => {
+        tabStore.setDot(fullMethod.method.id)
         setFullMethod({...fullMethod, host: host});
     }
 
@@ -58,7 +54,8 @@ const editor = ({pos, onChange}: EditorProp) => {
             body: fullMethod.method.requestBody,
             host: fullMethod.host,
             id: fullMethod.method.id,
-            metadata: undefined
+            metadata: undefined,
+            pos: pos
         })
         if (fullMethod.method.mode != Mode.Unary) {
             setRun(true)
@@ -66,15 +63,15 @@ const editor = ({pos, onChange}: EditorProp) => {
     }
 
     const onStop = async () => {
-        await protoStore.stop()
-        setRun(false)
+        await protoStore.stop(fullMethod.method.id);
+        setRun(false);
     }
 
     let requestCache = protoStore.requestCaches.get(fullMethod.method.id);
     let responseCache = protoStore.responseCaches.get(fullMethod.method.id);
     return (
         <Layout style={{height: '100%', backgroundColor: 'white', padding: '0px 10px'}}>
-            <Header className={styles.header} style={{paddingBottom: 10}}>
+            <Layout.Header className={styles.header} style={{paddingBottom: 10}}>
                 <Row gutter={5}>
                     <Col flex="auto" style={{paddingTop: 5}}>
                         <Input addonBefore={<Space><ApiOutlined/>{modeMap[fullMethod.method.mode]}</Space>}
@@ -94,8 +91,8 @@ const editor = ({pos, onChange}: EditorProp) => {
                         </Space>
                     </Col>
                 </Row>
-            </Header>
-            <Content>
+            </Layout.Header>
+            <Layout.Content>
                 <Allotment vertical={true}>
                     <Request run={run}
                              method={fullMethod.method}
@@ -104,7 +101,7 @@ const editor = ({pos, onChange}: EditorProp) => {
                              onPush={onPush}/>
                     <Response method={fullMethod.method} responseCache={responseCache}/>
                 </Allotment>
-            </Content>
+            </Layout.Content>
         </Layout>
     )
 }

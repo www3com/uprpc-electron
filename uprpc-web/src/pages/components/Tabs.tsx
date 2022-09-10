@@ -1,4 +1,4 @@
-import React, {useContext, useState} from "react";
+import React, {useContext} from "react";
 import {observer} from "mobx-react-lite";
 import {Badge, Button, Select, Space, Tabs} from "antd";
 import "allotment/dist/style.css";
@@ -29,7 +29,7 @@ const tabs = () => {
                 tab={<Badge dot={value.dot} offset={[5, 8]}>{value.title}</Badge>}
                 key={value.key}
                 style={{height: "100%"}}>
-                <Editor pos={value.pos} onChange={() => tabStore.setDot(value.key)}/>
+                <Editor pos={value.pos}/>
             </Tabs.TabPane>)
         })}
     </Tabs>)
