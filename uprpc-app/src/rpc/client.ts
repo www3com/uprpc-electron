@@ -39,9 +39,10 @@ export async function send(request: RequestData, callback: (response: ResponseDa
 export async function stop(id: string, callback: (response: ResponseData | null, err?: Error) => void) {
     let call = aliveSessions[id];
     if (!!call) {
+        call.cancel();
+    } else {
         callback(null, new Error("This request not exist: " + id));
     }
-    call.end();
 }
 
 function getClient(request: RequestData) {

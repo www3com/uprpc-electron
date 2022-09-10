@@ -69,8 +69,8 @@ export function removePath(path: string) {
 
 export async function sendRequest(window: BrowserWindow, req: RequestData) {
     // let req: RequestData = JSON.parse(reqData);
-    await client.send(req, (res: ResponseData | null, err: Error | undefined) => {
-        returnResponse(window, req, res, err);
+    await client.send(req, (res: ResponseData | null, err: Error | undefined, closeStream?: boolean) => {
+        returnResponse(window, req, res, err, closeStream);
     });
 }
 
@@ -83,11 +83,12 @@ export async function stopStream(window: BrowserWindow, id: string) {
 function returnResponse(window: BrowserWindow, req: RequestData, res: any, e?: Error, closeStream?: boolean): void {
     console.log("return response ", res);
     if (closeStream) {
-        window.webContents.send("endStream", {
-            id: req.id,
-            body: e?.message,
-            metadata: JSON.stringify(res, null, "\t"),
-        });
+        // window.webContents.send("endStream", {
+        //     id: req.id,
+        //     body: e?.message,
+        //     metadata: JSON.stringify(res, null, "\t"),
+        // });
+        window.webContents.send("endStream", req.id);
     } else {
         window.webContents.send("updateResponse", {
             id: req.id,
