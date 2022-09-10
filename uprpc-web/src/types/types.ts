@@ -8,29 +8,29 @@ declare global {  //设置全局属性
 export interface RequestData {
     id: string,
     host: string,
-    body: string,
+    body: any,
     metadata?: any
 }
 
 // 响应信息
 export interface ResponseData {
     id: string,
-    body?: string,
+    body?: any,
     metadata?: any
 }
 
 export enum Mode {
-    Unary,
-    ClientStream,
-    ServerStream,
-    BidirectionalStream
+    Unary = 1,
+    ClientStream = 2,
+    ServerStream = 3,
+    BidirectionalStream = 4
 }
 
 export interface Method {
     id: string,
     name: string,
     mode: Mode,
-    requestBody: string,
+    requestBody: any,
     requestConf?: any,
     responseConf?: any
 }
@@ -65,4 +65,11 @@ export interface Tab {
     title: string,
     type: string,
     pos: string
+}
+
+export const modeMap = {
+    [Mode.Unary]: 'Unary',
+    [Mode.ClientStream]: 'Client Stream',
+    [Mode.ServerStream]: 'Server Stream',
+    [Mode.BidirectionalStream]: 'Bidirectional Stream',
 }

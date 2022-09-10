@@ -8,12 +8,15 @@ interface StreamProps {
 }
 
 export default ({value}: StreamProps) => {
-    if (value == null || value.length == 0) {
-        return <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
+    const [selectedKey, setSelectedKey] = useState("1")
+    if (value == null) {
+        return <Empty image={Empty.PRESENTED_IMAGE_SIMPLE}/>
     }
-    return (<Collapse defaultActiveKey={['1']} accordion>
+    // @ts-ignore
+    return (<Collapse activeKey={selectedKey} accordion onChange={key => setSelectedKey(key)}>
         {value?.map(function (item, index) {
-            return <Collapse.Panel header={'stream' + index} key={index}>
+            console.log(index)
+            return <Collapse.Panel header={'stream' + (index + 1)} key={index + 1}>
                 <pre style={{padding: 0}}>
                     {item}
                 </pre>
