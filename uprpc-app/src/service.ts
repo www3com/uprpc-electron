@@ -74,7 +74,11 @@ export async function sendRequest(window: BrowserWindow, req: RequestData) {
     });
 }
 
-export async function stopStream(window: BrowserWindow, id: string) {}
+export async function stopStream(window: BrowserWindow, id: string) {
+    await client.stop(id, (res: ResponseData | null, err: Error | undefined) => {
+        console.log("stop {} {},err:{} ", id, !!err, err?.message);
+    });
+}
 
 function returnResponse(window: BrowserWindow, req: RequestData, response: ResponseData | null, e?: Error): void {
     window.webContents.send("updateResponse", {
