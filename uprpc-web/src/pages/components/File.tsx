@@ -16,7 +16,7 @@ import {
 } from "@ant-design/icons";
 import {context} from "@/stores/context";
 import Paths from "@/pages/components/Paths";
-import {Proto} from "@/types/types";
+import {Proto, TabType} from "@/types/types";
 
 const file = () => {
     let {tabStore, protoStore, pathsStore} = useContext(context);
@@ -27,7 +27,6 @@ const file = () => {
     const [autoExpandParent, setAutoExpandParent] = useState(true);
 
     const onExpand = (newExpandedKeys: string[]) => {
-        // @ts-ignore
         setExpandedKeys(newExpandedKeys);
         setAutoExpandParent(false);
     };
@@ -35,11 +34,18 @@ const file = () => {
     const getExpandedKeys = (value: string): string[] => {
         let keys = [];
         for (let proto of protoStore.protos) {
-            if (proto.name.indexOf(value) > -1) keys.push(proto.id)
+            if (proto.name.indexOf(value) > -1) {
+                keys.push(proto.id);
+            }
             for (let service of proto.services) {
-                if (service.name.indexOf(value) > -1) keys.push(service.id)
+                if (service.name.indexOf(value) > -1) {
+                    keys.push(service.id);
+                }
                 for (let method of service.methods) {
-                    if (method.name.indexOf(value) > -1) keys.push(method.id)
+                    console.log(method.name, method.name.indexOf(value))
+                    if (method.name.indexOf(value) > -1) {
+                        keys.push(method.id);
+                    }
                 }
             }
         }
@@ -49,11 +55,13 @@ const file = () => {
     const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const {value} = e.target;
         let keys = getExpandedKeys(value);
-        console.log(keys)
+        console.log(value, keys)
         setExpandedKeys(keys);
         setSearchValue(value);
         setAutoExpandParent(true);
     };
+
+
 
     const parse = (protos: Proto[]) => {
         let treeData = [];
@@ -63,6 +71,18 @@ const file = () => {
             for (let service of proto.services) {
                 let methods = [];
                 for (let m of service.methods) {
+                    // const strTitle = m.name;
+                    // const index = strTitle.indexOf(searchValue);
+                    // const beforeStr = strTitle.substring(0, index);
+                    // const afterStr = strTitle.slice(index + searchValue.length);
+                    // const title =
+                    //     index > -1 ? (<span>{beforeStr}
+                    //             <span style={{color: '#f50'}}>{searchValue}</span>
+                    //             {afterStr}
+                    //             </span>
+                    //     ) : (
+                    //         <span>{strTitle}</span>
+                    //     );
                     methods.push({key: m.id, title: m.name, icon: <BlockOutlined/>})
                 }
 
@@ -83,7 +103,8 @@ const file = () => {
         if (e.node.pos.split('-').length != 4) return
         tabStore.openTab({
             key: selectedKeys[0].toString(),
-            pos: e.node.pos,
+            params: e.node.pos,
+            type: TabType.Proto,
             title: e.node.title
         });
     }
@@ -153,6 +174,7 @@ const file = () => {
                                onChange={onChange}
                                style={{marginBottom: 5}}/>
                         <Tree.DirectoryTree
+                            // @ts-ignore
                             onExpand={onExpand}
                             expandedKeys={expandedKeys}
                             autoExpandParent={autoExpandParent}

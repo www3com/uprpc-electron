@@ -5,6 +5,8 @@ import "allotment/dist/style.css";
 import Editor from "@/pages/components/Editor";
 import {EyeOutlined} from "@ant-design/icons";
 import {context} from '@/stores/context'
+import {TabType} from "@/types/types";
+import Welcome from "@/pages/components/Welcome";
 
 const tabs = () => {
     let {tabStore} = useContext(context)
@@ -20,16 +22,23 @@ const tabs = () => {
         <Button type='text' icon={<EyeOutlined/>} size="large"/>
     </Space>;
 
-    return (<Tabs hideAdd type="editable-card" onEdit={onEdit} style={{height: "100%"}} size='small'
+    if (tabStore.openTabs.length == 0) {
+        return <Welcome/>
+    }
+
+    return (
+        <Tabs hideAdd type="editable-card" onEdit={onEdit} style={{height: "100%"}} size='small'
                   onTabClick={(key: string) => tabStore.selectTab(key)}
                   activeKey={tabStore.selectedTab}
                   tabBarExtraContent={extra}>
         {tabStore.openTabs.map((value) => {
             return (<Tabs.TabPane
+                closable={value.closable}
                 tab={<Badge dot={value.dot} offset={[5, 8]}>{value.title}</Badge>}
                 key={value.key}
                 style={{height: "100%"}}>
-                <Editor pos={value.pos}/>
+                {value.type == TabType.Welcome ? <Welcome/> : ''}
+                {value.type == TabType.Proto ? <Editor pos={value.params}/> : ''}
             </Tabs.TabPane>)
         })}
     </Tabs>)
