@@ -8,7 +8,7 @@ export default class TabStore {
     }
 
     selectedTab = '1';
-    openTabs: Tab[] = [{key: '1', title: 'New Tab', type: TabType.Proto, pos: '0', dot: false}];
+    openTabs: Tab[] = [];
 
     selectTab(key: string) {
         this.selectedTab = key;
@@ -23,7 +23,7 @@ export default class TabStore {
         })
     }
 
-    openTab(tab: Tab = {key: "", pos: "", title: "", type: TabType.Proto, dot: false}) {
+    openTab(tab: Tab) {
         if (this.openTabs.length == 1 && this.openTabs[0].key === '1') {
             this.openTabs.splice(0, 1);
         }

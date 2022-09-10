@@ -8,11 +8,15 @@ declare global {
 
 // 请求信息
 export interface RequestData {
-    id: string,
-    host: string,
-    body: string,
-    metadata?: any,
-    pos?: string
+    id: string;
+    protoPath: string;
+    namespace: string;
+    serviceName: string;
+    methodName: string;
+    methodMode: Mode;
+    host: string;
+    body: any;
+    metadata?: any;
 }
 
 // 响应信息
@@ -64,6 +68,7 @@ export interface ResponseCache {
 }
 
 export enum TabType {
+    Welcome,
     Proto,
     Env
 }
@@ -72,8 +77,9 @@ export interface Tab {
     key: string,
     title: string,
     type?: TabType,
-    pos: string,
-    dot?: boolean
+    params?: any,
+    dot?: boolean,
+    closable?: boolean
 }
 
 export const modeMap = {
