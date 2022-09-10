@@ -60,7 +60,8 @@ const editor = ({pos}: EditorProp) => {
 
     let requestCache = protoStore.requestCaches.get(method.id);
     let responseCache = protoStore.responseCaches.get(method.id);
-
+    // @ts-ignore
+    let running: boolean = protoStore.runningCaches.get(method.id);
     return (
         <Layout style={{height: '100%', backgroundColor: 'white', padding: '0px 10px'}}>
             <Layout.Header className={styles.header} style={{paddingBottom: 10}}>
@@ -72,7 +73,7 @@ const editor = ({pos}: EditorProp) => {
                     </Col>
                     <Col flex="160px">
                         <Space>
-                            {protoStore.runningCaches.get(method.id) ?
+                            {running ?
                                 <Button type='primary' icon={<PoweroffOutlined/>} onClick={onStop}>Stop</Button> :
                                 (method.mode == Mode.Unary ?
                                     <Button type='primary' icon={<SendOutlined/>} onClick={onSend}>Send</Button>
@@ -86,7 +87,7 @@ const editor = ({pos}: EditorProp) => {
             </Layout.Header>
             <Layout.Content>
                 <Allotment vertical={true}>
-                    <Request run={protoStore.runningCaches.get(method.id)}
+                    <Request running={running}
                              method={method}
                              requestCache={requestCache}
                              onChange={onRequestChange}

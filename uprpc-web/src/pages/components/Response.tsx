@@ -22,7 +22,7 @@ export default ({method, responseCache, onChange}: responseProps) => {
     let isStream = method.mode==Mode.ServerStream || method.mode == Mode.BidirectionalStream;
     return (
         <Tabs style={{height: "100%"}} animated={false}>
-            <Tabs.TabPane tab={isStream? 'Response Stream' : 'Response'} key='response'>
+            <Tabs.TabPane tab={isStream? 'Response Stream' : 'Response'} key='response' >
                 {isStream ?
                     <Stream value={responseCache?.streams}/> :
                     <AceEditor
