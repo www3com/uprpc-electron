@@ -3,15 +3,14 @@ import {Method, Proto, RequestCache, RequestData, ResponseCache, ResponseData} f
 
 export default class ProtoStore {
     constructor() {
-        console.log('init rpc store')
-        makeAutoObservable(this)
-        this.init()
+        console.log("init rpc store");
+        makeAutoObservable(this);
+        this.init();
     }
 
     protos: Proto[] = [];
     requestCaches: Map<string, RequestCache> = new Map<string, RequestCache>();
     responseCaches: Map<string, ResponseCache> = new Map<string, ResponseCache>();
-
     * init(): any {
         this.protos = JSON.parse(yield window.rpc.getFiles())
         this.onResponse();
@@ -23,8 +22,8 @@ export default class ProtoStore {
             if (responseCache == null) {
                 this.responseCaches.set(value.id, {
                     body: value.body,
-                    metadata: value.metadata
-                })
+                    metadata: value.metadata,
+                });
                 return;
             }
             // 对响应流处理
@@ -33,15 +32,15 @@ export default class ProtoStore {
             if (streams.length > 20) {
                 streams.pop();
             }
-            this.responseCaches.set(value.id, {...responseCache, streams: streams});
+            this.responseCaches.set(value.id, { ...responseCache, streams: streams });
         });
     }
 
-    * importFile(): any {
-        return yield window.rpc.importFile()
+    *importFile(): any {
+        return yield window.rpc.importFile();
     }
 
-    * send(requestData: RequestData): any {
+    *send(requestData: RequestData): any {
         // 清空缓存
         this.requestCaches.clear();
         this.responseCaches.clear();

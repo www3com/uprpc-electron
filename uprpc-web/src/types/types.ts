@@ -1,6 +1,8 @@
-declare global {  //设置全局属性
-    interface Window {  //window对象属性
-        rpc: any;   //加入对象
+declare global {
+    //设置全局属性
+    interface Window {
+        //window对象属性
+        rpc: any; //加入对象
     }
 }
 
@@ -36,28 +38,28 @@ export interface Method {
 }
 
 export interface Service {
-    id: string,
-    name: string,
-    namespace: string,
-    methods: Method[]
+    id: string;
+    name: string;
+    namespace: string;
+    methods: Method[];
 }
 
 export interface Proto {
-    id: string,
-    name: string,
-    path: string,
-    host: string,
-    services: Service[]
+    id: string;
+    name: string;
+    path: string;
+    host: string;
+    services: Service[];
 }
 
 export interface RequestCache {
-    streams?: string[]
+    streams?: string[];
 }
 
 export interface ResponseCache {
-    metadata?: any,
-    body?: string,
-    streams?: string[]
+    metadata?: any;
+    body?: string;
+    streams?: string[];
 }
 
 export enum TabType {
@@ -74,8 +76,8 @@ export interface Tab {
 }
 
 export const modeMap = {
-    [Mode.Unary]: 'Unary',
-    [Mode.ClientStream]: 'Client Stream',
-    [Mode.ServerStream]: 'Server Stream',
-    [Mode.BidirectionalStream]: 'Bidirectional Stream',
-}
+    [Mode.Unary]: "Unary",
+    [Mode.ClientStream]: "Client Stream",
+    [Mode.ServerStream]: "Server Stream",
+    [Mode.BidirectionalStream]: "Bidirectional Stream",
+};

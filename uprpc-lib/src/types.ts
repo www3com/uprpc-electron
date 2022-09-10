@@ -17,32 +17,30 @@ export interface MethodInfo {
 // 请求信息
 export interface RequestData {
     id: string;
-    pos: string;
     host: string;
-    body: any;
+    body: string;
     metadata?: any;
 }
 
 // 响应信息
 export interface ResponseData {
     id: string;
-    body?: any;
+    body?: string;
     metadata?: any;
 }
 
 export enum Mode {
-    Unary = 1,
-    ClientStream = 2,
-    ServerStream = 3,
-    BidirectionalStream = 4,
+    Unary,
+    ClientStream,
+    ServerStream,
+    BidirectionalStream,
 }
 
 export interface Method {
     id: string;
     name: string;
     mode: Mode;
-    pos: string;
-    requestBody: any;
+    requestBody: string;
     requestConf?: any;
     responseConf?: any;
 }
@@ -62,26 +60,14 @@ export interface Proto {
     services: Service[];
 }
 
-export interface RequestCache {
-    streams?: string[];
-}
-
 export interface ResponseCache {
     metadata?: any;
-    body?: string;
-    streams?: string[];
+    body: string;
+    streams: string[];
 }
 
 export interface Tab {
     key: string;
     title: string;
     type: string;
-    pos: string;
 }
-
-export const modeMap = {
-    [Mode.Unary]: "Unary",
-    [Mode.ClientStream]: "Client Stream",
-    [Mode.ServerStream]: "Server Stream",
-    [Mode.BidirectionalStream]: "Bidirectional Stream",
-};
