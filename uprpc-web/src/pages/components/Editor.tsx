@@ -45,7 +45,8 @@ const editor = ({pos}: EditorProp) => {
             body: fullMethod.method.requestBody,
             host: fullMethod.host,
             id: fullMethod.method.id,
-            metadata: undefined
+            metadata: undefined,
+            pos: pos
         });
     }
 
