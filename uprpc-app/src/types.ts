@@ -31,10 +31,10 @@ export interface ResponseData {
 }
 
 export enum Mode {
-    Unary = 1,
-    ClientStream = 2,
-    ServerStream = 3,
-    BidirectionalStream = 4,
+    Unary = 0,
+    ClientStream = 1,
+    ServerStream = 2,
+    BidirectionalStream = 3,
 }
 
 export interface Method {

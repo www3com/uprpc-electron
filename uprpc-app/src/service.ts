@@ -67,8 +67,8 @@ export function removePath(path: string) {
     store.savePaths(paths);
 }
 
-export async function sendRequest(window: BrowserWindow, reqData: string) {
-    let req: RequestData = JSON.parse(reqData);
+export async function sendRequest(window: BrowserWindow, req: RequestData) {
+    // let req: RequestData = JSON.parse(reqData);
     await client.send(req, (res: ResponseData | null, err: Error | undefined) => {
         returnResponse(window, req, res, err);
     });
@@ -77,6 +77,6 @@ export async function sendRequest(window: BrowserWindow, reqData: string) {
 function returnResponse(window: BrowserWindow, req: RequestData, response: ResponseData | null, e?: Error): void {
     window.webContents.send("updateResponse", {
         id: req.id,
-        responseBody: response ? response : e?.message,
+        body: JSON.stringify(response ? response : e?.message, null, "\t"),
     });
 }
