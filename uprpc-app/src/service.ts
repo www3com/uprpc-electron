@@ -74,6 +74,8 @@ export async function sendRequest(window: BrowserWindow, req: RequestData) {
     });
 }
 
+export async function stopStream(window: BrowserWindow, id: string) {}
+
 function returnResponse(window: BrowserWindow, req: RequestData, response: ResponseData | null, e?: Error): void {
     window.webContents.send("updateResponse", {
         id: req.id,

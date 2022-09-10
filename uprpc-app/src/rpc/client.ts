@@ -1,6 +1,6 @@
 import { loadSync } from "@grpc/proto-loader";
 import { credentials, GrpcObject, loadPackageDefinition, Metadata, ServiceError } from "@grpc/grpc-js";
-import { RequestData, ResponseData, MethodInfo, Mode } from "../types";
+import { RequestData, ResponseData, Mode } from "../types";
 
 import * as store from "../storage/store";
 
@@ -10,40 +10,34 @@ let aliveSessions = {};
 export async function send(request: RequestData, callback: (response: ResponseData | null, err?: Error) => void) {
     let reqId: string = request.id;
 
-    let methodInfo = store.getMethodInfo(reqId, request.pos);
-    if (methodInfo == null) {
-        callback(null, new Error("the method is not exist"));
-        return;
-    }
-
-    let client = getClient(methodInfo, request.host);
-    switch (methodInfo.mode) {
+    let client = getClient(request);
+    switch (request.methodMode) {
         case Mode.Unary: {
-            invokeUnary(client, methodInfo, request, callback);
+            invokeUnary(client, request, callback);
             break;
         }
         case Mode.ClientStream: {
-            invokeClientStream(client, methodInfo, request, callback);
+            invokeClientStream(client, request, callback);
             break;
         }
         case Mode.ServerStream: {
-            invokeServerStream(client, methodInfo, request, callback);
+            invokeServerStream(client, request, callback);
             break;
         }
         case Mode.BidirectionalStream: {
-            invokeBidirectionalStream(client, methodInfo, request, callback);
+            invokeBidirectionalStream(client, request, callback);
 
             break;
         }
         default: {
-            callback(null, new Error("Unsupported method mode:" + methodInfo.mode));
+            callback(null, new Error("Unsupported method mode:" + request.methodMode));
             return;
         }
     }
 }
 
-function getClient(methodInfo: MethodInfo, server: string) {
-    let packageDefinition = loadSync([methodInfo.protoPath], {
+function getClient(request: RequestData) {
+    let packageDefinition = loadSync([request.protoPath], {
         keepCase: true,
         longs: String,
         enums: String,
@@ -54,30 +48,29 @@ function getClient(methodInfo: MethodInfo, server: string) {
     let grpcObject: GrpcObject = loadPackageDefinition(packageDefinition);
 
     let service = null;
-    if (methodInfo.namespace == "") {
-        service = grpcObject[methodInfo.namespace];
+    if (request.namespace == "") {
+        service = grpcObject[request.namespace];
     } else {
-        service = grpcObject[methodInfo.namespace][methodInfo.serviceName];
+        service = grpcObject[request.namespace][request.serviceName];
     }
 
     let client = null;
-    if (!aliveClient[service.serviceName]) {
-        client = new service(server, credentials.createInsecure());
-        aliveClient[service.serviceName] = client;
+    if (!aliveClient[request.serviceName]) {
+        client = new service(request.host, credentials.createInsecure());
+        aliveClient[request.serviceName] = client;
     } else {
-        client = aliveClient[service.serviceName];
+        client = aliveClient[request.serviceName];
     }
     return client;
 }
 
 function invokeUnary(
     client: any,
-    methodInfo: MethodInfo,
     request: RequestData,
     callback: (response: ResponseData | null, err?: Error) => void
 ) {
     let metadata = new Metadata();
-    client[methodInfo.name](request.body, metadata, (err: ServiceError, response: any) => {
+    client[request.methodName](request.body, metadata, (err: ServiceError, response: any) => {
         if (err != null) {
             let codeBin = err.metadata.get("code-bin");
             console.log("received error:", err.code, err.message, codeBin.toString());
@@ -88,11 +81,10 @@ function invokeUnary(
 
 function invokeServerStream(
     client: any,
-    methodInfo: MethodInfo,
     request: RequestData,
     callback: (response: ResponseData | null, err?: Error) => void
 ) {
-    client[methodInfo.name](request.body, (err: any, response: any) => {
+    client[request.methodName](request.body, (err: any, response: any) => {
         if (err != null) {
             console.log(err);
         }
@@ -102,11 +94,10 @@ function invokeServerStream(
 
 function invokeClientStream(
     client: any,
-    methodInfo: MethodInfo,
     request: RequestData,
     callback: (response: ResponseData | null, err?: Error) => void
 ) {
-    client[methodInfo.name](request.body, (err: any, response: any) => {
+    client[request.methodName](request.body, (err: any, response: any) => {
         if (err != null) {
             console.log(err);
         }
@@ -116,20 +107,20 @@ function invokeClientStream(
 
 function invokeBidirectionalStream(
     client: any,
-    methodInfo: MethodInfo,
     request: RequestData,
     callback: (response: ResponseData | null, err?: Error) => void
 ) {
     let call = null;
-    if (!aliveSessions[methodInfo.name]) {
-        call = client[methodInfo.name]();
+    if (!aliveSessions[request.id]) {
+        call = client[request.id]();
         call.on("data", (response: any) => {
             console.log("客户端receive:", response);
             callback(response);
         });
         call.on("end", () => {
             console.log("服务器发送end,客户端关闭");
-            delete aliveSessions[methodInfo.name];
+            delete aliveSessions[request.id];
+            callback(null);
         });
         call.on("error", (e: Error) => {
             console.log("服务器发送end,客户端关闭");
@@ -137,13 +128,14 @@ function invokeBidirectionalStream(
         });
         call.on("metadata", (metadata: any) => {
             console.log("客户端 metadata:", metadata);
+            callback(null);
         });
         call.on("status", (status: any) => {
             console.log("客户端 status:", status);
         });
-        aliveSessions[methodInfo.name] = call;
+        aliveSessions[request.id] = call;
     } else {
-        call = aliveSessions[methodInfo.name];
+        call = aliveSessions[request.id];
     }
     call.write(JSON.parse(request.body));
 }
