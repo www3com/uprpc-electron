@@ -1,12 +1,7 @@
 import { loadSync } from "@grpc/proto-loader";
-<<<<<<< HEAD
 import { credentials, GrpcObject, loadPackageDefinition, Metadata, ServiceError } from "@grpc/grpc-js";
 import { RequestData, ResponseData, MethodInfo, Mode } from "../types";
-=======
 
-import { credentials, GrpcObject, loadPackageDefinition, Metadata, ServiceError } from "@grpc/grpc-js";
-import { RequestData, ResponseData, MethodInfo, Mode } from "@/types";
->>>>>>> 1b05d45f98bd5d82590ceb1518dc2f669945d8fa
 import * as store from "../storage/store";
 
 let aliveClient = {};
@@ -14,7 +9,6 @@ let aliveSessions = {};
 
 export async function send(request: RequestData, callback: (response: ResponseData | null, err?: Error) => void) {
     let reqId: string = request.id;
-<<<<<<< HEAD
 
     let methodInfo = store.getMethodInfo(reqId, request.pos);
     if (methodInfo == null) {
@@ -22,15 +16,6 @@ export async function send(request: RequestData, callback: (response: ResponseDa
         return;
     }
 
-=======
-
-    let methodInfo = store.getMethodInfo(reqId);
-    if (methodInfo == null) {
-        callback(null, new Error("the method is not exist"));
-        return;
-    }
-
->>>>>>> 1b05d45f98bd5d82590ceb1518dc2f669945d8fa
     let client = getClient(methodInfo, request.host);
     switch (methodInfo.mode) {
         case Mode.Unary: {
@@ -38,7 +23,6 @@ export async function send(request: RequestData, callback: (response: ResponseDa
             break;
         }
         case Mode.ClientStream: {
-<<<<<<< HEAD
             invokeClientStream(client, methodInfo, request, callback);
             break;
         }
@@ -48,17 +32,7 @@ export async function send(request: RequestData, callback: (response: ResponseDa
         }
         case Mode.BidirectionalStream: {
             invokeBidirectionalStream(client, methodInfo, request, callback);
-=======
-            invokeClientStream(client, request, callback);
-            break;
-        }
-        case Mode.ServerStream: {
-            invokeServerStream(client, request, callback);
-            break;
-        }
-        case Mode.BidirectionalStream: {
-            invokeBidirectionalStream(client, request, callback);
->>>>>>> 1b05d45f98bd5d82590ceb1518dc2f669945d8fa
+
             break;
         }
         default: {
@@ -105,20 +79,12 @@ function invokeUnary(
 ) {
     let metadata = new Metadata();
     metadata.add("callId", "123");
-<<<<<<< HEAD
     client[methodInfo.name](request.body, metadata, (err: ServiceError, response: any) => {
-=======
-    let call = client[methodInfo.name](request.body, metadata, (err: ServiceError, response: any) => {
->>>>>>> 1b05d45f98bd5d82590ceb1518dc2f669945d8fa
         if (err != null) {
             let codeBin = err.metadata.get("code-bin");
             console.log("received error:", err.code, err.message, codeBin.toString());
         }
-<<<<<<< HEAD
         callback(response, err);
-=======
-        callback(methodInfo, response, err);
->>>>>>> 1b05d45f98bd5d82590ceb1518dc2f669945d8fa
     });
 }
 
