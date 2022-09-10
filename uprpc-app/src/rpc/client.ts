@@ -126,7 +126,7 @@ function invokeBidirectionalStream(
         call = client[methodInfo.name]();
         call.on("data", (response: any) => {
             console.log("客户端receive:", response);
-            callback(request, response);
+            callback(response);
         });
         call.on("end", () => {
             console.log("服务器发送end,客户端关闭");
