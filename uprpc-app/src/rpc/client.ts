@@ -78,7 +78,6 @@ function invokeUnary(
     callback: (response: ResponseData | null, err?: Error) => void
 ) {
     let metadata = new Metadata();
-    metadata.add("callId", "123");
     client[methodInfo.name](request.body, metadata, (err: ServiceError, response: any) => {
         if (err != null) {
             let codeBin = err.metadata.get("code-bin");
