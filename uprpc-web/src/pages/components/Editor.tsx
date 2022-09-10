@@ -7,7 +7,7 @@ import {context} from "@/stores/context";
 import {observer} from "mobx-react-lite";
 import Response from "@/pages/components/Response";
 import Request from "@/pages/components/Request";
-import {Method, Mode, modeMap, } from "@/types/types";
+import {Method, Mode, modeMap,} from "@/types/types";
 
 interface EditorProp {
     pos: string
@@ -59,7 +59,7 @@ const editor = ({pos}: EditorProp) => {
     }
 
     const onStop = async () => {
-        await protoStore.stop(method.id);
+        await protoStore.stopStream(method.id);
         setRun(false);
     }
 
