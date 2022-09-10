@@ -5,19 +5,15 @@ declare global {
         rpc: any; //加入对象
     }
 }
-export interface MethodInfo {
-    id: string;
-    protoPath: string;
-    namespace: string;
-    serviceName: string;
-    name: string;
-    mode: Mode;
-}
 
 // 请求信息
 export interface RequestData {
     id: string;
-    pos: string;
+    protoPath: string;
+    namespace: string;
+    serviceName: string;
+    methodName: string;
+    methodMode: Mode;
     host: string;
     body: any;
     metadata?: any;

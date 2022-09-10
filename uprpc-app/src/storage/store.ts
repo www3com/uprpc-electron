@@ -1,4 +1,4 @@
-import { Proto, Service, Method, MethodInfo } from "../types";
+import { Proto, Service, Method } from "../types";
 
 const Store = require("electron-store");
 const uuid = require("uuid");
@@ -38,46 +38,4 @@ export function savePaths(paths: string[]) {
 export function getPaths(): string[] {
     let paths = store.get(PATHS_KEY);
     return paths == null ? [] : paths;
-}
-
-export function getMethodInfo2(id: string): MethodInfo | null {
-    let protos = getFiles();
-    if (protos.length > 0) {
-        protos.forEach((proto: Proto) => {
-            proto.services.forEach((service: Service) => {
-                service.methods.forEach((method: Method) => {
-                    if (method.id == id) {
-                        return {
-                            id: id,
-                            protoPath: proto.path,
-                            namespace: service.namespace,
-                            serviceName: service.name,
-                            name: method.name,
-                            mode: method.mode,
-                        };
-                    }
-                });
-            });
-        });
-    }
-    return null;
-}
-
-export function getMethodInfo(id: string, pos: string): MethodInfo | null {
-    let protos = getFiles();
-    let posArr = pos.split("-").map(Number);
-    let proto = protos[posArr[1]];
-    let service = proto.services[posArr[2]];
-    let method = service.methods[posArr[3]];
-    if (method.id == id) {
-        return {
-            id: id,
-            protoPath: proto.path,
-            namespace: service.namespace,
-            serviceName: service.name,
-            name: method.name,
-            mode: method.mode,
-        };
-    }
-    return null;
 }
