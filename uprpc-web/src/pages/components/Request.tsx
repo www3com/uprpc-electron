@@ -1,4 +1,4 @@
-import React, { useState} from "react";
+import React, {useState} from "react";
 import {Button, Card, Table, Tabs} from "antd";
 import AceEditor from "react-ace";
 import "ace-builds/src-noconflict/mode-json";
@@ -39,38 +39,43 @@ export default ({running, method, requestCache, onChange, onPush}: requestProps)
 
     let isStream = method.mode == Mode.ClientStream || method.mode == Mode.BidirectionalStream;
     let pushButton = running && isStream ?
-        <Button size='small' icon={<CloudUploadOutlined />} onClick={()=> onPush(body)}>Push</Button> : '';
-    const items = [
-        { label: 'Params', key: 'params', children: <AceEditor
-                style={{background: "#fff"}}
-                width={"100%"}
-                height='100%'
-                mode="json"
-                theme="textmate"
-                name="inputs"
-                fontSize={13}
-                cursorStart={2}
-                showPrintMargin={false}
-                showGutter
-                onChange={aceChange}
-                defaultValue={method.requestBody}
-                setOptions={{
-                    useWorker: true,
-                    displayIndentGuides: true
-                }}
-                tabSize={2}
-            /> }, // 务必填写 key
-        { label: 'Metadata', key: 'metadata', children: <Table size='small' bordered={true} pagination={false} dataSource={method.requestMetadata}
-                                                               columns={columns}/> },
-    ];
+        <Button size='small' type='primary' icon={<CloudUploadOutlined/>} onClick={() => onPush(body)}>Push</Button> : '';
+    const items = [{
+        label: 'Params', key: 'params', children: <AceEditor
+            style={{background: "#fff"}}
+            width={"100%"}
+            height='100%'
+            mode="json"
+            theme="textmate"
+            name="inputs"
+            fontSize={13}
+            cursorStart={2}
+            showPrintMargin={false}
+            showGutter
+            onChange={aceChange}
+            defaultValue={method.requestBody}
+            setOptions={{
+                useWorker: true,
+                displayIndentGuides: true
+            }}
+            tabSize={2}
+        />
+    }, {
+        label: 'Metadata', key: 'metadata', children:
+            <Table size='small'
+                   bordered={true}
+                   pagination={false}
+                   dataSource={method.requestMetadata}
+                   columns={columns}/>
+    }];
 
     return (
         <Allotment>
             <Tabs style={{height: "100%"}} animated={false} items={items}
                   tabBarExtraContent={<div style={{paddingRight: 10}}>{pushButton}</div>}/>
-            <Allotment.Pane visible={isStream} className={styles.requestStreamHeight} >
+            <Allotment.Pane visible={isStream} className={styles.requestStreamHeight}>
                 <Card title='Request Stream' size={"small"} bordered={false} style={{height: '100%'}}
-                      bodyStyle={{height: 'calc(100% - 40px)', overflow: "auto", padding:0}}>
+                      bodyStyle={{height: 'calc(100% - 40px)', overflow: "auto", padding: 0}}>
                     <Stream value={requestCache?.streams}/>
                 </Card>
             </Allotment.Pane>

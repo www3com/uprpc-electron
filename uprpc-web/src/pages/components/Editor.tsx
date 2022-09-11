@@ -7,18 +7,16 @@ import {context} from "@/stores/context";
 import {observer} from "mobx-react-lite";
 import Response from "@/pages/components/Response";
 import Request from "@/pages/components/Request";
-import {Method, Mode, modeMap,} from "@/types/types";
+import {Service, Method, Mode, modeMap, Proto,} from "@/types/types";
 
 interface EditorProp {
-    pos: string
+    proto: Proto,
+    service: Service,
+    method: Method
 }
 
-const editor = ({pos}: EditorProp) => {
+const editor = ({proto, service, method : initMethod}: EditorProp) => {
     let {protoStore, tabStore} = useContext(context)
-    let posArr = pos.split('-').map(Number);
-    let proto = protoStore.protos[posArr[1]];
-    let service = proto.services[posArr[2]]
-    let initMethod = service.methods[posArr[3]];
 
     const [host, setHost] = useState(proto.host);
     const [method, setMethod] = useState(initMethod);
@@ -43,7 +41,7 @@ const editor = ({pos}: EditorProp) => {
             namespace: service.namespace,
             serviceName: service.name,
             protoPath: proto.path,
-            host: proto.host,
+            host: host,
         };
     }
     const onPush = async () => {

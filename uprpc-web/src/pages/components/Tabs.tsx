@@ -20,7 +20,6 @@ const tabs = () => {
     const extra = <Space size={0} style={{marginRight: 10}}>
         <Select defaultValue="1" style={{width: 180}} bordered={false}>
             <Select.Option value="1">No Environment</Select.Option>
-            <Select.Option value="2">Lucy</Select.Option>
         </Select>
         <Button type='text' icon={<EyeOutlined/>} size="large"/>
     </Space>;
@@ -31,14 +30,17 @@ const tabs = () => {
 
     const items = tabStore.openTabs.map((value) => {
         let children = <></>;
-        if (value.type == TabType.Welcome) {
-            children = <Welcome/>;
-        }
+        let label = value.title;
         if (value.type == TabType.Proto) {
-            children = <Editor pos={value.params}/>
+            let posArr = value.params.split('-').map(Number);
+            let proto = protoStore.protos[posArr[1]];
+            let service = proto.services[posArr[2]]
+            let method = service.methods[posArr[3]];
+            label = method.name;
+            children = <Editor proto={proto} service={service} method={method}/>
         }
         return {
-            label: <Badge dot={value.dot} offset={[5, 8]}>{value.title}</Badge>,
+            label: <Badge dot={value.dot} offset={[5, 8]}>{label}</Badge>,
             key: value.key,
             closeable: value.closable,
             children: children

@@ -7,7 +7,7 @@ import {context} from "@/stores/context";
 const welcome = () => {
     let {protoStore} = useContext(context)
     const items = [{
-        label: 'home Page',
+        label: 'Home Page',
         key: 'home',
         children:
             <div style={{height: '100%', display: "flex", justifyContent: 'center', alignItems: 'center'}}>
@@ -16,7 +16,7 @@ const welcome = () => {
                     title="Welcome to use upRpc"
                     subTitle='Swim in the ocean of knowledge and enjoy it.'
                     extra={<Button type="primary"
-                                   onClick={() => protoStore.importFile()}
+                                   onClick={() => protoStore.importProto()}
                                    icon={<PlusOutlined/>}>Import Protos</Button>}/>
             </div>
     }];

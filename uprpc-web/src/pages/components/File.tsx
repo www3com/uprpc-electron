@@ -1,10 +1,10 @@
 import React, {Key, useContext, useState} from "react";
 import {observer} from "mobx-react-lite";
-import {Col, Input, Layout, notification, Row, Space, Tabs, Tooltip, Tree} from "antd";
+import {Col, Input, Layout, message, Modal, notification, Row, Space, Tabs, Tooltip, Tree} from "antd";
 import {
     BlockOutlined,
     CloseCircleOutlined,
-    DatabaseOutlined,
+    DatabaseOutlined, DeleteOutlined,
     DownOutlined,
     FileOutlined,
     FilterOutlined,
@@ -18,13 +18,26 @@ import {context} from "@/stores/context";
 import Paths from "@/pages/components/Paths";
 import {Proto, TabType} from "@/types/types";
 
+interface DeleteProto {
+    id: string,
+    name: string
+}
+
 const file = () => {
     let {tabStore, protoStore, pathsStore} = useContext(context);
-    const [hidden, setHidden] = useState(true);
+    const [visible, setVisible] = useState(false);
 
     const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
     const [searchValue, setSearchValue] = useState('');
     const [autoExpandParent, setAutoExpandParent] = useState(true);
+    const [deleteProto, setDeleteProto] = useState<DeleteProto>();
+
+    const showSearchBox = (visible: boolean) => {
+        setVisible(visible);
+        if (!visible) {
+            setSearchValue('');
+        }
+    }
 
     const onExpand = (newExpandedKeys: string[]) => {
         setExpandedKeys(newExpandedKeys);
@@ -34,16 +47,15 @@ const file = () => {
     const getExpandedKeys = (value: string): string[] => {
         let keys = [];
         for (let proto of protoStore.protos) {
-            if (proto.name.indexOf(value) > -1) {
+            if (proto.name.toLowerCase().indexOf(value.toLowerCase()) > -1) {
                 keys.push(proto.id);
             }
             for (let service of proto.services) {
-                if (service.name.indexOf(value) > -1) {
+                if (service.name.toLowerCase().indexOf(value.toLowerCase()) > -1) {
                     keys.push(service.id);
                 }
                 for (let method of service.methods) {
-                    console.log(method.name, method.name.indexOf(value))
-                    if (method.name.indexOf(value) > -1) {
+                    if (method.name.toLowerCase().indexOf(value.toLowerCase()) > -1) {
                         keys.push(method.id);
                     }
                 }
@@ -62,32 +74,35 @@ const file = () => {
     };
 
 
+    const getTitle = (strTitle: string, value: string) => {
+        const index = strTitle.toLowerCase().indexOf(searchValue.toLowerCase());
+        const beforeStr = strTitle.substring(0, index);
+        const middleStr = strTitle.substring(index, index + searchValue.length);
+        const afterStr = strTitle.slice(index + searchValue.length);
+        const title = index > -1 ?
+            <span>{beforeStr} <span style={{color: '#f50'}}>{middleStr}</span>{afterStr}</span>
+            : <span>{strTitle}</span>;
+        return title;
+    }
+
     const parse = (protos: Proto[]) => {
         let treeData = [];
         for (let proto of protos) {
-            let item: any = {key: proto.id, title: proto.name, icon: <FileOutlined/>, children: []};
-
+            let item: any = {
+                key: proto.id,
+                title: <span style={{width: '100%'}}>{getTitle(proto.name, searchValue)}</span>,
+                icon: <FileOutlined/>,
+                children: []
+            };
             for (let service of proto.services) {
                 let methods = [];
                 for (let m of service.methods) {
-                    // const strTitle = m.name;
-                    // const index = strTitle.indexOf(searchValue);
-                    // const beforeStr = strTitle.substring(0, index);
-                    // const afterStr = strTitle.slice(index + searchValue.length);
-                    // const title =
-                    //     index > -1 ? (<span>{beforeStr}
-                    //             <span style={{color: '#f50'}}>{searchValue}</span>
-                    //             {afterStr}
-                    //             </span>
-                    //     ) : (
-                    //         <span>{strTitle}</span>
-                    //     );
-                    methods.push({key: m.id, title: m.name, icon: <BlockOutlined/>})
+                    methods.push({key: m.id, title: getTitle(m.name, searchValue), icon: <BlockOutlined/>})
                 }
 
                 item.children.push({
                     key: service.id,
-                    title: service.name,
+                    title: getTitle(service.name, searchValue),
                     icon: <DatabaseOutlined/>,
                     children: methods
                 })
@@ -99,18 +114,23 @@ const file = () => {
 
 
     const onSelect = (selectedKeys: Key[], e: any) => {
-        if (e.node.pos.split('-').length != 4) return
+        let pos = e.node.pos.split('-');
+        if (pos.length == 2) {
+            let proto = protoStore.protos[pos[1]];
+            setDeleteProto({id: proto.id, name: proto.name})
+            return;
+        } else if (pos.length != 4) {
+            return
+        }
         tabStore.openTab({
             key: selectedKeys[0].toString(),
             params: e.node.pos,
             type: TabType.Proto,
-            title: e.node.title
         });
     }
 
     const onImport = async () => {
-        const result = await protoStore.importFile()
-        debugger
+        const result = await protoStore.importProto()
         if (!result.success) {
             notification.open({
                 message: 'Error while importing protos',
@@ -120,14 +140,43 @@ const file = () => {
         }
     };
 
+    const onReload = async () => {
+        const result = await protoStore.reloadProto()
+        if (result.success) {
+            message.success("Reload protos successful.")
+        } else {
+            notification.open({
+                message: 'Error while reloading protos',
+                description: result.message,
+                icon: <CloseCircleOutlined style={{color: 'red'}}/>
+            });
+        }
+    };
+
+    const onDelete = async () => {
+        if (deleteProto == null) {
+            message.warn('Please select the deleted proto.');
+            return;
+        }
+
+        Modal.confirm({
+            title: 'Confirm delete proto',
+            // icon: <ExclamationCircleOutlined />,
+            content: 'Do you want to remove the proto configuration '.concat(deleteProto.name, '?')
+        });
+        protoStore.deleteProto(deleteProto.id);
+    };
+
+
     const items = [{
         label: (<Space direction='vertical' size={0} align={"center"}>
             <HddOutlined style={{fontSize: 20, marginRight: 0}}/>
             <div style={{fontSize: 10}}>GRPC</div>
         </Space>),
         key: '1', children: <>
-            <Input size='small' placeholder='Filter Methods' hidden={hidden}
+            <Input size='small' placeholder='Filter Methods' hidden={!visible}
                    onChange={onChange}
+                   value={searchValue}
                    style={{marginBottom: 5}}/>
             <Tree.DirectoryTree
                 // @ts-ignore
@@ -144,7 +193,7 @@ const file = () => {
             <div style={{fontSize: 10}}>ENV</div>
         </Space>),
         key: '2',
-        children: '内容 2'
+        children: 'Please look forward to it!'
     }];
 
     return (
@@ -164,16 +213,19 @@ const file = () => {
                                 <a style={{color: '#000000D9', fontSize: 16}}
                                    onClick={onImport}><PlusCircleOutlined/></a>
                             </Tooltip>
+                            <Tooltip title='Reload Protos'>
+                                <a style={{color: '#000000D9', fontSize: 16}} onClick={onReload}><ReloadOutlined/></a>
+                            </Tooltip>
+                            <Tooltip title='Delete Selectecd Proto'>
+                                <a style={{color: '#000000D9', fontSize: 16}} onClick={onDelete}><DeleteOutlined/></a>
+                            </Tooltip>
                             <Tooltip title='Import Paths'>
                                 <a style={{color: '#000000D9', fontSize: 16}}
                                    onClick={() => pathsStore.showPaths(!pathsStore.pathsDrawerVisible)}><FolderOutlined/></a>
                             </Tooltip>
-                            <Tooltip title='Reload'>
-                                <a style={{color: '#000000D9', fontSize: 16}}><ReloadOutlined/></a>
-                            </Tooltip>
                             <Tooltip title='Filter Methods'>
                                 <a style={{color: '#000000D9', fontSize: 16}}
-                                   onClick={() => setHidden(!hidden)}><FilterOutlined/></a>
+                                   onClick={() => showSearchBox(!visible)}><FilterOutlined/></a>
                             </Tooltip>
 
                         </Space>
