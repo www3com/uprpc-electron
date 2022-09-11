@@ -92,7 +92,6 @@ export default class ProtoStore {
             this.requestCaches.set(requestData.id, {streams: streams})
         }
 
-        requestData.metadata = this.getMetadata(requestData.metadata);
         yield window.rpc.send(requestData);
     }
 
@@ -104,17 +103,6 @@ export default class ProtoStore {
 
     * save(method: Method) {
         console.log('save method', method);
-        method.requestMetadata = this.getMetadata(method.requestMetadata);
         yield window.rpc.save(method);
-    }
-
-    getMetadata(metadata: any) {
-        if (metadata == null || metadata.length == 0) {
-            return [];
-        }
-        let data = [...metadata];
-        console.log("...", data)
-        data.pop();
-        return data;
     }
 }
