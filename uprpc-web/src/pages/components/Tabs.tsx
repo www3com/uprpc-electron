@@ -2,11 +2,11 @@ import React, {useContext} from "react";
 import {observer} from "mobx-react-lite";
 import {Badge, Button, Select, Space, Tabs} from "antd";
 import "allotment/dist/style.css";
-import Editor from "@/pages/components/Editor";
 import {EyeOutlined} from "@ant-design/icons";
 import {context} from '@/stores/context'
 import {TabType} from "@/types/types";
 import Welcome from "@/pages/components/Welcome";
+import Editor from "@/pages/components/Editor";
 
 const tabs = () => {
     let {tabStore, protoStore} = useContext(context)
@@ -29,22 +29,27 @@ const tabs = () => {
         return <Welcome/>
     }
 
+    const items = tabStore.openTabs.map((value) => {
+        let children = <></>;
+        if (value.type == TabType.Welcome) {
+            children = <Welcome/>;
+        }
+        if (value.type == TabType.Proto) {
+            children = <Editor pos={value.params}/>
+        }
+        return {
+            label: <Badge dot={value.dot} offset={[5, 8]}>{value.title}</Badge>,
+            key: value.key,
+            closeable: value.closable,
+            children: children
+        };
+    });
+
     return (
-        <Tabs hideAdd type="editable-card" onEdit={onEdit} style={{height: "100%"}} size='small'
+        <Tabs hideAdd type="editable-card" onEdit={onEdit} style={{height: "100%"}} size='small' items={items}
               onTabClick={(key: string) => tabStore.selectTab(key)}
               activeKey={tabStore.selectedTab}
-              tabBarExtraContent={extra}>
-            {tabStore.openTabs.map((value) => {
-                return (<Tabs.TabPane
-                    closable={value.closable}
-                    tab={<Badge dot={value.dot} offset={[5, 8]}>{value.title}</Badge>}
-                    key={value.key}
-                    style={{height: "100%"}}>
-                    {value.type == TabType.Welcome ? <Welcome/> : ''}
-                    {value.type == TabType.Proto ? <Editor pos={value.params}/> : ''}
-                </Tabs.TabPane>)
-            })}
-        </Tabs>)
+              tabBarExtraContent={extra}/>)
 }
 
 export default observer(tabs)
