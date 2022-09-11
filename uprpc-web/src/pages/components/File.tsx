@@ -114,19 +114,18 @@ const file = () => {
 
 
     const onSelect = (selectedKeys: Key[], e: any) => {
+        setDeleteProto(undefined);
         let pos = e.node.pos.split('-');
         if (pos.length == 2) {
             let proto = protoStore.protos[pos[1]];
             setDeleteProto({id: proto.id, name: proto.name})
-            return;
-        } else if (pos.length != 4) {
-            return
+        } else if (pos.length == 4) {
+            tabStore.openTab({
+                key: selectedKeys[0].toString(),
+                params: e.node.pos,
+                type: TabType.Proto,
+            });
         }
-        tabStore.openTab({
-            key: selectedKeys[0].toString(),
-            params: e.node.pos,
-            type: TabType.Proto,
-        });
     }
 
     const onImport = async () => {
@@ -161,10 +160,10 @@ const file = () => {
 
         Modal.confirm({
             title: 'Confirm delete proto',
-            // icon: <ExclamationCircleOutlined />,
             content: 'Do you want to remove the proto configuration '.concat(deleteProto.name, '?')
         });
         protoStore.deleteProto(deleteProto.id);
+        setDeleteProto(undefined);
     };
 
 
