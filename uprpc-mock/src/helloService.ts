@@ -55,12 +55,12 @@ export class HelloWorldService {
     }
     // 简单gRPC调用
     sayHelloClient(call: any, callback: any) {
-        // callback(null, { message: "Hello " + call.request.name });
         call.on("data", (data: any) => {
             console.log("sayHelloClient: receive客户端: ", data);
         });
-        call.on("end", function () {
+        call.on("close", function () {
             console.log("sayHelloClient:服务器发送end,客户端关闭");
+            callback(null, { message: "Hello sayHelloClient" });
         });
     }
     // 简单gRPC调用
