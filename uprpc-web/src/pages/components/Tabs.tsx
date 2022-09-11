@@ -20,7 +20,6 @@ const tabs = () => {
     const extra = <Space size={0} style={{marginRight: 10}}>
         <Select defaultValue="1" style={{width: 180}} bordered={false}>
             <Select.Option value="1">No Environment</Select.Option>
-            <Select.Option value="2">Lucy</Select.Option>
         </Select>
         <Button type='text' icon={<EyeOutlined/>} size="large"/>
     </Space>;

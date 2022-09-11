@@ -193,7 +193,7 @@ const file = () => {
             <div style={{fontSize: 10}}>ENV</div>
         </Space>),
         key: '2',
-        children: '内容 2'
+        children: 'Please look forward to it!'
     }];
 
     return (
