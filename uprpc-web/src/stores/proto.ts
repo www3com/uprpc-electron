@@ -109,6 +109,9 @@ export default class ProtoStore {
     }
 
     getMetadata(metadata: any) {
+        if (metadata == null || metadata.length == 0) {
+            return [];
+        }
         let data = [...metadata];
         console.log("...", data)
         data.pop();
