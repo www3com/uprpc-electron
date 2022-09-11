@@ -13,10 +13,14 @@ export default class ProtoStore {
     responseCaches: Map<string, ResponseCache> = new Map<string, ResponseCache>();
     runningCaches: Map<string, boolean> = new Map<string, boolean>();
 
-    * init(): any {
-        this.protos = JSON.parse(yield window.rpc.getFiles())
-        this.onEndStream()
+    init(): any {
+        this.getProtos();
+        this.onEndStream();
         this.onResponse();
+    }
+
+    * getProtos() {
+        this.protos = JSON.parse(yield window.rpc.getFiles())
     }
 
     onEndStream() {
@@ -45,8 +49,18 @@ export default class ProtoStore {
     }
 
 
-    * importFile(): any {
-        return yield window.rpc.importFile();
+    * importProto(): any {
+        let files = yield window.rpc.importFile();
+        this.getProtos();
+        return files;
+    }
+
+    * reloadProto() :any {
+        console.log('reload file');
+    }
+
+    * deleteProto(id:string) {
+        console.log('delete proto')
     }
 
     * send(requestData: RequestData): any {

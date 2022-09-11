@@ -1,10 +1,10 @@
 import React, {Key, useContext, useState} from "react";
 import {observer} from "mobx-react-lite";
-import {Col, Input, Layout, notification, Row, Space, Tabs, Tooltip, Tree} from "antd";
+import {Col, Input, Layout, message, Modal, notification, Row, Space, Tabs, Tooltip, Tree} from "antd";
 import {
     BlockOutlined,
     CloseCircleOutlined,
-    DatabaseOutlined,
+    DatabaseOutlined, DeleteOutlined,
     DownOutlined,
     FileOutlined,
     FilterOutlined,
@@ -18,6 +18,11 @@ import {context} from "@/stores/context";
 import Paths from "@/pages/components/Paths";
 import {Proto, TabType} from "@/types/types";
 
+interface DeleteProto {
+    id: string,
+    name: string
+}
+
 const file = () => {
     let {tabStore, protoStore, pathsStore} = useContext(context);
     const [visible, setVisible] = useState(false);
@@ -25,6 +30,7 @@ const file = () => {
     const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
     const [searchValue, setSearchValue] = useState('');
     const [autoExpandParent, setAutoExpandParent] = useState(true);
+    const [deleteProto, setDeleteProto] = useState<DeleteProto>();
 
     const showSearchBox = (visible: boolean) => {
         setVisible(visible);
@@ -84,7 +90,7 @@ const file = () => {
         for (let proto of protos) {
             let item: any = {
                 key: proto.id,
-                title: getTitle(proto.name, searchValue),
+                title: <span style={{width: '100%'}}>{getTitle(proto.name, searchValue)}</span>,
                 icon: <FileOutlined/>,
                 children: []
             };
@@ -108,7 +114,14 @@ const file = () => {
 
 
     const onSelect = (selectedKeys: Key[], e: any) => {
-        if (e.node.pos.split('-').length != 4) return
+        let pos = e.node.pos.split('-');
+        if (pos.length == 2) {
+            let proto = protoStore.protos[pos[1]];
+            setDeleteProto({id: proto.id, name: proto.name})
+            return;
+        } else if (pos.length != 4) {
+            return
+        }
         tabStore.openTab({
             key: selectedKeys[0].toString(),
             params: e.node.pos,
@@ -117,8 +130,7 @@ const file = () => {
     }
 
     const onImport = async () => {
-        const result = await protoStore.importFile()
-        debugger
+        const result = await protoStore.importProto()
         if (!result.success) {
             notification.open({
                 message: 'Error while importing protos',
@@ -127,6 +139,34 @@ const file = () => {
             });
         }
     };
+
+    const onReload = async () => {
+        const result = await protoStore.reloadProto()
+        if (result.success) {
+            message.success("Reload protos successful.")
+        } else {
+            notification.open({
+                message: 'Error while reloading protos',
+                description: result.message,
+                icon: <CloseCircleOutlined style={{color: 'red'}}/>
+            });
+        }
+    };
+
+    const onDelete = async () => {
+        if (deleteProto == null) {
+            message.warn('Please select the deleted proto.');
+            return;
+        }
+
+        Modal.confirm({
+            title: 'Confirm delete proto',
+            // icon: <ExclamationCircleOutlined />,
+            content: 'Do you want to remove the proto configuration '.concat(deleteProto.name, '?')
+        });
+        protoStore.deleteProto(deleteProto.id);
+    };
+
 
     const items = [{
         label: (<Space direction='vertical' size={0} align={"center"}>
@@ -173,12 +213,15 @@ const file = () => {
                                 <a style={{color: '#000000D9', fontSize: 16}}
                                    onClick={onImport}><PlusCircleOutlined/></a>
                             </Tooltip>
+                            <Tooltip title='Reload Protos'>
+                                <a style={{color: '#000000D9', fontSize: 16}} onClick={onReload}><ReloadOutlined/></a>
+                            </Tooltip>
+                            <Tooltip title='Delete Selectecd Proto'>
+                                <a style={{color: '#000000D9', fontSize: 16}} onClick={onDelete}><DeleteOutlined/></a>
+                            </Tooltip>
                             <Tooltip title='Import Paths'>
                                 <a style={{color: '#000000D9', fontSize: 16}}
                                    onClick={() => pathsStore.showPaths(!pathsStore.pathsDrawerVisible)}><FolderOutlined/></a>
-                            </Tooltip>
-                            <Tooltip title='Reload'>
-                                <a style={{color: '#000000D9', fontSize: 16}}><ReloadOutlined/></a>
                             </Tooltip>
                             <Tooltip title='Filter Methods'>
                                 <a style={{color: '#000000D9', fontSize: 16}}
