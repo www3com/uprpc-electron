@@ -1,6 +1,6 @@
 import React, {Key, useContext, useState} from "react";
 import {observer} from "mobx-react-lite";
-import {Col, Input, Layout, message, Modal, notification, Row, Space, Tabs, Tooltip, Tree} from "antd";
+import {Col, Empty, Input, Layout, message, Modal, notification, Row, Space, Tabs, Tooltip, Tree} from "antd";
 import {
     BlockOutlined,
     CloseCircleOutlined,
@@ -166,7 +166,7 @@ const file = () => {
         setDeleteProto(undefined);
     };
 
-
+    let datasource = parse(protoStore.protos);
     const items = [{
         label: (<Space direction='vertical' size={0} align={"center"}>
             <HddOutlined style={{fontSize: 20, marginRight: 0}}/>
@@ -177,6 +177,7 @@ const file = () => {
                    onChange={onChange}
                    value={searchValue}
                    style={{marginBottom: 5}}/>
+            {datasource.length == 0? <Empty style={{marginTop: '80px'}} description='No Proto'/>:
             <Tree.DirectoryTree
                 // @ts-ignore
                 onExpand={onExpand}
@@ -185,7 +186,7 @@ const file = () => {
                 onSelect={onSelect}
                 switcherIcon={<DownOutlined/>}
                 defaultExpandedKeys={['0-0-0']}
-                treeData={parse(protoStore.protos)}/></>
+                treeData={datasource}/>}</>
     }, {
         label: (<Space direction='vertical' size={0}>
             <SettingOutlined style={{fontSize: 20, marginRight: 0}}/>
@@ -226,7 +227,6 @@ const file = () => {
                                 <a style={{color: '#000000D9', fontSize: 16}}
                                    onClick={() => showSearchBox(!visible)}><FilterOutlined/></a>
                             </Tooltip>
-
                         </Space>
                     </Col>
                 </Row>
