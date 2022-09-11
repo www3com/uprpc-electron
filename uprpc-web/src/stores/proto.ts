@@ -55,15 +55,16 @@ export default class ProtoStore {
         return files;
     }
 
-    * reloadProto() :any {
+    * reloadProto(): any {
         console.log('reload file');
     }
 
-    * deleteProto(id:string) {
+    * deleteProto(id: string) {
         console.log('delete proto')
     }
 
     * send(requestData: RequestData): any {
+        console.log('Request data: ', requestData)
         this.removeCache(requestData.id)
         yield this.push(requestData);
         if (requestData.methodMode != Mode.Unary) {
@@ -91,6 +92,7 @@ export default class ProtoStore {
             this.requestCaches.set(requestData.id, {streams: streams})
         }
 
+        requestData.metadata = this.getMetadata(requestData.metadata);
         yield window.rpc.send(requestData);
     }
 
@@ -102,7 +104,14 @@ export default class ProtoStore {
 
     * save(method: Method) {
         console.log('save method', method);
+        method.requestMetadata = this.getMetadata(method.requestMetadata);
         yield window.rpc.save(method);
     }
 
+    getMetadata(metadata: any) {
+        let data = [...metadata];
+        console.log("...", data)
+        data.pop();
+        return data;
+    }
 }

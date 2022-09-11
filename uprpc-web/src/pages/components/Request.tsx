@@ -5,9 +5,10 @@ import "ace-builds/src-noconflict/mode-json";
 import "ace-builds/src-noconflict/ext-language_tools"
 import {Allotment} from "allotment";
 import Stream from "@/pages/components/Stream";
-import {CloudUploadOutlined} from "@ant-design/icons";
+import {CloudUploadOutlined, MinusCircleOutlined} from "@ant-design/icons";
 import {Method, Mode, RequestCache} from "@/types/types";
 import styles from '../style.less';
+import {v4} from 'uuid';
 
 interface requestProps {
     running: boolean,
@@ -19,8 +20,7 @@ interface requestProps {
 
 export default ({running, method, requestCache, onChange, onPush}: requestProps) => {
 
-    const [body, setBody] = useState(method.requestBody);
-
+    let [body, setBody] = useState(method.requestBody);
     const aceChange = (value: string) => {
         if (onChange) {
             onChange({...method, requestBody: value});
@@ -28,18 +28,35 @@ export default ({running, method, requestCache, onChange, onPush}: requestProps)
         setBody(value);
     }
 
-    const columns = [
-        {title: 'Key', dataIndex: 'key', key: 'key'},
-        {title: 'Value', dataIndex: 'value', key: 'value'},
-        {
-            title: 'Action', dataIndex: 'action', key: 'action',
-            render: (text: string, record: any) => (<a>编码</a>)
+    let metadata = method.requestMetadata;
+    if (metadata == null || metadata.length == 0) {
+        metadata = [{id: v4(), name: '', value: ''}];
+    }
+    const [datasource, setDatasource] = useState(metadata);
+
+    const onEdit = (index: number, column: string, value: any) => {
+        if (index == datasource.length - 1) {
+            datasource.push({id: v4(), name: '', value: ''});
+            setDatasource([...datasource]);
         }
-    ];
+        datasource[index][column] = value;
+        if (onChange) {
+            onChange({...method, requestMetadata: datasource});
+        }
+    }
+
+    const onDelete = (index: number) => {
+        if (datasource.length == 1) {
+            return;
+        }
+        datasource.splice(index, 1);
+        setDatasource([...datasource]);
+    }
 
     let isStream = method.mode == Mode.ClientStream || method.mode == Mode.BidirectionalStream;
     let pushButton = running && isStream ?
-        <Button size='small' type='primary' icon={<CloudUploadOutlined/>} onClick={() => onPush(body)}>Push</Button> : '';
+        <Button size='small' type='primary' icon={<CloudUploadOutlined/>}
+                onClick={() => onPush(body)}>Push</Button> : '';
     const items = [{
         label: 'Params', key: 'params', children: <AceEditor
             style={{background: "#fff"}}
@@ -62,11 +79,28 @@ export default ({running, method, requestCache, onChange, onPush}: requestProps)
         />
     }, {
         label: 'Metadata', key: 'metadata', children:
-            <Table size='small'
+            <Table rowKey='id'
+                   size={'small'}
                    bordered={true}
                    pagination={false}
-                   dataSource={method.requestMetadata}
-                   columns={columns}/>
+                   dataSource={datasource}>
+                <Table.Column className={styles.metadataColumn} key='key' dataIndex='key' title='key' align='center'
+                              render={(text: string, record: any, index: number) => {
+                                  return <input key={'key' + record.id} defaultValue={record.name}
+                                                onChange={(e) => onEdit(index, 'name', e.target.value)}/>
+                              }}/>
+                <Table.Column className={styles.metadataColumn} key='value' dataIndex='value' title='value'
+                              align='center'
+                              render={(text: string, record: any, index: number) => {
+                                  return <input key={'value' + record.id} defaultValue={record.value}
+                                                onChange={(e) => onEdit(index, 'value', e.target.value)}/>
+                              }}/>
+                <Table.Column className={styles.metadataColumn} key='action' dataIndex='action' align='center'
+                              render={(text: string, record: any, index: number) => {
+                                  return <Button size={"small"} type='text' icon={<MinusCircleOutlined/>}
+                                                 onClick={() => onDelete(index)}/>
+                              }}/>
+            </Table>
     }];
 
     return (
