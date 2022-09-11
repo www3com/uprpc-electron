@@ -6,21 +6,15 @@ import {context} from "@/stores/context";
 
 const welcome = () => {
     let {protoStore} = useContext(context)
-    const items = [{
-        label: 'Home Page',
-        key: 'home',
-        children:
-            <div style={{height: '100%', display: "flex", justifyContent: 'center', alignItems: 'center'}}>
-                <Result
-                    icon={<SmileOutlined style={{fontSize: 120}}/>}
-                    title="Welcome to use upRpc"
-                    subTitle='Swim in the ocean of knowledge and enjoy it.'
-                    extra={<Button type="primary"
-                                   onClick={() => protoStore.importProto()}
-                                   icon={<PlusOutlined/>}>Import Protos</Button>}/>
-            </div>
-    }];
-    return (<Tabs style={{height: '100%'}} items={items}/>)
+    return (<div style={{height: '100%', display: "flex", justifyContent: 'center', alignItems: 'center'}}>
+        <Result
+            icon={<SmileOutlined style={{fontSize: 120}}/>}
+            title="Welcome to use upRpc"
+            subTitle='Swim in the ocean of knowledge and enjoy it.'
+            extra={<Button type="primary"
+                           onClick={() => protoStore.importProto()}
+                           icon={<PlusOutlined/>}>Import Protos</Button>}/>
+    </div>)
 }
 
 export default observer(welcome);

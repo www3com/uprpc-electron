@@ -80,7 +80,7 @@ const file = () => {
         const middleStr = strTitle.substring(index, index + searchValue.length);
         const afterStr = strTitle.slice(index + searchValue.length);
         const title = index > -1 ?
-            <span>{beforeStr} <span style={{color: '#f50'}}>{middleStr}</span>{afterStr}</span>
+            <span>{beforeStr}<span style={{color: '#f50'}}>{middleStr}</span>{afterStr}</span>
             : <span>{strTitle}</span>;
         return title;
     }
@@ -177,16 +177,18 @@ const file = () => {
                    onChange={onChange}
                    value={searchValue}
                    style={{marginBottom: 5}}/>
-            {datasource.length == 0? <Empty style={{marginTop: '80px'}} description='No Proto'/>:
-            <Tree.DirectoryTree
-                // @ts-ignore
-                onExpand={onExpand}
-                expandedKeys={expandedKeys}
-                autoExpandParent={autoExpandParent}
-                onSelect={onSelect}
-                switcherIcon={<DownOutlined/>}
-                defaultExpandedKeys={['0-0-0']}
-                treeData={datasource}/>}</>
+            {datasource.length == 0 ?
+                <div style={{height: '80%', display: 'flex', justifyContent: 'center', alignItems: 'center'}}><Empty
+                    style={{marginTop: '80px'}} description='No Proto'/></div> :
+                <Tree.DirectoryTree
+                    // @ts-ignore
+                    onExpand={onExpand}
+                    expandedKeys={expandedKeys}
+                    autoExpandParent={autoExpandParent}
+                    onSelect={onSelect}
+                    switcherIcon={<DownOutlined/>}
+                    defaultExpandedKeys={['0-0-0']}
+                    treeData={datasource}/>}</>
     }, {
         label: (<Space direction='vertical' size={0}>
             <SettingOutlined style={{fontSize: 20, marginRight: 0}}/>
