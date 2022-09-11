@@ -178,8 +178,8 @@ const file = () => {
                    value={searchValue}
                    style={{marginBottom: 5}}/>
             {datasource.length == 0 ?
-                <div style={{height: '80%', display: 'flex', justifyContent: 'center', alignItems: 'center'}}><Empty
-                    style={{marginTop: '80px'}} description='No Proto'/></div> :
+                <div style={{height: '90%', display: 'flex', justifyContent: 'center', alignItems: 'center'}}><Empty
+                    description='No proto'/></div> :
                 <Tree.DirectoryTree
                     // @ts-ignore
                     onExpand={onExpand}

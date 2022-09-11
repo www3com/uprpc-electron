@@ -6,7 +6,7 @@ import {context} from "@/stores/context";
 
 const welcome = () => {
     let {protoStore} = useContext(context)
-    return (<div style={{height: '100%', display: "flex", justifyContent: 'center', alignItems: 'center'}}>
+    return (<div style={{height: '90%', width:'90%', display: "flex", justifyContent: 'center', alignItems: 'center'}}>
         <Result
             icon={<SmileOutlined style={{fontSize: 120}}/>}
             title="Welcome to use upRpc"
