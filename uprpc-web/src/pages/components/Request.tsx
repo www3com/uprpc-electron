@@ -59,7 +59,7 @@ export default ({running, method, requestCache, onChange, onPush}: requestProps)
                     displayIndentGuides: true
                 }}
                 tabSize={2}
-            /> }, // 务必填写 key
+            /> },
         { label: 'Metadata', key: 'metadata', children: <Table size='small' bordered={true} pagination={false} dataSource={method.requestMetadata}
                                                                columns={columns}/> },
     ];

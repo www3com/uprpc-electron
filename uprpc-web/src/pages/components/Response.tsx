@@ -19,40 +19,44 @@ export default ({method, responseCache, onChange}: responseProps) => {
         {title: 'Value', dataIndex: 'value', key: 'value'}
     ];
 
-    let isStream = method.mode==Mode.ServerStream || method.mode == Mode.BidirectionalStream;
-    return (
-        <Tabs style={{height: "100%"}} animated={false}>
-            <Tabs.TabPane tab={isStream? 'Response Stream' : 'Response'} key='response' >
-                {isStream ?
-                    <Stream value={responseCache?.streams}/> :
-                    <AceEditor
-                        style={{background: "#fff"}}
-                        width={"100%"}
-                        height='100%'
-                        mode="json"
-                        theme="textmate"
-                        name="inputs"
-                        fontSize={13}
-                        cursorStart={2}
-                        highlightActiveLine={false}
-                        showPrintMargin={false}
-                        showGutter={false}
-                        value={responseCache?.body}
-                        setOptions={{
-                            showLineNumbers: false,
-                            highlightGutterLine: false,
-                            fixedWidthGutter: false,
-                            tabSize: 1,
-                            displayIndentGuides: false
-                        }}
-                        readOnly={true}
-                        tabSize={2}
-                    />}
-            </Tabs.TabPane>
-            <Tabs.TabPane tab='Metadata' key='metadata'>
-                <Table size='small' bordered={true} pagination={false} columns={columns}/>
-            </Tabs.TabPane>
-        </Tabs>
+    const items = [
+        {
+            label: 'Metadata',
+            key: 'matadata',
+            children: <Table size='small' bordered={true} pagination={false} columns={columns}/>
+        }
+    ];
+    let tab = {label: '', key: 'response', children: <></>}
+    if (method.mode == Mode.ServerStream || method.mode == Mode.BidirectionalStream) {
+        tab = {...tab, label: 'Response Stream', children: <Stream value={responseCache?.streams}/>}
+    } else {
+        tab = {
+            ...tab, label: 'Response', children: <AceEditor
+                style={{background: "#fff"}}
+                width={"100%"}
+                height='100%'
+                mode="json"
+                theme="textmate"
+                name="inputs"
+                fontSize={13}
+                cursorStart={2}
+                highlightActiveLine={false}
+                showPrintMargin={false}
+                showGutter={false}
+                value={responseCache?.body}
+                setOptions={{
+                    showLineNumbers: false,
+                    highlightGutterLine: false,
+                    fixedWidthGutter: false,
+                    tabSize: 1,
+                    displayIndentGuides: false
+                }}
+                readOnly={true}
+                tabSize={2}
+            />
+        }
+    }
+    items.unshift(tab);
 
-    )
+    return <Tabs style={{height: "100%"}} animated={false} items={items}/>;
 }

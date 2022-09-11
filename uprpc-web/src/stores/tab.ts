@@ -1,5 +1,5 @@
 import {makeAutoObservable} from "mobx";
-import {Tab, TabType} from "@/types/types";
+import {Tab} from "@/types/types";
 
 export default class TabStore {
     constructor() {
@@ -37,10 +37,10 @@ export default class TabStore {
     }
 
     remove(key: string) {
-        if (this.openTabs.length == 1) return;
         this.openTabs.forEach((item, index) => {
             if (item.key == key) {
                 this.openTabs.splice(index, 1);
+                if (this.openTabs.length == 0) return;
                 let pos = index < this.openTabs.length ? index : this.openTabs.length - 1;
                 this.selectedTab = this.openTabs[pos].key
             }

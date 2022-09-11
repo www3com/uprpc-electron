@@ -20,11 +20,18 @@ import {Proto, TabType} from "@/types/types";
 
 const file = () => {
     let {tabStore, protoStore, pathsStore} = useContext(context);
-    const [hidden, setHidden] = useState(true);
+    const [visible, setVisible] = useState(false);
 
     const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
     const [searchValue, setSearchValue] = useState('');
     const [autoExpandParent, setAutoExpandParent] = useState(true);
+
+    const showSearchBox = (visible: boolean) => {
+        setVisible(visible);
+        if (!visible) {
+            setSearchValue('');
+        }
+    }
 
     const onExpand = (newExpandedKeys: string[]) => {
         setExpandedKeys(newExpandedKeys);
@@ -34,16 +41,15 @@ const file = () => {
     const getExpandedKeys = (value: string): string[] => {
         let keys = [];
         for (let proto of protoStore.protos) {
-            if (proto.name.indexOf(value) > -1) {
+            if (proto.name.toLowerCase().indexOf(value.toLowerCase()) > -1) {
                 keys.push(proto.id);
             }
             for (let service of proto.services) {
-                if (service.name.indexOf(value) > -1) {
+                if (service.name.toLowerCase().indexOf(value.toLowerCase()) > -1) {
                     keys.push(service.id);
                 }
                 for (let method of service.methods) {
-                    console.log(method.name, method.name.indexOf(value))
-                    if (method.name.indexOf(value) > -1) {
+                    if (method.name.toLowerCase().indexOf(value.toLowerCase()) > -1) {
                         keys.push(method.id);
                     }
                 }
@@ -62,32 +68,35 @@ const file = () => {
     };
 
 
+    const getTitle = (strTitle: string, value: string) => {
+        const index = strTitle.toLowerCase().indexOf(searchValue.toLowerCase());
+        const beforeStr = strTitle.substring(0, index);
+        const middleStr = strTitle.substring(index, index + searchValue.length);
+        const afterStr = strTitle.slice(index + searchValue.length);
+        const title = index > -1 ?
+            <span>{beforeStr} <span style={{color: '#f50'}}>{middleStr}</span>{afterStr}</span>
+            : <span>{strTitle}</span>;
+        return title;
+    }
+
     const parse = (protos: Proto[]) => {
         let treeData = [];
         for (let proto of protos) {
-            let item: any = {key: proto.id, title: proto.name, icon: <FileOutlined/>, children: []};
-
+            let item: any = {
+                key: proto.id,
+                title: getTitle(proto.name, searchValue),
+                icon: <FileOutlined/>,
+                children: []
+            };
             for (let service of proto.services) {
                 let methods = [];
                 for (let m of service.methods) {
-                    // const strTitle = m.name;
-                    // const index = strTitle.indexOf(searchValue);
-                    // const beforeStr = strTitle.substring(0, index);
-                    // const afterStr = strTitle.slice(index + searchValue.length);
-                    // const title =
-                    //     index > -1 ? (<span>{beforeStr}
-                    //             <span style={{color: '#f50'}}>{searchValue}</span>
-                    //             {afterStr}
-                    //             </span>
-                    //     ) : (
-                    //         <span>{strTitle}</span>
-                    //     );
-                    methods.push({key: m.id, title: m.name, icon: <BlockOutlined/>})
+                    methods.push({key: m.id, title: getTitle(m.name, searchValue), icon: <BlockOutlined/>})
                 }
 
                 item.children.push({
                     key: service.id,
-                    title: service.name,
+                    title: getTitle(service.name, searchValue),
                     icon: <DatabaseOutlined/>,
                     children: methods
                 })
@@ -104,7 +113,6 @@ const file = () => {
             key: selectedKeys[0].toString(),
             params: e.node.pos,
             type: TabType.Proto,
-            title: e.node.title
         });
     }
 
@@ -126,8 +134,9 @@ const file = () => {
             <div style={{fontSize: 10}}>GRPC</div>
         </Space>),
         key: '1', children: <>
-            <Input size='small' placeholder='Filter Methods' hidden={hidden}
+            <Input size='small' placeholder='Filter Methods' hidden={!visible}
                    onChange={onChange}
+                   value={searchValue}
                    style={{marginBottom: 5}}/>
             <Tree.DirectoryTree
                 // @ts-ignore
@@ -173,7 +182,7 @@ const file = () => {
                             </Tooltip>
                             <Tooltip title='Filter Methods'>
                                 <a style={{color: '#000000D9', fontSize: 16}}
-                                   onClick={() => setHidden(!hidden)}><FilterOutlined/></a>
+                                   onClick={() => showSearchBox(!visible)}><FilterOutlined/></a>
                             </Tooltip>
 
                         </Space>

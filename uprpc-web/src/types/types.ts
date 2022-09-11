@@ -1,8 +1,6 @@
 declare global {
-    //设置全局属性
     interface Window {
-        //window对象属性
-        rpc: any; //加入对象
+        rpc: any
     }
 }
 
@@ -68,14 +66,13 @@ export interface ResponseCache {
 }
 
 export enum TabType {
-    Welcome,
     Proto,
     Env
 }
 
 export interface Tab {
     key: string,
-    title: string,
+    title?: string,
     type?: TabType,
     params?: any,
     dot?: boolean,
