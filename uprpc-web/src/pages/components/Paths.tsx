@@ -8,7 +8,7 @@ import {context} from '@/stores/context'
 const paths = () => {
     let {pathsStore} = useContext(context)
     return (
-        <Drawer title='Import Paths' placement='left' width={500} visible={pathsStore.pathsDrawerVisible}
+        <Drawer title='Import Paths' placement='left' width={500} open={pathsStore.pathsDrawerVisible}
                 onClose={() => pathsStore.showPaths(false)} style={{padding: 5}}
                 bodyStyle={{padding: 5}}
                 extra={<Button type='link' icon={<PlusOutlined/>} onClick={() => pathsStore.addPath()}>Add

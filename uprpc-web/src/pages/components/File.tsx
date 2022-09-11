@@ -62,7 +62,6 @@ const file = () => {
     };
 
 
-
     const parse = (protos: Proto[]) => {
         let treeData = [];
         for (let proto of protos) {
@@ -121,17 +120,32 @@ const file = () => {
         }
     };
 
-    const grpc = (
-        <Space direction='vertical' size={0} align={"center"}>
+    const items = [{
+        label: (<Space direction='vertical' size={0} align={"center"}>
             <HddOutlined style={{fontSize: 20, marginRight: 0}}/>
             <div style={{fontSize: 10}}>GRPC</div>
-        </Space>);
-
-    const env = (
-        <Space direction='vertical' size={0}>
+        </Space>),
+        key: '1', children: <>
+            <Input size='small' placeholder='Filter Methods' hidden={hidden}
+                   onChange={onChange}
+                   style={{marginBottom: 5}}/>
+            <Tree.DirectoryTree
+                // @ts-ignore
+                onExpand={onExpand}
+                expandedKeys={expandedKeys}
+                autoExpandParent={autoExpandParent}
+                onSelect={onSelect}
+                switcherIcon={<DownOutlined/>}
+                defaultExpandedKeys={['0-0-0']}
+                treeData={parse(protoStore.protos)}/></>
+    }, {
+        label: (<Space direction='vertical' size={0}>
             <SettingOutlined style={{fontSize: 20, marginRight: 0}}/>
             <div style={{fontSize: 10}}>ENV</div>
-        </Space>);
+        </Space>),
+        key: '2',
+        children: '内容 2'
+    }];
 
     return (
         <Layout style={{height: '100%', paddingTop: '5px'}}>
@@ -168,28 +182,7 @@ const file = () => {
 
             </Layout.Header>
             <Layout.Content style={{backgroundColor: 'white'}}>
-                <Tabs tabPosition='left' size='small' style={{height: '100%'}}>
-                    <Tabs.TabPane tab={grpc} key="2" style={{height: "100%", overflow: 'auto', paddingLeft: 0}}>
-                        <Input size='small' placeholder='Filter Methods' hidden={hidden}
-                               onChange={onChange}
-                               style={{marginBottom: 5}}/>
-                        <Tree.DirectoryTree
-                            // @ts-ignore
-                            onExpand={onExpand}
-                            expandedKeys={expandedKeys}
-                            autoExpandParent={autoExpandParent}
-                            onSelect={onSelect}
-                            switcherIcon={<DownOutlined/>}
-                            defaultExpandedKeys={['0-0-0']}
-                            treeData={parse(protoStore.protos)}
-                        />
-
-                    </Tabs.TabPane>
-                    <Tabs.TabPane tab={env} key="3">
-
-                    </Tabs.TabPane>
-
-                </Tabs>
+                <Tabs tabPosition='left' size='small' style={{height: '100%'}} items={items}/>
                 <Paths/>
             </Layout.Content>
         </Layout>

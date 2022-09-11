@@ -48,7 +48,6 @@ export default ({method, responseCache, onChange}: responseProps) => {
                         readOnly={true}
                         tabSize={2}
                     />}
-
             </Tabs.TabPane>
             <Tabs.TabPane tab='Metadata' key='metadata'>
                 <Table size='small' bordered={true} pagination={false} columns={columns}/>

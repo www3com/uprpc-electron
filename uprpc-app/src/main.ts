@@ -5,8 +5,8 @@ const path = require("path");
 
 function createWindow() {
   const mainWindow = new BrowserWindow({
-    // width: 1000,
-    // height: 800,
+    width: 1280,
+    height: 1000,
     title: "upRpc",
     webPreferences: {
       preload: path.join(__dirname, "bridge.js"),
@@ -15,7 +15,7 @@ function createWindow() {
 
   // mainWindow.loadFile('./dist/index.html')
   mainWindow.loadURL("http://localhost:8000");
-  mainWindow.webContents.openDevTools();
+  // mainWindow.webContents.openDevTools();
   router.register(mainWindow);
 }
 
