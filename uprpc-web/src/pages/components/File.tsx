@@ -211,21 +211,21 @@ const file = () => {
                     <Col flex='auto' style={{paddingLeft: 10, fontSize: 18}}>upRpc</Col>
                     <Col flex="100px">
                         <Space size={8} style={{paddingRight: 10}}>
-                            <Tooltip title='Import Protos'>
+                            <Tooltip title='Import protos'>
                                 <a style={{color: '#000000D9', fontSize: 16}}
                                    onClick={onImport}><PlusCircleOutlined/></a>
                             </Tooltip>
-                            <Tooltip title='Reload Protos'>
+                            <Tooltip title='Reload protos'>
                                 <a style={{color: '#000000D9', fontSize: 16}} onClick={onReload}><ReloadOutlined/></a>
                             </Tooltip>
-                            <Tooltip title='Delete Selectecd Proto'>
+                            <Tooltip title='Delete selectecd proto'>
                                 <a style={{color: '#000000D9', fontSize: 16}} onClick={onDelete}><DeleteOutlined/></a>
                             </Tooltip>
-                            <Tooltip title='Import Paths'>
+                            <Tooltip title='Import dependency paths'>
                                 <a style={{color: '#000000D9', fontSize: 16}}
                                    onClick={() => pathsStore.showPaths(!pathsStore.pathsDrawerVisible)}><FolderOutlined/></a>
                             </Tooltip>
-                            <Tooltip title='Filter Methods'>
+                            <Tooltip title='Filter methods'>
                                 <a style={{color: '#000000D9', fontSize: 16}}
                                    onClick={() => showSearchBox(!visible)}><FilterOutlined/></a>
                             </Tooltip>
