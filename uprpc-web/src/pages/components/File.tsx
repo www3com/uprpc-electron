@@ -196,12 +196,12 @@ const file = () => {
     }];
 
     return (
-        <Layout style={{height: '100%', paddingTop: '5px'}}>
+        <Layout style={{height: '100%'}}>
             <Layout.Header style={{
                 padding: 0,
                 backgroundColor: 'white',
-                height: '40px',
-                lineHeight: '40px',
+                height: '44px',
+                lineHeight: '44px',
                 borderBottom: '1px solid #f0f0f0'
             }}>
                 <Row>
