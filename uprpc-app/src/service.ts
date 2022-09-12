@@ -1,83 +1,46 @@
-import * as store from "./storage/store";
-import { BrowserWindow, ipcMain } from "electron";
+import {BrowserWindow, ipcMain} from "electron";
 import * as electron from "electron";
 import * as client from "./rpc/client";
-import { RequestData, ResponseData, CloseStreamData, isCloseStreamData } from "./types";
+import {RequestData, ResponseData} from "./types";
 
-const { loadProto } = require("./proto/parser");
+const {loadProto} = require("./proto/parser");
 
-export async function importProto() {
+export async function openProto() {
     const result = await electron.dialog.showOpenDialog({
         title: "Import File",
         properties: ["openFile", "multiSelections"],
-        filters: [{ name: "proto", extensions: ["proto"] }],
+        filters: [{name: "proto", extensions: ["proto"]}],
     });
 
     if (result.canceled) {
-        return { success: true };
+        return {success: true, data: []};
     }
 
-    for (let path of result.filePaths) {
-        try {
-            let proto = await loadProto(path, store.getPaths());
-            store.addProto(proto);
-        } catch (e: any) {
-            return { success: false, message: e.message };
-        }
+    return {success: true, data: result.filePaths};
+}
+
+export async function parseProto(paths: string[], includeDirs: string[]) {
+    let protos = [];
+    for (let path of paths) {
+        let proto = await loadProto(path, includeDirs)
+        protos.push(proto);
     }
-    return { success: true };
+    return {success: true, data: protos};
 }
 
-export function getProtos() {
-    return JSON.stringify(store.getProtos());
-}
-export async function reloadProto() {
-    let protos = store.getProtos();
-    for (let proto of protos) {
-        proto = await loadProto(proto.path, store.getPaths());
-        store.addProto(proto);
-    }
-    return { success: true };
-}
-export async function deleteProto(id: string) {
-    store.deleteProto(id);
-    return { success: true };
-}
-
-export function getPaths(): string[] {
-    return store.getPaths();
-}
-
-export async function addPath() {
+export async function openIncludeDir() {
     const result = await electron.dialog.showOpenDialog({
         title: "Import Paths",
         properties: ["openDirectory"],
     });
 
     if (result.canceled) {
-        return { success: false };
+        return {success: true};
     }
 
-    let paths = store.getPaths();
-    let path = result.filePaths[0];
-    if (paths.indexOf(path) == -1) {
-        paths.push(path);
-        store.savePaths(paths);
-    }
-
-    return { success: true, paths: paths };
+    return {success: true, data: result.filePaths[0]};
 }
 
-export function removePath(path: string) {
-    console.log("remove ", path);
-    let paths = store.getPaths();
-    paths.forEach((value, index) => {
-        if (value == path) {
-            paths.splice(index, 1);
-        }
-    });
-    store.savePaths(paths);
-}
 
 export async function sendRequest(window: BrowserWindow, req: RequestData) {
     // let req: RequestData = JSON.parse(reqData);

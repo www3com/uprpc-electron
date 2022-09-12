@@ -7,13 +7,9 @@ contextBridge.exposeInMainWorld("rpc", {
     handleEndStream: (callback: any) => ipcRenderer.on("endStream", callback),
 
     // Import File
-    getProtos: () => ipcRenderer.invoke("getProtos"),
-    importProto: () => ipcRenderer.invoke("importProto"),
-    reloadProto: () => ipcRenderer.invoke("reloadProto"),
-    deleteProto: (id: string) => ipcRenderer.invoke("deleteProto", id),
+    parseProto: (paths:string[], includeDirs: string[]) => ipcRenderer.invoke("parseProto", paths, includeDirs),
+    openProto: () => ipcRenderer.invoke("openProto"),
 
     // Paths
-    addPath: () => ipcRenderer.invoke("addPath"),
-    removePath: (path: string) => ipcRenderer.invoke("removePath", path),
-    getPaths: () => ipcRenderer.invoke("getPaths"),
+    openIncludeDir: () => ipcRenderer.invoke("openIncludeDir"),
 });
