@@ -1,31 +1,31 @@
-import {BrowserWindow, ipcMain} from "electron";
+import { BrowserWindow, ipcMain } from "electron";
 import * as electron from "electron";
 import * as client from "./rpc/client";
-import {RequestData, ResponseData} from "./types";
+import { RequestData, ResponseData } from "./types";
 
-const {loadProto} = require("./proto/parser");
+const { loadProto } = require("./proto/parser");
 
 export async function openProto() {
     const result = await electron.dialog.showOpenDialog({
         title: "Import File",
         properties: ["openFile", "multiSelections"],
-        filters: [{name: "proto", extensions: ["proto"]}],
+        filters: [{ name: "proto", extensions: ["proto"] }],
     });
 
     if (result.canceled) {
-        return {success: true, data: []};
+        return { success: true, data: [] };
     }
 
-    return {success: true, data: result.filePaths};
+    return { success: true, data: result.filePaths };
 }
 
 export async function parseProto(paths: string[], includeDirs: string[]) {
     let protos = [];
     for (let path of paths) {
-        let proto = await loadProto(path, includeDirs)
+        let proto = await loadProto(path, includeDirs);
         protos.push(proto);
     }
-    return {success: true, data: protos};
+    return { success: true, data: protos };
 }
 
 export async function openIncludeDir() {
@@ -35,17 +35,16 @@ export async function openIncludeDir() {
     });
 
     if (result.canceled) {
-        return {success: true};
+        return { success: true };
     }
 
-    return {success: true, data: result.filePaths[0]};
+    return { success: true, data: result.filePaths[0] };
 }
-
 
 export async function sendRequest(window: BrowserWindow, req: RequestData) {
     // let req: RequestData = JSON.parse(reqData);
-    await client.send(req, (res: ResponseData | null, err: Error | undefined, closeStream?: boolean) => {
-        returnResponse(window, req, res, err, closeStream);
+    await client.send(req, (res: ResponseData | null, md: any, err: Error | undefined, closeStream?: boolean) => {
+        returnResponse(window, req, res, md, err, closeStream);
     });
 }
 
@@ -55,20 +54,24 @@ export async function stopStream(window: BrowserWindow, id: string) {
     });
 }
 
-function returnResponse(window: BrowserWindow, req: RequestData, res: any, e?: Error, closeStream?: boolean): void {
+function returnResponse(
+    window: BrowserWindow,
+    req: RequestData,
+    res: any,
+    md: any,
+    e?: Error,
+    closeStream?: boolean
+): void {
     if (closeStream) {
-        // window.webContents.send("endStream", {
-        //     id: req.id,
-        //     body: e?.message,
-        //     metadata: JSON.stringify(res, null, "\t"),
-        // });
         console.log("endStream ", req.id);
         window.webContents.send("endStream", req.id);
     } else {
-        console.log("return response ", res);
-        window.webContents.send("updateResponse", {
+        let resData: ResponseData = {
             id: req.id,
             body: JSON.stringify(res ? res : e?.message, null, "\t"),
-        });
+            metadata: md,
+        };
+        console.log("return response data: ", resData);
+        window.webContents.send("updateResponse", resData);
     }
 }

@@ -17,6 +17,7 @@ export interface RequestData {
     host: string;
     body: any;
     metadata?: any;
+    includeDirs?: string[];
 }
 
 // 响应信息
