@@ -96,7 +96,7 @@ export default class ProtoStore {
             streams?.unshift(requestData.body);
             this.requestCaches.set(requestData.id, {streams: streams});
         }
-
+        requestData.includeDirs = storage.listIncludeDir();
         yield window.rpc.send(requestData);
     }
 

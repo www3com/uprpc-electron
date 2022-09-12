@@ -6,15 +6,16 @@ declare global {
 
 // 请求信息
 export interface RequestData {
-    id: string;
-    protoPath: string;
-    namespace: string;
-    serviceName: string;
-    methodName: string;
-    methodMode: Mode;
-    host: string;
-    body: any;
-    metadata?: any;
+    id: string,
+    protoPath: string,
+    namespace: string,
+    serviceName: string,
+    methodName: string,
+    methodMode: Mode,
+    host: string,
+    body: any,
+    metadata?: any,
+    includeDirs?: string[],
 }
 
 // 响应信息
