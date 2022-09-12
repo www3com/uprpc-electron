@@ -1,5 +1,16 @@
 import { Metadata, MetadataValue } from "@grpc/grpc-js";
 
+export function fromObj(mdObj: any): Metadata {
+    let md = new Metadata();
+    if (mdObj) {
+        Object.keys(mdObj).forEach((key: string) => {
+            let value = mdObj[key];
+            md.add(key, value);
+        });
+    }
+    return md;
+}
+
 export function parseMetadata(metadata: Metadata): Map<string, any> {
     let result: Map<string, any> = new Map<string, any>();
     Object.keys(metadata.getMap()).forEach((key: string) => {

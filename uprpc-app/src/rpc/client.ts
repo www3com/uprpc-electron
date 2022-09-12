@@ -1,32 +1,44 @@
 import { loadSync } from "@grpc/proto-loader";
 import { credentials, GrpcObject, loadPackageDefinition, Metadata, ServiceError } from "@grpc/grpc-js";
 import { RequestData, ResponseData, Mode } from "../types";
-import { parseMetadata } from "./metadata";
+import { parseMetadata, fromObj } from "./metadata";
 
 import * as store from "../storage/store";
 
 let aliveClient = {};
 let aliveSessions = {};
 
-export async function send(request: RequestData, callback: (response: ResponseData | null, err?: Error) => void) {
-    let reqId: string = request.id;
+export declare function Callback(
+    response: ResponseData | null,
+    metadata?: any,
+    err?: Error,
+    closeStream?: boolean
+): void;
+interface CallOptions {
+    onData?: Function;
+    onEnd?: Function;
+    onError?: Function;
+    onMetadata?: Function;
+    onStatus?: Function;
+}
 
-    let client = getClient(request);
+export async function send(request: RequestData, callback: typeof Callback) {
+    let reqId: string = request.id;
     switch (request.methodMode) {
         case Mode.Unary: {
-            invokeUnary(client, request, callback);
+            invokeUnary(request, callback);
             break;
         }
         case Mode.ClientStream: {
-            invokeClientStream(client, request, callback);
+            invokeClientStream(request, callback);
             break;
         }
         case Mode.ServerStream: {
-            invokeServerStream(client, request, callback);
+            invokeServerStream(request, callback);
             break;
         }
         case Mode.BidirectionalStream: {
-            invokeBidirectionalStream(client, request, callback);
+            invokeBidirectionalStream(request, callback);
             break;
         }
         default: {
@@ -46,114 +58,61 @@ export async function stop(id: string, callback: (response: ResponseData | null,
     }
 }
 
-function getClient(request: RequestData) {
-    let packageDefinition = loadSync([request.protoPath], {
-        keepCase: true,
-        longs: String,
-        enums: String,
-        defaults: true,
-        oneofs: true,
-        includeDirs: store.getPaths(),
-    });
-
-    let grpcObject: GrpcObject = loadPackageDefinition(packageDefinition);
-
-    let service = null;
-    if (request.namespace == "") {
-        service = grpcObject[request.namespace];
-    } else {
-        service = grpcObject[request.namespace][request.serviceName];
-    }
-
-    let client = null;
-    if (!aliveClient[request.serviceName]) {
-        client = new service(request.host, credentials.createInsecure());
-        aliveClient[request.serviceName] = client;
-    } else {
-        client = aliveClient[request.serviceName];
-    }
-    return client;
-}
-
-function invokeUnary(
-    client: any,
-    request: RequestData,
-    callback: (response: any | null, err?: Error, closeStream?: boolean) => void
-) {
-    let metadata = new Metadata();
-    metadata.add("code-bin", Buffer.from("sa"));
-    let code1: Buffer = Buffer.alloc(64);
-    code1.writeBigInt64LE(BigInt(100));
-    code1.writeBigInt64LE(BigInt(200002002));
-    metadata.add("code-bin", code1);
-
-    client[request.methodName](JSON.parse(request.body), metadata, (err: ServiceError, response: any) => {
-        if (err != null) {
-            let code;
-
-            let t = err.metadata.get("code-bin")[0];
-            if (t instanceof Uint8Array && t.length == 4) {
-                code = t.readIntBE(0, t.length);
-            }
-            if (t instanceof Uint8Array && t.length == 8) {
-                code = t.readIntBE(0, t.length);
-            }
-            console.log("received error:", err.code, err.message, code);
-            let md = parseMetadata(err.metadata);
-            console.log("received md:", md);
-        }
-        callback(response, err);
-    });
-}
-
-function invokeServerStream(
-    client: any,
-    request: RequestData,
-    callback: (response: any | null, err?: Error, closeStream?: boolean) => void
-) {
-    let call = getOrCreateSession(client, request, {
+function invokeUnary(request: RequestData, callback: typeof Callback) {
+    let metadata = fromObj(request.metadata);
+    let call = getCallStub(request, {
         onData: (response: any) => {
             console.log("客户端receive:", response);
             callback(response);
         },
-        onEnd: () => {},
-        onError: (e: Error, response: any) => callback(response, undefined, true),
+        onError: (err: any) => {
+            console.log("客户端receive:", err);
+            callback(null, err.metadata.getMap(), err);
+        },
+    });
+}
+
+function invokeServerStream(request: RequestData, callback: typeof Callback) {
+    let call = getCallStub(request, {
+        onData: (response: any) => {
+            console.log("客户端receive:", response);
+            callback(response);
+        },
+        onEnd: (s: any) => callback(null, null, undefined, true),
+        onError: (err: any, response: any) => callback(response, err.metadata.getMap(), err, true),
         onMetadata: (metadata: any) => callback(null),
         // onStatus: (status: any) => callback(null),
     });
 }
 
-function invokeClientStream(
-    client: any,
-    request: RequestData,
-    callback: (response: any | null, err?: Error, closeStream?: boolean) => void
-) {
-    let call = getOrCreateSession(client, request, {
-        onData: (response: any) => {
+function invokeClientStream(request: RequestData, callback: typeof Callback) {
+    let call = getCallStub(request, {
+        onEnd: (response: any) => {
             console.log("客户端receive:", response);
             callback(response);
         },
-        onError: (e: Error, response: any) => callback(response, e, true),
+        onError: (err: any, response: any) => callback(response, err.metadata.getMap(), err, true),
     });
     call.write(JSON.parse(request.body));
 }
 
-function invokeBidirectionalStream(
-    client: any,
-    request: RequestData,
-    callback: (response: any | null, err?: Error, closeStream?: boolean) => void
-) {
-    let call = getOrCreateSession(client, request, {
+function invokeBidirectionalStream(request: RequestData, callback: typeof Callback) {
+    let call = getCallStub(request, {
         onData: (response: any) => {
             console.log("客户端receive:", response);
             callback(response);
         },
-        onEnd: () => callback(null, undefined, true),
-        onError: (e: Error, response: any) => callback(response, e, true),
+        onEnd: () => callback(null, null, undefined, true),
+        onError: (err: any, response: any) => callback(response, err.metadata.getMap(), err, true),
         onMetadata: (metadata: any) => callback(null),
         onStatus: (status: any) => callback(null),
     });
     call.write(JSON.parse(request.body));
+}
+
+function getCallStub(request: RequestData, callOptions: CallOptions) {
+    let client = getClient(request);
+    return getOrCreateSession(client, request, callOptions);
 }
 
 function getOrCreateSession(client: any, request: RequestData, callOptions: CallOptions) {
@@ -162,7 +121,7 @@ function getOrCreateSession(client: any, request: RequestData, callOptions: Call
         call =
             request.methodMode === Mode.BidirectionalStream
                 ? client[request.methodName]()
-                : client[request.methodName](request.body, (err: ServiceError, response: any) => {
+                : client[request.methodName](JSON.parse(request.body), (err: ServiceError, response: any) => {
                       console.log("收到服务端返回数据：", err, response);
                       if (err != null) {
                           callOptions.onError ? callOptions.onError(err, response) : void 0;
@@ -206,14 +165,35 @@ function getOrCreateSession(client: any, request: RequestData, callOptions: Call
     return call;
 }
 
-function isWriteable(mode: Mode): boolean {
-    return mode === Mode.BidirectionalStream || mode === Mode.ClientStream;
+function getClient(request: RequestData) {
+    let packageDefinition = loadSync([request.protoPath], {
+        keepCase: true,
+        longs: String,
+        enums: String,
+        defaults: true,
+        oneofs: true,
+        includeDirs: store.getPaths(),
+    });
+
+    let grpcObject: GrpcObject = loadPackageDefinition(packageDefinition);
+
+    let service = null;
+    if (request.namespace == "") {
+        service = grpcObject[request.namespace];
+    } else {
+        service = grpcObject[request.namespace][request.serviceName];
+    }
+
+    let client = null;
+    if (!aliveClient[request.serviceName]) {
+        client = new service(request.host, credentials.createInsecure());
+        aliveClient[request.serviceName] = client;
+    } else {
+        client = aliveClient[request.serviceName];
+    }
+    return client;
 }
 
-interface CallOptions {
-    onData?: Function;
-    onEnd?: Function;
-    onError?: Function;
-    onMetadata?: Function;
-    onStatus?: Function;
+function isWriteable(mode: Mode): boolean {
+    return mode === Mode.BidirectionalStream || mode === Mode.ClientStream;
 }
