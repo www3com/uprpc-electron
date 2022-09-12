@@ -139,17 +139,9 @@ const file = () => {
         }
     };
 
-    const onReload = async () => {
-        const result = await protoStore.reloadProto()
-        if (result.success) {
-            message.success("Reload protos successful.")
-        } else {
-            notification.open({
-                message: 'Error while reloading protos',
-                description: result.message,
-                icon: <CloseCircleOutlined style={{color: 'red'}}/>
-            });
-        }
+    const onReload = () => {
+        protoStore.reloadProto()
+        message.success("Reload protos successful.")
     };
 
     const onDelete = async () => {
@@ -161,7 +153,7 @@ const file = () => {
         Modal.confirm({
             title: 'Confirm delete proto',
             content: 'Do you want to remove the proto configuration '.concat(deleteProto.name, '?'),
-            onOk:() => {
+            onOk: () => {
                 protoStore.deleteProto(deleteProto.id);
                 setDeleteProto(undefined);
             }
@@ -225,7 +217,7 @@ const file = () => {
                             </Tooltip>
                             <Tooltip title='Import dependency paths'>
                                 <a style={{color: '#000000D9', fontSize: 16}}
-                                   onClick={() => pathsStore.showPaths(!pathsStore.pathsDrawerVisible)}><FolderOutlined/></a>
+                                   onClick={() => pathsStore.showIncludeDir(!pathsStore.pathsDrawerVisible)}><FolderOutlined/></a>
                             </Tooltip>
                             <Tooltip title='Filter methods'>
                                 <a style={{color: '#000000D9', fontSize: 16}}

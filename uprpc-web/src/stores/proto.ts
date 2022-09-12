@@ -1,5 +1,6 @@
-import { makeAutoObservable } from "mobx";
-import { Method, Mode, Proto, RequestCache, RequestData, ResponseCache, ResponseData } from "@/types/types";
+import {makeAutoObservable} from "mobx";
+import {Method, Mode, Proto, RequestCache, RequestData, ResponseCache, ResponseData} from "@/types/types";
+import * as storage from './localStorage';
 
 export default class ProtoStore {
     constructor() {
@@ -13,14 +14,10 @@ export default class ProtoStore {
     responseCaches: Map<string, ResponseCache> = new Map<string, ResponseCache>();
     runningCaches: Map<string, boolean> = new Map<string, boolean>();
 
-    init(): any {
-        this.getProtos();
+    init(): void {
+        this.reloadProto();
         this.onEndStream();
         this.onResponse();
-    }
-
-    *getProtos() {
-        this.protos = JSON.parse(yield window.rpc.getProtos());
     }
 
     onEndStream() {
@@ -44,31 +41,34 @@ export default class ProtoStore {
             let streams = responseCache.streams;
             if (streams == null) return;
             streams.unshift(value.body);
-            this.responseCaches.set(value.id, { ...responseCache, streams: streams });
+            this.responseCaches.set(value.id, {...responseCache, streams: streams});
         });
     }
 
-    *importProto(): any {
-        let files = yield window.rpc.importProto();
-        this.getProtos();
-        return files;
+    * importProto(): any {
+
+        let res = yield window.rpc.openProto();
+        debugger
+        if (!res.success) {
+            return res;
+        }
+
+        res = yield  window.rpc.parseProto(res.data, storage.listIncludeDir());
+        storage.addProto(res.data);
+        this.reloadProto();
+        return {success: true}
     }
 
-    *reloadProto(): any {
-        console.log("reload file");
-        yield window.rpc.reloadProto();
-        this.getProtos();
-        return { success: true };
+    reloadProto(): void {
+        this.protos = storage.listProto();
     }
 
-    *deleteProto(id: string) {
-        console.log("delete proto");
-        yield window.rpc.deleteProto(id);
-        this.getProtos();
-        return { success: true };
+    deleteProto(id: string): void {
+        storage.removeProto(id);
+        this.reloadProto();
     }
 
-    *send(requestData: RequestData): any {
+    * send(requestData: RequestData): any {
         console.log("Request data: ", requestData);
         this.removeCache(requestData.id);
         yield this.push(requestData);
@@ -84,7 +84,7 @@ export default class ProtoStore {
         this.runningCaches.delete(methodId);
     }
 
-    *push(requestData: RequestData): any {
+    * push(requestData: RequestData): any {
         console.log("push request data", requestData);
         let requestCache = this.requestCaches.get(requestData.id);
         if (requestCache == null) {
@@ -94,19 +94,19 @@ export default class ProtoStore {
         } else {
             let streams = requestCache.streams;
             streams?.unshift(requestData.body);
-            this.requestCaches.set(requestData.id, { streams: streams });
+            this.requestCaches.set(requestData.id, {streams: streams});
         }
 
         yield window.rpc.send(requestData);
     }
 
-    *stopStream(methodId: string) {
+    * stopStream(methodId: string) {
         console.log("request stop stream");
         yield window.rpc.stopStream(methodId);
         this.runningCaches.set(methodId, false);
     }
 
-    *save(method: Method) {
+    * save(method: Method) {
         console.log("save method", method);
         yield window.rpc.save(method);
     }

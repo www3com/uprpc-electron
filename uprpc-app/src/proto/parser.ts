@@ -11,7 +11,7 @@ import {
     OneOf,
     Service,
 } from "protobufjs";
-import { v4 } from "uuid";
+import {v4} from "uuid";
 import * as path from "path";
 import * as fs from "fs";
 
@@ -39,7 +39,7 @@ export async function loadProto(file: string, includeDirs: string[]) {
     try {
         await root.load([file]);
     } catch (e) {
-        console.log(e);
+        throw  e;
     }
     let services = parse(root, EMPTY, root.nested);
     return {
@@ -106,7 +106,7 @@ function parseField(field: Field): any {
         } else {
             v = parseScalar(field.type);
         }
-        return { [parseScalar(field.keyType)]: v };
+        return {[parseScalar(field.keyType)]: v};
     }
 
     if (field.resolvedType instanceof Type) {

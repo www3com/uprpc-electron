@@ -1,7 +1,5 @@
 import {makeAutoObservable} from "mobx";
-import {createContext} from "react";
-import {Proto, RequestCache, RequestData, ResponseCache, ResponseData, Tab} from "@/types/types";
-import protoList from '../../mock/rpc.json';
+import * as storage from "@/stores/localStorage";
 
 export default class PathStore {
     constructor() {
@@ -11,25 +9,25 @@ export default class PathStore {
     }
 
     pathsDrawerVisible = false;
-    paths: string[] = [];
+    includeDirs: string[] = [];
 
     * init(): any {
-        this.paths = yield window.rpc.getPaths()
+        this.includeDirs = storage.listIncludeDir();
     }
 
-    showPaths(visible: boolean) {
+    showIncludeDir(visible: boolean) {
         this.pathsDrawerVisible = visible
     }
 
-    * addPath(): any {
-        let res = yield window.rpc.addPath()
+    * addIncludeDir(): any {
+        let res = yield window.rpc.openIncludeDir()
         if (res.success) {
-            this.paths = res.paths;
+            storage.addIncludeDir(res.data);
+            this.includeDirs = storage.listIncludeDir();
         }
     }
 
-    * removePath(path: string) {
-        yield window.rpc.removePath(path)
-        this.paths = yield window.rpc.getPaths()
+    * removeIncludeDir(path: string) {
+        storage.removeIncludeDir(path);
     }
 }

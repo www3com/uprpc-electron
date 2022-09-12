@@ -9,16 +9,16 @@ const paths = () => {
     let {pathsStore} = useContext(context)
     return (
         <Drawer title='Import Paths' placement='left' width={500} open={pathsStore.pathsDrawerVisible}
-                onClose={() => pathsStore.showPaths(false)} style={{padding: 5}}
+                onClose={() => pathsStore.showIncludeDir(false)} style={{padding: 5}}
                 bodyStyle={{padding: 5}}
-                extra={<Button type='link' icon={<PlusOutlined/>} onClick={() => pathsStore.addPath()}>Add
+                extra={<Button type='link' icon={<PlusOutlined/>} onClick={() => pathsStore.addIncludeDir()}>Add
                     Path</Button>}>
             <List
                 size="large"
                 loadMore={<div></div>}
-                dataSource={pathsStore.paths}
+                dataSource={pathsStore.includeDirs}
                 renderItem={item =>
-                    <List.Item actions={[<a onClick={() => pathsStore.removePath(item)}><CloseOutlined/></a>]}>
+                    <List.Item actions={[<a onClick={() => pathsStore.removeIncludeDir(item)}><CloseOutlined/></a>]}>
                         {item}
                     </List.Item>}
             />

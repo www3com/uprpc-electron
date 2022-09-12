@@ -1,16 +1,13 @@
-import { BrowserWindow, ipcMain } from "electron";
+import {BrowserWindow, ipcMain, ipcRenderer} from "electron";
 import * as service from "./service";
-import * as rpc from "./rpc/client";
 
 export function register(window: BrowserWindow) {
-    ipcMain.handle("importProto", (event: any) => service.importProto());
-    ipcMain.handle("getProtos", (event: any) => service.getProtos());
-    ipcMain.handle("reloadProto", (event: any) => service.reloadProto());
-    ipcMain.handle("deleteProto", (event: any, id: string) => service.deleteProto(id));
+    // Import File
+    ipcMain.handle("parseProto", (event: any, paths: string[], includeDirs: string[]) => service.parseProto(paths, includeDirs));
+    ipcMain.handle("openProto", (event: any) => service.openProto());
 
-    ipcMain.handle("addPath", (event: any) => service.addPath());
-    ipcMain.handle("removePath", (event: any, path) => service.removePath(path));
-    ipcMain.handle("getPaths", (event: any) => service.getPaths());
+    ipcMain.handle("openIncludeDir", (event: any) => service.openIncludeDir());
+
     ipcMain.handle("send", (event: any, method) => service.sendRequest(window, method));
     ipcMain.handle("stopStream", (event: any, method) => service.stopStream(window, method));
 }
