@@ -160,10 +160,12 @@ const file = () => {
 
         Modal.confirm({
             title: 'Confirm delete proto',
-            content: 'Do you want to remove the proto configuration '.concat(deleteProto.name, '?')
+            content: 'Do you want to remove the proto configuration '.concat(deleteProto.name, '?'),
+            onOk:() => {
+                protoStore.deleteProto(deleteProto.id);
+                setDeleteProto(undefined);
+            }
         });
-        protoStore.deleteProto(deleteProto.id);
-        setDeleteProto(undefined);
     };
 
     let datasource = parse(protoStore.protos);

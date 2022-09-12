@@ -5,3 +5,5 @@ uprpc-mock/dist
 uprpc-mock/node_modules
 uprpc-lib/dist
 uprpc-lib/node_modules
+.DS_Store
+uprpc-mock/.DS_Store

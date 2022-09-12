@@ -1,5 +1,5 @@
-import {makeAutoObservable} from "mobx";
-import {Method, Mode, Proto, RequestCache, RequestData, ResponseCache, ResponseData} from "@/types/types";
+import { makeAutoObservable } from "mobx";
+import { Method, Mode, Proto, RequestCache, RequestData, ResponseCache, ResponseData } from "@/types/types";
 
 export default class ProtoStore {
     constructor() {
@@ -19,8 +19,8 @@ export default class ProtoStore {
         this.onResponse();
     }
 
-    * getProtos() {
-        this.protos = JSON.parse(yield window.rpc.getFiles())
+    *getProtos() {
+        this.protos = JSON.parse(yield window.rpc.getProtos());
     }
 
     onEndStream() {
@@ -36,36 +36,41 @@ export default class ProtoStore {
                 this.responseCaches.set(value.id, {
                     body: value.body,
                     metadata: value.metadata,
-                    streams: [value.body]
-                })
+                    streams: [value.body],
+                });
                 return;
             }
             // 对响应流处理
             let streams = responseCache.streams;
             if (streams == null) return;
             streams.unshift(value.body);
-            this.responseCaches.set(value.id, {...responseCache, streams: streams});
+            this.responseCaches.set(value.id, { ...responseCache, streams: streams });
         });
     }
 
-
-    * importProto(): any {
-        let files = yield window.rpc.importFile();
+    *importProto(): any {
+        let files = yield window.rpc.importProto();
         this.getProtos();
         return files;
     }
 
-    * reloadProto(): any {
-        console.log('reload file');
+    *reloadProto(): any {
+        console.log("reload file");
+        yield window.rpc.reloadProto();
+        this.getProtos();
+        return { success: true };
     }
 
-    * deleteProto(id: string) {
-        console.log('delete proto')
+    *deleteProto(id: string) {
+        console.log("delete proto");
+        yield window.rpc.deleteProto(id);
+        this.getProtos();
+        return { success: true };
     }
 
-    * send(requestData: RequestData): any {
-        console.log('Request data: ', requestData)
-        this.removeCache(requestData.id)
+    *send(requestData: RequestData): any {
+        console.log("Request data: ", requestData);
+        this.removeCache(requestData.id);
         yield this.push(requestData);
         if (requestData.methodMode != Mode.Unary) {
             this.runningCaches.set(requestData.id, true);
@@ -79,30 +84,30 @@ export default class ProtoStore {
         this.runningCaches.delete(methodId);
     }
 
-    * push(requestData: RequestData): any {
+    *push(requestData: RequestData): any {
         console.log("push request data", requestData);
         let requestCache = this.requestCaches.get(requestData.id);
         if (requestCache == null) {
             this.requestCaches.set(requestData.id, {
-                streams: [requestData.body]
+                streams: [requestData.body],
             });
         } else {
             let streams = requestCache.streams;
             streams?.unshift(requestData.body);
-            this.requestCaches.set(requestData.id, {streams: streams})
+            this.requestCaches.set(requestData.id, { streams: streams });
         }
 
         yield window.rpc.send(requestData);
     }
 
-    * stopStream(methodId: string) {
-        console.log('request stop stream');
+    *stopStream(methodId: string) {
+        console.log("request stop stream");
         yield window.rpc.stopStream(methodId);
         this.runningCaches.set(methodId, false);
     }
 
-    * save(method: Method) {
-        console.log('save method', method);
+    *save(method: Method) {
+        console.log("save method", method);
         yield window.rpc.save(method);
     }
 }

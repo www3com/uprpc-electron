@@ -1,6 +1,7 @@
 import { loadSync } from "@grpc/proto-loader";
 import { credentials, GrpcObject, loadPackageDefinition, Metadata, ServiceError } from "@grpc/grpc-js";
 import { RequestData, ResponseData, Mode } from "../types";
+import { parseMetadata } from "./metadata";
 
 import * as store from "../storage/store";
 
@@ -26,7 +27,6 @@ export async function send(request: RequestData, callback: (response: ResponseDa
         }
         case Mode.BidirectionalStream: {
             invokeBidirectionalStream(client, request, callback);
-
             break;
         }
         default: {
@@ -53,6 +53,7 @@ function getClient(request: RequestData) {
         enums: String,
         defaults: true,
         oneofs: true,
+        includeDirs: store.getPaths(),
     });
 
     let grpcObject: GrpcObject = loadPackageDefinition(packageDefinition);
@@ -80,10 +81,26 @@ function invokeUnary(
     callback: (response: any | null, err?: Error, closeStream?: boolean) => void
 ) {
     let metadata = new Metadata();
+    metadata.add("code-bin", Buffer.from("sa"));
+    let code1: Buffer = Buffer.alloc(64);
+    code1.writeBigInt64LE(BigInt(100));
+    code1.writeBigInt64LE(BigInt(200002002));
+    metadata.add("code-bin", code1);
+
     client[request.methodName](JSON.parse(request.body), metadata, (err: ServiceError, response: any) => {
         if (err != null) {
-            let codeBin = err.metadata.get("code-bin");
-            console.log("received error:", err.code, err.message, codeBin.toString());
+            let code;
+
+            let t = err.metadata.get("code-bin")[0];
+            if (t instanceof Uint8Array && t.length == 4) {
+                code = t.readIntBE(0, t.length);
+            }
+            if (t instanceof Uint8Array && t.length == 8) {
+                code = t.readIntBE(0, t.length);
+            }
+            console.log("received error:", err.code, err.message, code);
+            let md = parseMetadata(err.metadata);
+            console.log("received md:", md);
         }
         callback(response, err);
     });
