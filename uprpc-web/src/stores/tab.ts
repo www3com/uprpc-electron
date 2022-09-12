@@ -12,8 +12,6 @@ export default class TabStore {
 
     selectTab(key: string) {
         this.selectedTab = key;
-        let a = Buffer.from("asds");
-        console.log("aa", a);
     }
 
     setDot(key: string) {

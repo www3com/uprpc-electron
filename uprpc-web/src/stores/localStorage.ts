@@ -61,3 +61,25 @@ export function removeProto(id: string): void {
     }
     localStorage.setItem(PROTOS_KEY, JSON.stringify(localProtos));
 }
+
+export function listMethod(protoId: string): Method[] {
+    let methods = [];
+    let proto = getProto(protoId);
+    if (proto == null) return [];
+    for (let service of proto.services) {
+        for (let method of service.methods) {
+            methods.push(method);
+        }
+    }
+    return methods;
+}
+
+function getProto(protoId: string): Proto | null {
+    let protos = listProto();
+    for (let proto of protos) {
+        if (proto.id == protoId) {
+            return proto;
+        }
+    }
+    return null;
+}

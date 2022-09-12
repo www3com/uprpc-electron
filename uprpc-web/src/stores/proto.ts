@@ -28,6 +28,7 @@ export default class ProtoStore {
 
     onResponse() {
         window.rpc.handleResponse((event: any, value: ResponseData) => {
+            console.log('Response data: ', value);
             let responseCache = this.responseCaches.get(value.id);
             if (responseCache == null) {
                 this.responseCaches.set(value.id, {
@@ -46,12 +47,8 @@ export default class ProtoStore {
     }
 
     * importProto(): any {
-
         let res = yield window.rpc.openProto();
-        debugger
-        if (!res.success) {
-            return res;
-        }
+        if (!res.success) return res;
 
         res = yield  window.rpc.parseProto(res.data, storage.listIncludeDir());
         storage.addProto(res.data);
@@ -88,9 +85,7 @@ export default class ProtoStore {
         console.log("push request data", requestData);
         let requestCache = this.requestCaches.get(requestData.id);
         if (requestCache == null) {
-            this.requestCaches.set(requestData.id, {
-                streams: [requestData.body],
-            });
+            this.requestCaches.set(requestData.id, {streams: [requestData.body]});
         } else {
             let streams = requestCache.streams;
             streams?.unshift(requestData.body);

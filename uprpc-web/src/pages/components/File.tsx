@@ -17,6 +17,7 @@ import {
 import {context} from "@/stores/context";
 import {Proto, TabType} from "@/types/types";
 import IncludeDir from "@/pages/components/IncludeDir";
+import * as storage from '@/stores/localStorage';
 
 interface DeleteProto {
     id: string,
@@ -154,6 +155,16 @@ const file = () => {
             title: 'Confirm delete proto',
             content: 'Do you want to remove the proto configuration '.concat(deleteProto.name, '?'),
             onOk: () => {
+                //close opened tab
+                let methods = storage.listMethod(deleteProto.id);
+                for (let method of methods) {
+                    for (let tab of tabStore.openTabs) {
+                        if (tab.key == method.id) {
+                            tabStore.remove(tab.key);
+                            break;
+                        }
+                    }
+                }
                 protoStore.deleteProto(deleteProto.id);
                 setDeleteProto(undefined);
             }
