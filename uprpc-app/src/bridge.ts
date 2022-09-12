@@ -7,8 +7,10 @@ contextBridge.exposeInMainWorld("rpc", {
     handleEndStream: (callback: any) => ipcRenderer.on("endStream", callback),
 
     // Import File
-    getFiles: () => ipcRenderer.invoke("getFiles"),
-    importFile: () => ipcRenderer.invoke("importFile"),
+    getProtos: () => ipcRenderer.invoke("getProtos"),
+    importProto: () => ipcRenderer.invoke("importProto"),
+    reloadProto: () => ipcRenderer.invoke("reloadProto"),
+    deleteProto: (id: string) => ipcRenderer.invoke("deleteProto", id),
 
     // Paths
     addPath: () => ipcRenderer.invoke("addPath"),

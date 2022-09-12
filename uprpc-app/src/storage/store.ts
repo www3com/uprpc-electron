@@ -2,10 +2,8 @@ import { Proto, Service, Method } from "../types";
 
 const Store = require("electron-store");
 const uuid = require("uuid");
-const FILES_KEY = "files";
+const PROTOS_KEY = "protos";
 const PATHS_KEY = "paths";
-
-import { basename } from "path";
 
 let option = {
     name: "uprpc",
@@ -14,21 +12,32 @@ let option = {
 };
 const store = new Store(option);
 
-export function getFiles() {
-    let files = store.get(FILES_KEY);
-    return files == null ? [] : files;
+export function getProtos() {
+    let protos = store.get(PROTOS_KEY);
+    return protos == null ? [] : protos;
 }
 
-export function addFile(proto: Proto) {
-    let localFiles = getFiles();
-    for (let i = 0; i < localFiles.length; i++) {
-        if (localFiles[i].path === proto.path) {
-            localFiles.splice(i, 1);
+export function addProto(proto: Proto) {
+    let localProtos = getProtos();
+    for (let i = 0; i < localProtos.length; i++) {
+        if (localProtos[i].path === proto.path) {
+            localProtos.splice(i, 1);
             break;
         }
     }
-    localFiles.push(proto);
-    store.set(FILES_KEY, localFiles);
+    localProtos.push(proto);
+    store.set(PROTOS_KEY, localProtos);
+}
+
+export function deleteProto(id: string) {
+    let localProtos = getProtos();
+    for (let i = 0; i < localProtos.length; i++) {
+        if (localProtos[i].id === id) {
+            localProtos.splice(i, 1);
+            break;
+        }
+    }
+    store.set(PROTOS_KEY, localProtos);
 }
 
 export function savePaths(paths: string[]) {

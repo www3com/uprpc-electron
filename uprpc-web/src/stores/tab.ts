@@ -1,17 +1,19 @@
-import {makeAutoObservable} from "mobx";
-import {Tab} from "@/types/types";
+import { makeAutoObservable } from "mobx";
+import { Tab } from "@/types/types";
 
 export default class TabStore {
     constructor() {
-        console.log('init tab store')
-        makeAutoObservable(this)
+        console.log("init tab store");
+        makeAutoObservable(this);
     }
 
-    selectedTab = '1';
+    selectedTab = "1";
     openTabs: Tab[] = [];
 
     selectTab(key: string) {
         this.selectedTab = key;
+        let a = Buffer.from("asds");
+        console.log("aa", a);
     }
 
     setDot(key: string) {
@@ -20,20 +22,20 @@ export default class TabStore {
                 item.dot = true;
                 this.openTabs.splice(index, 1, item);
             }
-        })
+        });
     }
 
     openTab(tab: Tab) {
-        if (this.openTabs.length == 1 && this.openTabs[0].key === '1') {
+        if (this.openTabs.length == 1 && this.openTabs[0].key === "1") {
             this.openTabs.splice(0, 1);
         }
 
         let index = this.openTabs.findIndex((value) => value.key === tab.key);
         if (index == -1) {
-            this.openTabs.push(tab)
+            this.openTabs.push(tab);
         }
 
-        this.selectedTab = tab.key
+        this.selectedTab = tab.key;
     }
 
     remove(key: string) {
@@ -42,8 +44,8 @@ export default class TabStore {
                 this.openTabs.splice(index, 1);
                 if (this.openTabs.length == 0) return;
                 let pos = index < this.openTabs.length ? index : this.openTabs.length - 1;
-                this.selectedTab = this.openTabs[pos].key
+                this.selectedTab = this.openTabs[pos].key;
             }
-        })
+        });
     }
 }

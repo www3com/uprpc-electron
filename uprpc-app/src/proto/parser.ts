@@ -9,38 +9,60 @@ import {
     Field,
     MapField,
     OneOf,
-    Service
-} from 'protobufjs'
-import {v4} from 'uuid';
-import {basename} from "path";
+    Service,
+} from "protobufjs";
+import { v4 } from "uuid";
+import * as path from "path";
+import * as fs from "fs";
 
-const EMPTY = '';
+const EMPTY = "";
 
-export async function loadProto(path: string) {
-    let root = await load(path, new Root());
+export async function loadProto(file: string, includeDirs: string[]) {
+    let root = new Root();
+    const originalResolvePath = root.resolvePath;
+    root.resolvePath = (origin, target) => {
+        if (path.isAbsolute(target)) {
+            return target;
+        }
+        for (const directory of includeDirs) {
+            const fullPath = path.join(directory, target);
+            try {
+                fs.accessSync(fullPath, fs.constants.R_OK);
+                return fullPath;
+            } catch (err) {
+                continue;
+            }
+        }
+        return originalResolvePath(origin, target);
+    };
+
+    try {
+        await root.load([file]);
+    } catch (e) {
+        console.log(e);
+    }
     let services = parse(root, EMPTY, root.nested);
     return {
         id: v4(),
-        name: basename(path),
-        path: path,
-        host: '127.0.0.1:9000',
-        services: services
+        name: path.basename(file),
+        path: file,
+        host: "127.0.0.1:9000",
+        services: services,
     };
 }
 
 function parse(root: Root, namespaceName: string, children: any): any {
     let services = [];
     for (let key in children) {
-        let node = children[key]
+        let node = children[key];
         if (isNamespace(node)) {
-            services.push(...parse(root, namespaceName == EMPTY ? key : namespaceName.concat('.', key), node.nested))
+            services.push(...parse(root, namespaceName == EMPTY ? key : namespaceName.concat(".", key), node.nested));
         } else if (node instanceof Service) {
-            services.push(parseService(root, namespaceName, node))
+            services.push(parseService(root, namespaceName, node));
         }
     }
     return services;
 }
-
 
 function parseService(root: Root, namespaceName: string, service: Service) {
     let parsedMethods = [];
@@ -52,8 +74,8 @@ function parseService(root: Root, namespaceName: string, service: Service) {
             id: v4(),
             name: methodName,
             // @ts-ignore
-            mode: method.responseStream << 1 | method.requestStream,
-            requestBody: JSON.stringify(parseTypeFields(reqType), null, '\t'),
+            mode: (method.responseStream << 1) | method.requestStream,
+            requestBody: JSON.stringify(parseTypeFields(reqType), null, "\t"),
         });
     }
 
@@ -61,7 +83,7 @@ function parseService(root: Root, namespaceName: string, service: Service) {
         id: v4(),
         name: service.name,
         namespace: namespaceName,
-        methods: parsedMethods
+        methods: parsedMethods,
     };
 }
 
@@ -82,9 +104,9 @@ function parseField(field: Field): any {
         } else if (field.resolvedType instanceof Enum) {
             v = parseEnum(field.resolvedType);
         } else {
-            v = parseScalar(field.type)
+            v = parseScalar(field.type);
         }
-        return {[parseScalar(field.keyType)]: v}
+        return { [parseScalar(field.keyType)]: v };
     }
 
     if (field.resolvedType instanceof Type) {
@@ -110,7 +132,6 @@ function parseEnum(enumType: Enum): number {
     return enumType.values[enumKey];
 }
 
-
 function pickOneOf(oneofs: OneOf[]) {
     return oneofs.reduce((fields: { [key: string]: any }, oneOf) => {
         fields[oneOf.name] = parseField(oneOf.fieldsArray[0]);
@@ -118,31 +139,31 @@ function pickOneOf(oneofs: OneOf[]) {
     }, {});
 }
 
-
 function parseScalar(type: string) {
     let map = {
-        'string': '',
-        'number': 1,
-        'bool': true,
-        'int32': 3200,
-        'int64': 6400,
-        'uint32': 32000,
-        'uint64': 64000,
-        'sint32': 320,
-        'sint64': 640,
-        'fixed32': 3200,
-        'fixed64': 64000,
-        'sfixed32': 320,
-        'sfixed64': 640,
-        'double': 3.141592,
-        'float': 5.512322,
-        'bytes': Buffer.from([])
-    }
-    return map[type]
+        string: "",
+        number: 1,
+        bool: true,
+        int32: 3200,
+        int64: 6400,
+        uint32: 32000,
+        uint64: 64000,
+        sint32: 320,
+        sint64: 640,
+        fixed32: 3200,
+        fixed64: 64000,
+        sfixed32: 320,
+        sfixed64: 640,
+        double: 3.141592,
+        float: 5.512322,
+        bytes: Buffer.from([]),
+    };
+    return map[type];
 }
 
 function isNamespace(lookupType: ReflectionObject) {
-    return (lookupType instanceof Namespace) &&
+    return (
+        lookupType instanceof Namespace &&
         !(lookupType instanceof Method) &&
         !(lookupType instanceof Service) &&
         !(lookupType instanceof Type) &&
@@ -150,4 +171,5 @@ function isNamespace(lookupType: ReflectionObject) {
         !(lookupType instanceof Field) &&
         !(lookupType instanceof MapField) &&
         !(lookupType instanceof OneOf)
+    );
 }

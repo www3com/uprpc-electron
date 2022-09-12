@@ -31,11 +31,21 @@ export class HelloWorldService {
         let callId = call.metadata.get("callId");
         console.log("callId=", callId);
 
+        let code1: Buffer = Buffer.alloc(64);
+        code1.writeBigInt64LE(BigInt(100));
+        code1.writeBigInt64LE(BigInt(200002002));
+
+        let code2: Buffer = Buffer.alloc(32);
+        code2.writeDoubleLE(23333333.00002);
+
         let metadata = new Metadata();
         // keys that end with '-bin' must have Buffer values
-        metadata.add("code-bin", Buffer.from("9500"));
+        metadata.add("code-bin", code1);
+        metadata.add("code-bin", Buffer.from("sss"));
+        metadata.add("code-bin", code2);
         metadata.add("data", "sss");
-        callback(null, { message: "Hello " + call.request.name }, metadata);
+        metadata.add("data", "21232323");
+        callback(new Error("test error"), { message: "Hello " + call.request.name }, metadata);
     }
     // 简单gRPC调用
     sayHelloServer(call: any, callback: any) {

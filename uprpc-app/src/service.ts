@@ -6,7 +6,7 @@ import { RequestData, ResponseData, CloseStreamData, isCloseStreamData } from ".
 
 const { loadProto } = require("./proto/parser");
 
-export async function importFile() {
+export async function importProto() {
     const result = await electron.dialog.showOpenDialog({
         title: "Import File",
         properties: ["openFile", "multiSelections"],
@@ -19,8 +19,8 @@ export async function importFile() {
 
     for (let path of result.filePaths) {
         try {
-            let proto = await loadProto(path);
-            store.addFile(proto);
+            let proto = await loadProto(path, store.getPaths());
+            store.addProto(proto);
         } catch (e: any) {
             return { success: false, message: e.message };
         }
@@ -28,8 +28,20 @@ export async function importFile() {
     return { success: true };
 }
 
-export function listFiles() {
-    return JSON.stringify(store.getFiles());
+export function getProtos() {
+    return JSON.stringify(store.getProtos());
+}
+export async function reloadProto() {
+    let protos = store.getProtos();
+    for (let proto of protos) {
+        proto = await loadProto(proto.path, store.getPaths());
+        store.addProto(proto);
+    }
+    return { success: true };
+}
+export async function deleteProto(id: string) {
+    store.deleteProto(id);
+    return { success: true };
 }
 
 export function getPaths(): string[] {
@@ -81,15 +93,16 @@ export async function stopStream(window: BrowserWindow, id: string) {
 }
 
 function returnResponse(window: BrowserWindow, req: RequestData, res: any, e?: Error, closeStream?: boolean): void {
-    console.log("return response ", res);
     if (closeStream) {
         // window.webContents.send("endStream", {
         //     id: req.id,
         //     body: e?.message,
         //     metadata: JSON.stringify(res, null, "\t"),
         // });
+        console.log("endStream ", req.id);
         window.webContents.send("endStream", req.id);
     } else {
+        console.log("return response ", res);
         window.webContents.send("updateResponse", {
             id: req.id,
             body: JSON.stringify(res ? res : e?.message, null, "\t"),
