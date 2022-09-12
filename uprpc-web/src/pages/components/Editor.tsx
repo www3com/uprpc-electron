@@ -2,7 +2,14 @@ import styles from "../style.less";
 import {Button, Col, Input, Layout, Row, Space} from "antd";
 import React, {useContext, useState} from "react";
 import {Allotment} from "allotment";
-import {ApiOutlined, PlayCircleOutlined, PoweroffOutlined, SaveOutlined, SendOutlined} from "@ant-design/icons";
+import {
+    ApiOutlined,
+    FilePptOutlined,
+    PlayCircleOutlined,
+    PoweroffOutlined,
+    SaveOutlined,
+    SendOutlined
+} from "@ant-design/icons";
 import {context} from "@/stores/context";
 import {observer} from "mobx-react-lite";
 import Response from "@/pages/components/Response";
@@ -15,7 +22,7 @@ interface EditorProp {
     method: Method
 }
 
-const editor = ({proto, service, method : initMethod}: EditorProp) => {
+const editor = ({proto, service, method: initMethod}: EditorProp) => {
     let {protoStore, tabStore} = useContext(context)
 
     const [host, setHost] = useState(proto.host);
@@ -79,6 +86,8 @@ const editor = ({proto, service, method : initMethod}: EditorProp) => {
                                               onClick={onSend}>Start</Button>)}
                             <Button icon={<SaveOutlined/>}
                                     onClick={() => protoStore.save(method)}>Save</Button>
+                            <Button icon={<FilePptOutlined/>}
+                                    onClick={() => protoStore.save(method)}>View Proto</Button>
                         </Space>
                     </Col>
                 </Row>

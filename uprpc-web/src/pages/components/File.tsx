@@ -1,6 +1,6 @@
 import React, {Key, useContext, useState} from "react";
 import {observer} from "mobx-react-lite";
-import {Col, Input, Layout, message, Modal, notification, Row, Space, Tabs, Tooltip, Tree} from "antd";
+import {Col, Empty, Input, Layout, message, Modal, notification, Row, Space, Tabs, Tooltip, Tree} from "antd";
 import {
     BlockOutlined,
     CloseCircleOutlined,
@@ -80,7 +80,7 @@ const file = () => {
         const middleStr = strTitle.substring(index, index + searchValue.length);
         const afterStr = strTitle.slice(index + searchValue.length);
         const title = index > -1 ?
-            <span>{beforeStr} <span style={{color: '#f50'}}>{middleStr}</span>{afterStr}</span>
+            <span>{beforeStr}<span style={{color: '#f50'}}>{middleStr}</span>{afterStr}</span>
             : <span>{strTitle}</span>;
         return title;
     }
@@ -114,19 +114,18 @@ const file = () => {
 
 
     const onSelect = (selectedKeys: Key[], e: any) => {
+        setDeleteProto(undefined);
         let pos = e.node.pos.split('-');
         if (pos.length == 2) {
             let proto = protoStore.protos[pos[1]];
             setDeleteProto({id: proto.id, name: proto.name})
-            return;
-        } else if (pos.length != 4) {
-            return
+        } else if (pos.length == 4) {
+            tabStore.openTab({
+                key: selectedKeys[0].toString(),
+                params: e.node.pos,
+                type: TabType.Proto,
+            });
         }
-        tabStore.openTab({
-            key: selectedKeys[0].toString(),
-            params: e.node.pos,
-            type: TabType.Proto,
-        });
     }
 
     const onImport = async () => {
@@ -161,13 +160,13 @@ const file = () => {
 
         Modal.confirm({
             title: 'Confirm delete proto',
-            // icon: <ExclamationCircleOutlined />,
             content: 'Do you want to remove the proto configuration '.concat(deleteProto.name, '?')
         });
         protoStore.deleteProto(deleteProto.id);
+        setDeleteProto(undefined);
     };
 
-
+    let datasource = parse(protoStore.protos);
     const items = [{
         label: (<Space direction='vertical' size={0} align={"center"}>
             <HddOutlined style={{fontSize: 20, marginRight: 0}}/>
@@ -178,15 +177,18 @@ const file = () => {
                    onChange={onChange}
                    value={searchValue}
                    style={{marginBottom: 5}}/>
-            <Tree.DirectoryTree
-                // @ts-ignore
-                onExpand={onExpand}
-                expandedKeys={expandedKeys}
-                autoExpandParent={autoExpandParent}
-                onSelect={onSelect}
-                switcherIcon={<DownOutlined/>}
-                defaultExpandedKeys={['0-0-0']}
-                treeData={parse(protoStore.protos)}/></>
+            {datasource.length == 0 ?
+                <div style={{height: '90%', display: 'flex', justifyContent: 'center', alignItems: 'center'}}><Empty
+                    description='No proto'/></div> :
+                <Tree.DirectoryTree
+                    // @ts-ignore
+                    onExpand={onExpand}
+                    expandedKeys={expandedKeys}
+                    autoExpandParent={autoExpandParent}
+                    onSelect={onSelect}
+                    switcherIcon={<DownOutlined/>}
+                    defaultExpandedKeys={['0-0-0']}
+                    treeData={datasource}/>}</>
     }, {
         label: (<Space direction='vertical' size={0}>
             <SettingOutlined style={{fontSize: 20, marginRight: 0}}/>
@@ -197,37 +199,36 @@ const file = () => {
     }];
 
     return (
-        <Layout style={{height: '100%', paddingTop: '5px'}}>
+        <Layout style={{height: '100%'}}>
             <Layout.Header style={{
                 padding: 0,
                 backgroundColor: 'white',
-                height: '40px',
-                lineHeight: '40px',
+                height: '44px',
+                lineHeight: '44px',
                 borderBottom: '1px solid #f0f0f0'
             }}>
                 <Row>
                     <Col flex='auto' style={{paddingLeft: 10, fontSize: 18}}>upRpc</Col>
                     <Col flex="100px">
                         <Space size={8} style={{paddingRight: 10}}>
-                            <Tooltip title='Import Protos'>
+                            <Tooltip title='Import protos'>
                                 <a style={{color: '#000000D9', fontSize: 16}}
                                    onClick={onImport}><PlusCircleOutlined/></a>
                             </Tooltip>
-                            <Tooltip title='Reload Protos'>
+                            <Tooltip title='Reload protos'>
                                 <a style={{color: '#000000D9', fontSize: 16}} onClick={onReload}><ReloadOutlined/></a>
                             </Tooltip>
-                            <Tooltip title='Delete Selectecd Proto'>
+                            <Tooltip title='Delete selectecd proto'>
                                 <a style={{color: '#000000D9', fontSize: 16}} onClick={onDelete}><DeleteOutlined/></a>
                             </Tooltip>
-                            <Tooltip title='Import Paths'>
+                            <Tooltip title='Import dependency paths'>
                                 <a style={{color: '#000000D9', fontSize: 16}}
                                    onClick={() => pathsStore.showPaths(!pathsStore.pathsDrawerVisible)}><FolderOutlined/></a>
                             </Tooltip>
-                            <Tooltip title='Filter Methods'>
+                            <Tooltip title='Filter methods'>
                                 <a style={{color: '#000000D9', fontSize: 16}}
                                    onClick={() => showSearchBox(!visible)}><FilterOutlined/></a>
                             </Tooltip>
-
                         </Space>
                     </Col>
                 </Row>
