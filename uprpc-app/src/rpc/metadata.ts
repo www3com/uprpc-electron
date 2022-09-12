@@ -3,9 +3,12 @@ import { Metadata, MetadataValue } from "@grpc/grpc-js";
 export function fromObj(mdObj: any): Metadata {
     let md = new Metadata();
     if (mdObj) {
-        Object.keys(mdObj).forEach((key: string) => {
-            let value = mdObj[key];
-            md.add(key, value);
+        mdObj.forEach((item: any) => {
+            let values = item["value"];
+            // values.forEach((value: any) => {
+            //     md.add(item["name"], value);
+            // });
+            md.add(item["name"], values);
         });
     }
     return md;

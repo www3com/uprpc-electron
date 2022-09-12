@@ -3,8 +3,6 @@ import { credentials, GrpcObject, loadPackageDefinition, Metadata, ServiceError 
 import { RequestData, ResponseData, Mode } from "../types";
 import { parseMetadata, fromObj } from "./metadata";
 
-import * as store from "../storage/store";
-
 let aliveClient = {};
 let aliveSessions = {};
 
@@ -67,9 +65,11 @@ function invokeUnary(request: RequestData, callback: typeof Callback) {
         },
         onError: (err: any) => {
             console.log("客户端receive:", err);
-            callback(null, err.metadata.getMap(), err);
+            callback(null, err.metadata.toJSON(), err);
         },
     });
+
+    return;
 }
 
 function invokeServerStream(request: RequestData, callback: typeof Callback) {
@@ -116,52 +116,62 @@ function getCallStub(request: RequestData, callOptions: CallOptions) {
 }
 
 function getOrCreateSession(client: any, request: RequestData, callOptions: CallOptions) {
+    if (request.methodMode === Mode.Unary) {
+        try {
+            client[request.methodName](JSON.parse(request.body), (err: ServiceError, response: any) => {
+                console.log("收到服务端返回数据：", err, response);
+                if (err != null) {
+                    callOptions.onError ? callOptions.onError(err, response) : void 0;
+                } else {
+                    callOptions.onData ? callOptions.onData(response) : void 0;
+                }
+            });
+        } catch (err) {
+            callOptions.onError ? callOptions.onError(err, null) : void 0;
+        }
+        return;
+    }
+
     let call = null;
-    if (!aliveSessions[request.id]) {
-        call =
-            request.methodMode === Mode.BidirectionalStream
-                ? client[request.methodName]()
-                : client[request.methodName](JSON.parse(request.body), (err: ServiceError, response: any) => {
-                      console.log("收到服务端返回数据：", err, response);
-                      if (err != null) {
-                          callOptions.onError ? callOptions.onError(err, response) : void 0;
-                      } else {
-                          callOptions.onData ? callOptions.onData(response) : void 0;
-                      }
-                  });
-        if (callOptions?.onData) {
-            call.on("data", callOptions.onData);
-        }
-        if (callOptions?.onEnd) {
-            call.on("end", (data: any) => {
-                console.log("服务器发送end,客户端关闭", data);
-                delete aliveSessions[request.id];
-                callOptions.onEnd ? callOptions.onEnd() : void 0;
-            });
-        }
-        if (callOptions?.onError) {
-            call.on("error", (e: Error) => {
-                console.log("发生异常,客户端关闭");
-                delete aliveSessions[request.id];
-                callOptions.onError ? callOptions.onError(e) : void 0;
-            });
-        }
-        if (callOptions?.onMetadata) {
-            call.on("metadata", callOptions.onMetadata);
-        }
-        if (callOptions?.onStatus) {
-            call.on("status", (s: any) => {
-                console.log("连接状态发生变化：", s);
-                callOptions.onStatus ? callOptions.onStatus(s) : void 0;
-            });
-        }
-        aliveSessions[request.id] = {
-            call: call,
-            methodMode: request.methodMode,
-        };
-    } else {
+    if (!!aliveSessions[request.id]) {
         call = aliveSessions[request.id].call;
     }
+
+    call =
+        request.methodMode === Mode.BidirectionalStream
+            ? client[request.methodName]()
+            : client[request.methodName](JSON.parse(request.body));
+
+    if (callOptions?.onData) {
+        call.on("data", callOptions.onData);
+    }
+    if (callOptions?.onEnd) {
+        call.on("end", (data: any) => {
+            console.log("服务器发送end,客户端关闭", data);
+            delete aliveSessions[request.id];
+            callOptions.onEnd ? callOptions.onEnd() : void 0;
+        });
+    }
+    if (callOptions?.onError) {
+        call.on("error", (e: Error) => {
+            console.log("发生异常,客户端关闭");
+            delete aliveSessions[request.id];
+            callOptions.onError ? callOptions.onError(e) : void 0;
+        });
+    }
+    if (callOptions?.onMetadata) {
+        call.on("metadata", callOptions.onMetadata);
+    }
+    if (callOptions?.onStatus) {
+        call.on("status", (s: any) => {
+            console.log("连接状态发生变化：", s);
+            callOptions.onStatus ? callOptions.onStatus(s) : void 0;
+        });
+    }
+    aliveSessions[request.id] = {
+        call: call,
+        methodMode: request.methodMode,
+    };
     return call;
 }
 
@@ -172,7 +182,7 @@ function getClient(request: RequestData) {
         enums: String,
         defaults: true,
         oneofs: true,
-        includeDirs: store.getPaths(),
+        includeDirs: request.includeDirs,
     });
 
     let grpcObject: GrpcObject = loadPackageDefinition(packageDefinition);
@@ -182,6 +192,10 @@ function getClient(request: RequestData) {
         service = grpcObject[request.namespace];
     } else {
         service = grpcObject[request.namespace][request.serviceName];
+    }
+
+    if (request.methodMode === Mode.Unary) {
+        return new service(request.host, credentials.createInsecure());
     }
 
     let client = null;
