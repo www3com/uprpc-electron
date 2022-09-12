@@ -15,8 +15,8 @@ import {
     SettingOutlined
 } from "@ant-design/icons";
 import {context} from "@/stores/context";
-import Paths from "@/pages/components/Paths";
 import {Proto, TabType} from "@/types/types";
+import IncludeDir from "@/pages/components/IncludeDir";
 
 interface DeleteProto {
     id: string,
@@ -24,7 +24,7 @@ interface DeleteProto {
 }
 
 const file = () => {
-    let {tabStore, protoStore, pathsStore} = useContext(context);
+    let {tabStore, protoStore, includeDirStore} = useContext(context);
     const [visible, setVisible] = useState(false);
 
     const [expandedKeys, setExpandedKeys] = useState<string[]>([]);
@@ -217,7 +217,7 @@ const file = () => {
                             </Tooltip>
                             <Tooltip title='Import dependency paths'>
                                 <a style={{color: '#000000D9', fontSize: 16}}
-                                   onClick={() => pathsStore.showIncludeDir(!pathsStore.pathsDrawerVisible)}><FolderOutlined/></a>
+                                   onClick={() => includeDirStore.showIncludeDir(!includeDirStore.includeDirDrawerVisible)}><FolderOutlined/></a>
                             </Tooltip>
                             <Tooltip title='Filter methods'>
                                 <a style={{color: '#000000D9', fontSize: 16}}
@@ -230,7 +230,7 @@ const file = () => {
             </Layout.Header>
             <Layout.Content style={{backgroundColor: 'white'}}>
                 <Tabs tabPosition='left' size='small' style={{height: '100%'}} items={items}/>
-                <Paths/>
+                <IncludeDir/>
             </Layout.Content>
         </Layout>
     )

@@ -1,14 +1,14 @@
 import {makeAutoObservable} from "mobx";
 import * as storage from "@/stores/localStorage";
 
-export default class PathStore {
+export default class IncludeDirStore {
     constructor() {
         console.log('init paths store')
         makeAutoObservable(this)
         this.init()
     }
 
-    pathsDrawerVisible = false;
+    includeDirDrawerVisible = false;
     includeDirs: string[] = [];
 
     * init(): any {
@@ -16,7 +16,7 @@ export default class PathStore {
     }
 
     showIncludeDir(visible: boolean) {
-        this.pathsDrawerVisible = visible
+        this.includeDirDrawerVisible = visible
     }
 
     * addIncludeDir(): any {
