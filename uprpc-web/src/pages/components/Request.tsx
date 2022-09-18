@@ -1,14 +1,13 @@
 import React, {useState} from "react";
-import {Button, Card, Table, Tabs, Tooltip} from "antd";
+import {Button, Card, Input, Select, Table, Tabs, Tooltip} from "antd";
 import AceEditor from "react-ace";
 import "ace-builds/src-noconflict/mode-json";
 import "ace-builds/src-noconflict/ext-language_tools"
 import {Allotment} from "allotment";
 import Stream from "@/pages/components/Stream";
 import {CloudUploadOutlined, MinusCircleOutlined, PlusCircleOutlined} from "@ant-design/icons";
-import {Method, Mode, RequestCache} from "@/types/types";
+import {Metadata, Method, Mode, parseTypeMap, RequestCache} from "@/types/types";
 import styles from '../style.less';
-import {v4} from 'uuid';
 
 interface requestProps {
     running: boolean,
@@ -28,22 +27,23 @@ export default ({running, method, requestCache, onChange, onPush}: requestProps)
         setBody(value);
     }
 
-    const [datasource, setDatasource] = useState(method.requestMetadata == null ? [] : method.requestMetadata);
-    const onEdit = (index: number, column: string, value: any) => {
-        datasource[index][column] = value;
+    const [metadatas, setMetadatas] = useState(method.requestMetadata == null ? [] : method.requestMetadata);
+    const onEdit = (metadata: Metadata) => {
+        metadatas[metadata.id] = metadata;
+        setMetadatas([...metadatas])
         if (onChange) {
-            onChange({...method, requestMetadata: datasource});
+            onChange({...method, requestMetadata: metadatas});
         }
     }
 
     const onAdd = () => {
-        datasource.push({id: v4(), name: '', value: ''});
-        setDatasource([...datasource]);
+        metadatas.push({parseType: 0, id: metadatas.length, key: '', value: ''});
+        setMetadatas([...metadatas]);
     }
 
     const onDelete = (index: number) => {
-        datasource.splice(index, 1);
-        setDatasource([...datasource]);
+        metadatas.splice(index, 1);
+        setMetadatas([...metadatas]);
     }
 
     let isStream = method.mode == Mode.ClientStream || method.mode == Mode.BidirectionalStream;
@@ -77,18 +77,18 @@ export default ({running, method, requestCache, onChange, onPush}: requestProps)
                    size={'small'}
                    bordered={true}
                    pagination={false}
-                   dataSource={datasource}>
+                   dataSource={metadatas}>
                 <Table.Column className={styles.metadataColumn} key='key' dataIndex='key' title='key' align='center'
                               width={'30%'}
                               render={(text: string, record: any, index: number) => {
-                                  return <input key={'key' + record.id} defaultValue={record.name}
-                                                onChange={(e) => onEdit(index, 'name', e.target.value)}/>
+                                  return <Input key={'key' + record.id} defaultValue={record.name}
+                                                onChange={(e) => onEdit({...record, key: e.target.value})}/>
                               }}/>
                 <Table.Column className={styles.metadataColumn} key='value' dataIndex='value' title='value'
                               align='center'
                               render={(text: string, record: any, index: number) => {
-                                  return <input key={'value' + record.id} defaultValue={record.value}
-                                                onChange={(e) => onEdit(index, 'value', e.target.value)}/>
+                                  return <InputWrapper metadata={record}
+                                                       onChange={metadata => onEdit({...metadata, key: record.key})}/>
                               }}/>
                 <Table.Column className={styles.metadataColumn} key='action' dataIndex='action' align='center'
                               width={80}
@@ -96,9 +96,10 @@ export default ({running, method, requestCache, onChange, onPush}: requestProps)
                                   <Button size='small' type='text' icon={<PlusCircleOutlined/>} onClick={onAdd}/>
                               </Tooltip>}
                               render={(text: string, record: any, index: number) => {
-                                  return <Tooltip title='Delete metadata' placement='bottom'><Button size={"small"} type='text'
-                                                                                  icon={<MinusCircleOutlined/>}
-                                                                                  onClick={() => onDelete(index)}/></Tooltip>
+                                  return <Tooltip title='Delete metadata' placement='bottom'>
+                                      <Button size={"small"} type='text' icon={<MinusCircleOutlined/>}
+                                              onClick={() => onDelete(index)}/>
+                                  </Tooltip>
                               }}/>
             </Table>
     }];
@@ -115,4 +116,34 @@ export default ({running, method, requestCache, onChange, onPush}: requestProps)
             </Allotment.Pane>
         </Allotment>
     )
+}
+
+
+interface InputWrapperProp {
+    metadata: Metadata,
+    onChange: (metadata: Metadata) => void;
+}
+
+const InputWrapper = ({metadata, onChange}: InputWrapperProp) => {
+    const [metadataState, setMetadataState] = useState(metadata);
+
+    const handleChange = (md: Metadata) => {
+        setMetadataState(md);
+        onChange(md);
+    }
+
+    let items:any[] = [];
+    parseTypeMap.forEach((value, key) => items.push(<Select.Option key={key} value={key.toString()}>{value}</Select.Option>))
+
+    return <div style={{display: 'flex'}}>
+        <Input key={'v' + metadataState.id} defaultValue={metadataState.value}
+               onChange={e => handleChange({...metadataState, value: e.target.value})}/>
+        {metadata.key.endsWith('-bin') ?
+            <Select key={'s' + metadataState.id} defaultValue={metadataState.parseType.toString()} bordered={false}
+                    onChange={value => handleChange({...metadataState, parseType: Number.parseInt(value)})}
+                    style={{width: 140}}>
+                <Select.Option key={0} value='0'>Empty</Select.Option>
+                {items}
+            </Select> : ''}
+    </div>
 }

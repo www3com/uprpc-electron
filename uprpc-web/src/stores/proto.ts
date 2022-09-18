@@ -28,6 +28,7 @@ export default class ProtoStore {
 
     onResponse() {
         window.rpc.handleResponse((event: any, value: ResponseData) => {
+            console.log('Response data: ', value);
             let responseCache = this.responseCaches.get(value.id);
             if (responseCache == null) {
                 this.responseCaches.set(value.id, {
@@ -46,12 +47,8 @@ export default class ProtoStore {
     }
 
     * importProto(): any {
-
         let res = yield window.rpc.openProto();
-        debugger
-        if (!res.success) {
-            return res;
-        }
+        if (!res.success) return res;
 
         res = yield  window.rpc.parseProto(res.data, storage.listIncludeDir());
         storage.addProto(res.data);
@@ -69,7 +66,6 @@ export default class ProtoStore {
     }
 
     * send(requestData: RequestData): any {
-        console.log("Request data: ", requestData);
         this.removeCache(requestData.id);
         yield this.push(requestData);
         if (requestData.methodMode != Mode.Unary) {
@@ -77,20 +73,11 @@ export default class ProtoStore {
         }
     }
 
-    removeCache(methodId: string) {
-        // 清空缓存
-        this.requestCaches.delete(methodId);
-        this.responseCaches.delete(methodId);
-        this.runningCaches.delete(methodId);
-    }
-
     * push(requestData: RequestData): any {
-        console.log("push request data", requestData);
+        console.log("send request data", requestData);
         let requestCache = this.requestCaches.get(requestData.id);
         if (requestCache == null) {
-            this.requestCaches.set(requestData.id, {
-                streams: [requestData.body],
-            });
+            this.requestCaches.set(requestData.id, {streams: [requestData.body]});
         } else {
             let streams = requestCache.streams;
             streams?.unshift(requestData.body);
@@ -98,6 +85,13 @@ export default class ProtoStore {
         }
         requestData.includeDirs = storage.listIncludeDir();
         yield window.rpc.send(requestData);
+    }
+
+    removeCache(methodId: string) {
+        // 清空缓存
+        this.requestCaches.delete(methodId);
+        this.responseCaches.delete(methodId);
+        this.runningCaches.delete(methodId);
     }
 
     * stopStream(methodId: string) {

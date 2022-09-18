@@ -18,7 +18,8 @@ const includeDir = () => {
                 loadMore={<div></div>}
                 dataSource={includeDirStore.includeDirs}
                 renderItem={item =>
-                    <List.Item actions={[<a onClick={() => includeDirStore.removeIncludeDir(item)}><CloseOutlined/></a>]}>
+                    <List.Item
+                        actions={[<a onClick={() => includeDirStore.removeIncludeDir(item)}><CloseOutlined/></a>]}>
                         {item}
                     </List.Item>}
             />
