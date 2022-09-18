@@ -66,7 +66,6 @@ export default class ProtoStore {
     }
 
     * send(requestData: RequestData): any {
-        console.log("Request data: ", requestData);
         this.removeCache(requestData.id);
         yield this.push(requestData);
         if (requestData.methodMode != Mode.Unary) {
@@ -74,15 +73,8 @@ export default class ProtoStore {
         }
     }
 
-    removeCache(methodId: string) {
-        // 清空缓存
-        this.requestCaches.delete(methodId);
-        this.responseCaches.delete(methodId);
-        this.runningCaches.delete(methodId);
-    }
-
     * push(requestData: RequestData): any {
-        console.log("push request data", requestData);
+        console.log("send request data", requestData);
         let requestCache = this.requestCaches.get(requestData.id);
         if (requestCache == null) {
             this.requestCaches.set(requestData.id, {streams: [requestData.body]});
@@ -93,6 +85,13 @@ export default class ProtoStore {
         }
         requestData.includeDirs = storage.listIncludeDir();
         yield window.rpc.send(requestData);
+    }
+
+    removeCache(methodId: string) {
+        // 清空缓存
+        this.requestCaches.delete(methodId);
+        this.responseCaches.delete(methodId);
+        this.runningCaches.delete(methodId);
     }
 
     * stopStream(methodId: string) {

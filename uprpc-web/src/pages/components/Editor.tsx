@@ -1,9 +1,9 @@
 import styles from "../style.less";
-import {Button, Col, Input, Layout, Row, Space} from "antd";
+import {Button, Col, Input, Layout, notification, Row, Space} from "antd";
 import React, {useContext, useState} from "react";
 import {Allotment} from "allotment";
 import {
-    ApiOutlined,
+    ApiOutlined, CloseCircleOutlined,
     FilePptOutlined,
     PlayCircleOutlined,
     PoweroffOutlined,
@@ -56,7 +56,15 @@ const editor = ({proto, service, method: initMethod}: EditorProp) => {
     }
 
     const onSend = async () => {
-        await protoStore.send(getRequestData())
+        try {
+            await protoStore.send(getRequestData())
+        } catch (e: any) {
+            notification.open({
+                message: 'Calling error',
+                description: e.message,
+                icon: <CloseCircleOutlined style={{color: 'red'}}/>
+            });
+        }
     }
 
     const onStop = async () => {
@@ -99,7 +107,7 @@ const editor = ({proto, service, method: initMethod}: EditorProp) => {
                              requestCache={requestCache}
                              onChange={onRequestChange}
                              onPush={onPush}/>
-                    <Response method={method} responseCache={responseCache}/>
+                    <Response method={method} responseCache={responseCache} onChange={method1 => setMethod(method1)}/>
                 </Allotment>
             </Layout.Content>
         </Layout>
