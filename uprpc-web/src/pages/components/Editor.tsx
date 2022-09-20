@@ -15,6 +15,7 @@ import {observer} from "mobx-react-lite";
 import Response from "@/pages/components/Response";
 import Request from "@/pages/components/Request";
 import {Service, Method, Mode, modeMap, Proto,} from "@/types/types";
+import {encode} from "@/utils/metadata";
 
 interface EditorProp {
     proto: Proto,
@@ -39,6 +40,11 @@ const editor = ({proto, service, method: initMethod}: EditorProp) => {
     }
 
     const getRequestData = () => {
+        if (method.requestMds != null && method.requestMds.length > 0) {
+            method.requestMds = method.requestMds.map((value, index) => {
+                return {...value, key: value.key, value: encode(value.value, value.parseType)}
+            })
+        }
         return {
             id: method.id,
             body: method.requestBody,

@@ -22,7 +22,7 @@ export enum ParseType {
 
     UintLE,
     UintBE,
-    UInt8,
+    Uint8,
     Uint16LE,
     Uint16BE,
     Uint32LE,
@@ -51,7 +51,7 @@ export const parseTypeMap: Map<number, string> = new Map([
 
     [ParseType.UintLE, "UintLE"],
     [ParseType.UintBE, "UintBE"],
-    [ParseType.UInt8, "UInt8"],
+    [ParseType.Uint8, "UInt8"],
     [ParseType.Uint16LE, "Uint16LE"],
     [ParseType.Uint16BE, "Uint16BE"],
     [ParseType.Uint32LE, "Uint32LE"],
