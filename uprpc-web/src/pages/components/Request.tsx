@@ -27,23 +27,23 @@ export default ({running, method, requestCache, onChange, onPush}: requestProps)
         setBody(value);
     }
 
-    const [metadatas, setMetadatas] = useState(method.requestMetadata == null ? [] : method.requestMetadata);
+    const [mds, setMds] = useState(method.requestMds == null ? [] : method.requestMds);
     const onEdit = (metadata: Metadata) => {
-        metadatas[metadata.id] = metadata;
-        setMetadatas([...metadatas])
+        mds[metadata.id] = metadata;
+        setMds([...mds])
         if (onChange) {
-            onChange({...method, requestMetadata: metadatas});
+            onChange({...method, requestMds: mds});
         }
     }
 
     const onAdd = () => {
-        metadatas.push({parseType: 0, id: metadatas.length, key: '', value: ''});
-        setMetadatas([...metadatas]);
+        mds.push({parseType: 0, id: mds.length, key: '', value: ''});
+        setMds([...mds]);
     }
 
     const onDelete = (index: number) => {
-        metadatas.splice(index, 1);
-        setMetadatas([...metadatas]);
+        mds.splice(index, 1);
+        setMds([...mds]);
     }
 
     let isStream = method.mode == Mode.ClientStream || method.mode == Mode.BidirectionalStream;
@@ -77,7 +77,7 @@ export default ({running, method, requestCache, onChange, onPush}: requestProps)
                    size={'small'}
                    bordered={true}
                    pagination={false}
-                   dataSource={metadatas}>
+                   dataSource={mds}>
                 <Table.Column className={styles.metadataColumn} key='key' dataIndex='key' title='key' align='center'
                               width={'30%'}
                               render={(text: string, record: any, index: number) => {

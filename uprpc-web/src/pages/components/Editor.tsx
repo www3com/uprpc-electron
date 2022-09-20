@@ -30,7 +30,7 @@ const editor = ({proto, service, method: initMethod}: EditorProp) => {
 
     const onRequestChange = (method: Method) => {
         tabStore.setDot(method.id)
-        setMethod({...method, requestBody: method.requestBody, requestMetadata: method.requestMetadata});
+        setMethod({...method, requestBody: method.requestBody, requestMds: method.requestMds});
     }
 
     const onHostChange = (host: string) => {
@@ -42,7 +42,7 @@ const editor = ({proto, service, method: initMethod}: EditorProp) => {
         return {
             id: method.id,
             body: method.requestBody,
-            metadata: method.requestMetadata,
+            metadata: method.requestMds,
             methodMode: method.mode,
             methodName: method.name,
             namespace: service.namespace,

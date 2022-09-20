@@ -4,8 +4,8 @@ declare global {
     }
 }
 
-enum ParseType {
-    Empty,
+export enum ParseType {
+    Text = 1,
     IntLE,
     IntBE,
     Int8,
@@ -65,7 +65,7 @@ export const parseTypeMap: Map<number, string> = new Map([
 export interface Metadata {
     id: number,
     key: string,
-    value: any,
+    value?: any,
     parseType: ParseType
 }
 
@@ -79,7 +79,7 @@ export interface RequestData {
     methodMode: Mode,
     host: string,
     body: any,
-    metadata?: any,
+    mds?: Metadata[],
     includeDirs?: string[],
 }
 
@@ -87,7 +87,7 @@ export interface RequestData {
 export interface ResponseData {
     id: string,
     body: string,
-    metadata?: any
+    mds?: Metadata[]
 }
 
 export enum Mode {
@@ -109,8 +109,8 @@ export interface Method {
     name: string,
     mode: Mode,
     requestBody: string,
-    requestMetadata?: Metadata[],
-    responseMetadata?: Map<string, Map<number, number>>
+    requestMds?: Metadata[],
+    responseMds?: Metadata[]
 }
 
 export interface Service {
@@ -133,7 +133,7 @@ export interface RequestCache {
 }
 
 export interface ResponseCache {
-    metadata?: Metadata[],
+    mds?: Metadata[],
     body: string,
     streams: string[]
 }
@@ -151,5 +151,3 @@ export interface Tab {
     dot?: boolean,
     closable?: boolean
 }
-
-
