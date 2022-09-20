@@ -1,55 +1,25 @@
 import { Metadata, MetadataValue } from "@grpc/grpc-js";
+import { Metadata as MD } from "../types";
 
-export function fromObj(mdObj: any): Metadata {
-    let md = new Metadata();
-    if (mdObj) {
-        mdObj.forEach((item: any) => {
-            let values = item["value"];
-            // values.forEach((value: any) => {
-            //     md.add(item["name"], value);
-            // });
-            md.add(item["name"], values);
+export function parseMds(mds: MD[]): Metadata {
+    let metadata = new Metadata();
+    if (mds) {
+        mds.forEach((item: MD) => {
+            metadata.add(item.key, item.value);
         });
     }
-    return md;
+    return metadata;
 }
 
-export function parseMetadata(metadata: Metadata): Map<string, any> {
-    let result: Map<string, any> = new Map<string, any>();
-    Object.keys(metadata.getMap()).forEach((key: string) => {
+export function parseMetadata(metadata: Metadata): MD[] {
+    let mds: MD[] = [];
+    Object.keys(metadata.getMap()).forEach((key: string, index: number) => {
         let values = metadata.get(key);
-        if (key.endsWith("-bin")) {
-            result.set(key, parseValue(values, false));
+        if (values instanceof Array) {
+            values.forEach((v, i) => mds.push({ id: mds.length + 1, key: key, value: v }));
         } else {
-            result.set(key, values.toString());
+            mds.push({ id: mds.length + 1, key: key, value: values });
         }
     });
-    return result;
-}
-
-function parseValue(values: MetadataValue[], byBe: boolean): Array<any> {
-    let mdValues: Array<any> = [];
-    values.forEach((value: MetadataValue) => {
-        if (value instanceof Uint8Array) {
-            switch (value.length) {
-                case 8:
-                    mdValues.push(byBe ? value.readUInt8() : value.readUInt8());
-                    break;
-                case 16:
-                    mdValues.push(byBe ? value.readInt16BE() : value.readInt16LE());
-                    break;
-                case 32:
-                    mdValues.push(byBe ? value.readInt32BE() : value.readInt32LE());
-                    break;
-                case 64:
-                    mdValues.push(byBe ? value.readBigInt64BE() : value.readBigInt64LE());
-                    break;
-                default:
-                    mdValues.push(value.toString());
-                    break;
-            }
-        }
-    });
-
-    return mdValues;
+    return mds;
 }

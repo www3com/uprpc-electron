@@ -69,7 +69,7 @@ function returnResponse(
         let resData: ResponseData = {
             id: req.id,
             body: JSON.stringify(res ? res : e?.message, null, "\t"),
-            metadata: md,
+            mds: md,
         };
         console.log("return response data: ", resData);
         window.webContents.send("updateResponse", resData);
