@@ -1,12 +1,12 @@
-import {ParseType} from "../types/types";
+import { ParseType } from "../types/types";
 
 export function encode(value: any, parseType: number) {
     let buffer = new ArrayBuffer(16);
     let view = new DataView(buffer);
 
     switch (parseType) {
-        case ParseType.IntLE:
-        case ParseType.IntBE:
+        // case ParseType.IntLE:
+        // case ParseType.IntBE:
         case ParseType.Int8:
             view.setInt8(0, value);
             break;
@@ -34,8 +34,8 @@ export function encode(value: any, parseType: number) {
         case ParseType.DoubleBE:
             view.setFloat64(0, value, false);
             break;
-        case ParseType.UintLE:
-        case ParseType.UintBE:
+        // case ParseType.UintLE:
+        // case ParseType.UintBE:
         case ParseType.Uint8:
             view.setUint8(0, value);
             break;
@@ -68,50 +68,57 @@ export function encode(value: any, parseType: number) {
 }
 
 export function decode(value: any, parseType: number): any {
-    const view = new DataView(value.buffer, value.byteOffset, value.length);
-    switch (parseType) {
-        case ParseType.IntLE:
-        case ParseType.IntBE:
-        case ParseType.Int8:
-            return view.getInt8(0);
-        case ParseType.Int16LE:
-            return view.getInt16(0, true);
-        case ParseType.Int16BE:
-            return view.getInt16(0, false);
-        case ParseType.Int32LE:
-            return view.getInt32(0, true);
-        case ParseType.Int32BE:
-            return view.getInt32(0, false);
-        case ParseType.FloatLE:
-            return view.getFloat32(0, true);
-        case ParseType.FloatBE:
-            return view.getFloat32(0, false);
-        case ParseType.DoubleLE:
-            return view.getFloat64(0, true);
-        case ParseType.DoubleBE:
-            return view.getFloat64(0, false);
-        case ParseType.UintLE:
-        case ParseType.UintBE:
-        case ParseType.Uint8:
-            return view.getUint8(0);
-        case ParseType.Uint16LE:
-            return view.getUint16(0, true);
-        case ParseType.Uint16BE:
-            return view.getUint16(0, false);
-        case ParseType.Uint32LE:
-            return view.getUint32(0, true);
-        case ParseType.Uint32BE:
-            return view.getUint32(0, false);
-        case ParseType.BigInt64LE:
-            return view.getBigInt64(0, true);
-        case ParseType.BigInt64BE:
-            return view.getBigInt64(0, false);
-        case ParseType.BigUint64LE:
-            return view.getBigUint64(0, true);
-        case ParseType.BigUint64BE:
-            return view.getBigInt64(0, false);
-        default:
-            return '[Buffer ... ' + value.length + ' bytes]';
+    if (ParseType.Text == parseType) {
+        return new TextDecoder().decode(value);
+    }
+
+    const view = new DataView(value.buffer, value.byteOffset, value.byteLength);
+    try {
+        switch (parseType) {
+            // case ParseType.IntLE:
+            // case ParseType.IntBE:
+            case ParseType.Int8:
+                return view.getInt8(0).toString();
+            case ParseType.Int16LE:
+                return view.getInt16(0, true).toString();
+            case ParseType.Int16BE:
+                return view.getInt16(0, false).toString();
+            case ParseType.Int32LE:
+                return view.getInt32(0, true).toString();
+            case ParseType.Int32BE:
+                return view.getInt32(0, false).toString();
+            case ParseType.FloatLE:
+                return view.getFloat32(0, true).toString();
+            case ParseType.FloatBE:
+                return view.getFloat32(0, false).toString();
+            case ParseType.DoubleLE:
+                return view.getFloat64(0, true).toString();
+            case ParseType.DoubleBE:
+                return view.getFloat64(0, false).toString();
+            // case ParseType.UintLE:
+            // case ParseType.UintBE:
+            case ParseType.Uint8:
+                return view.getUint8(0).toString();
+            case ParseType.Uint16LE:
+                return view.getUint16(0, true).toString();
+            case ParseType.Uint16BE:
+                return view.getUint16(0, false).toString();
+            case ParseType.Uint32LE:
+                return view.getUint32(0, true).toString();
+            case ParseType.Uint32BE:
+                return view.getUint32(0, false).toString();
+            case ParseType.BigInt64LE:
+                return view.getBigInt64(0, true).toString().toString();
+            case ParseType.BigInt64BE:
+                return view.getBigInt64(0, false).toString();
+            case ParseType.BigUint64LE:
+                return view.getBigUint64(0, true).toString();
+            case ParseType.BigUint64BE:
+                return view.getBigInt64(0, false).toString();
+            default:
+                return "[Buffer ... " + value.length + " bytes]";
+        }
+    } catch (e) {
+        return "decode error";
     }
 }
-
