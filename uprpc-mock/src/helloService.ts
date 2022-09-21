@@ -60,7 +60,7 @@ export class HelloWorldService {
         }, 1000);
 
         call.on("end", function () {
-            console.log("sayHelloDouble: 客户端发送end,客户端关闭");
+            console.log("sayHelloServer: 客户端发送end,客户端关闭");
         });
     }
     // 简单gRPC调用

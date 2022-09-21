@@ -6,6 +6,13 @@ declare global {
     }
 }
 
+export interface Metadata {
+    id: number;
+    key: string;
+    value?: any;
+    parseType?: any;
+}
+
 // 请求信息
 export interface RequestData {
     id: string;
@@ -16,15 +23,15 @@ export interface RequestData {
     methodMode: Mode;
     host: string;
     body: any;
-    metadata?: any;
+    mds?: Metadata[];
     includeDirs?: string[];
 }
 
 // 响应信息
 export interface ResponseData {
     id: string;
-    body?: any;
-    metadata?: any;
+    body: string;
+    mds?: Metadata[];
 }
 
 // 关闭流信息

@@ -1,7 +1,7 @@
 import { loadSync } from "@grpc/proto-loader";
 import { credentials, GrpcObject, loadPackageDefinition, Metadata, ServiceError } from "@grpc/grpc-js";
 import { RequestData, ResponseData, Mode } from "../types";
-import { parseMetadata, fromObj } from "./metadata";
+import { parseMetadata, parseMds } from "./metadata";
 
 let aliveClient = {};
 let aliveSessions = {};
@@ -57,7 +57,7 @@ export async function stop(id: string, callback: (response: ResponseData | null,
 }
 
 function invokeUnary(request: RequestData, callback: typeof Callback) {
-    let metadata = fromObj(request.metadata);
+    let metadata = parseMds(request.mds || []);
     let call = getCallStub(request, {
         onData: (response: any) => {
             console.log("客户端receive:", response);
@@ -65,7 +65,7 @@ function invokeUnary(request: RequestData, callback: typeof Callback) {
         },
         onError: (err: any) => {
             console.log("客户端receive:", err);
-            callback(null, err.metadata.toJSON(), err);
+            callback(null, parseMetadata(err.metadata), err);
         },
     });
 
@@ -79,7 +79,7 @@ function invokeServerStream(request: RequestData, callback: typeof Callback) {
             callback(response);
         },
         onEnd: (s: any) => callback(null, null, undefined, true),
-        onError: (err: any, response: any) => callback(response, err.metadata.getMap(), err, true),
+        onError: (err: any, response: any) => callback(response, parseMetadata(err.metadata), err, true),
         onMetadata: (metadata: any) => callback(null),
         // onStatus: (status: any) => callback(null),
     });
@@ -91,7 +91,7 @@ function invokeClientStream(request: RequestData, callback: typeof Callback) {
             console.log("客户端receive:", response);
             callback(response);
         },
-        onError: (err: any, response: any) => callback(response, err.metadata.getMap(), err, true),
+        onError: (err: any, response: any) => callback(response, parseMetadata(err.metadata), err, true),
     });
     call.write(JSON.parse(request.body));
 }
@@ -103,7 +103,7 @@ function invokeBidirectionalStream(request: RequestData, callback: typeof Callba
             callback(response);
         },
         onEnd: () => callback(null, null, undefined, true),
-        onError: (err: any, response: any) => callback(response, err.metadata.getMap(), err, true),
+        onError: (err: any, response: any) => callback(response, parseMetadata(err.metadata), err, true),
         onMetadata: (metadata: any) => callback(null),
         onStatus: (status: any) => callback(null),
     });
