@@ -68,7 +68,7 @@ export function encode(value: any, parseType: number) {
 }
 
 export function decode(value: any, parseType: number): any {
-    const view = new DataView(value, value.byteOffset, value.length);
+    const view = new DataView(value.buffer, value.byteOffset, value.length);
     switch (parseType) {
         case ParseType.IntLE:
         case ParseType.IntBE:

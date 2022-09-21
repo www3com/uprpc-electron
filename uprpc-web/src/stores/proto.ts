@@ -33,7 +33,7 @@ export default class ProtoStore {
             if (responseCache == null) {
                 this.responseCaches.set(value.id, {
                     body: value.body,
-                    metadata: value.metadata,
+                    mds: value.mds,
                     streams: [value.body],
                 });
                 return;
