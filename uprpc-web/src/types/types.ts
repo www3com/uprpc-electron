@@ -1,11 +1,11 @@
 declare global {
     interface Window {
-        rpc: any
+        rpc: any;
     }
 }
 
 export enum ParseType {
-    Text = 1,
+    Text = 0,
     IntLE,
     IntBE,
     Int8,
@@ -35,8 +35,9 @@ export enum ParseType {
 }
 
 export const parseTypeMap: Map<number, string> = new Map([
-    [ParseType.IntLE, "IntLE"],
-    [ParseType.IntBE, "IntBE"],
+    [ParseType.Text, "Text"],
+    // [ParseType.IntLE, "IntLE"],
+    // [ParseType.IntBE, "IntBE"],
     [ParseType.Int8, "Int8"],
     [ParseType.Int16LE, "Int16LE"],
     [ParseType.Int16BE, "Int16BE"],
@@ -49,8 +50,8 @@ export const parseTypeMap: Map<number, string> = new Map([
     [ParseType.DoubleLE, "DoubleLE"],
     [ParseType.DoubleBE, "DoubleBE"],
 
-    [ParseType.UintLE, "UintLE"],
-    [ParseType.UintBE, "UintBE"],
+    // [ParseType.UintLE, "UintLE"],
+    // [ParseType.UintBE, "UintBE"],
     [ParseType.Uint8, "UInt8"],
     [ParseType.Uint16LE, "Uint16LE"],
     [ParseType.Uint16BE, "Uint16BE"],
@@ -59,42 +60,42 @@ export const parseTypeMap: Map<number, string> = new Map([
     [ParseType.BigInt64BE, "BigInt64BE"],
     [ParseType.BigInt64LE, "BigInt64LE"],
     [ParseType.BigUint64BE, "BigUint64BE"],
-    [ParseType.BigUint64LE, "BigUint64LE"]
+    [ParseType.BigUint64LE, "BigUint64LE"],
 ]);
 
 export interface Metadata {
-    id: number,
-    key: string,
-    value?: any,
-    parseType: ParseType
+    id: number;
+    key: string;
+    value?: any;
+    parseType: ParseType;
 }
 
 // 请求信息
 export interface RequestData {
-    id: string,
-    protoPath: string,
-    namespace: string,
-    serviceName: string,
-    methodName: string,
-    methodMode: Mode,
-    host: string,
-    body: any,
-    mds?: Metadata[],
-    includeDirs?: string[],
+    id: string;
+    protoPath: string;
+    namespace: string;
+    serviceName: string;
+    methodName: string;
+    methodMode: Mode;
+    host: string;
+    body: any;
+    mds?: Metadata[];
+    includeDirs?: string[];
 }
 
 // 响应信息
 export interface ResponseData {
-    id: string,
-    body: string,
-    mds?: Metadata[]
+    id: string;
+    body: string;
+    mds?: Metadata[];
 }
 
 export enum Mode {
     Unary = 0,
     ClientStream = 1,
     ServerStream = 2,
-    BidirectionalStream = 3
+    BidirectionalStream = 3,
 }
 
 export const modeMap = {
@@ -105,12 +106,12 @@ export const modeMap = {
 };
 
 export interface Method {
-    id: string,
-    name: string,
-    mode: Mode,
-    requestBody: string,
-    requestMds?: Metadata[],
-    responseMds?: Metadata[]
+    id: string;
+    name: string;
+    mode: Mode;
+    requestBody: string;
+    requestMds?: Metadata[];
+    responseMds?: Metadata[];
 }
 
 export interface Service {
@@ -133,21 +134,21 @@ export interface RequestCache {
 }
 
 export interface ResponseCache {
-    mds?: Metadata[],
-    body: string,
-    streams: string[]
+    mds?: Metadata[];
+    body: string;
+    streams: string[];
 }
 
 export enum TabType {
     Proto,
-    Env
+    Env,
 }
 
 export interface Tab {
-    key: string,
-    title?: string,
-    type?: TabType,
-    params?: any,
-    dot?: boolean,
-    closable?: boolean
+    key: string;
+    title?: string;
+    type?: TabType;
+    params?: any;
+    dot?: boolean;
+    closable?: boolean;
 }
