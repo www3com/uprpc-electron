@@ -78,14 +78,12 @@ export default ({running, method, requestCache, onChange, onPush}: requestProps)
                    bordered={true}
                    pagination={false}
                    dataSource={mds}>
-                <Table.Column className={styles.metadataColumn} key='key' dataIndex='key' title='key' align='center'
-                              width={'30%'}
+                <Table.Column className={styles.metadataColumn} key='key' dataIndex='key' title='KEY' width={'30%'}
                               render={(text: string, record: any, index: number) => {
                                   return <Input key={'key' + record.id} defaultValue={record.name}
                                                 onChange={(e) => onEdit({...record, key: e.target.value})}/>
                               }}/>
-                <Table.Column className={styles.metadataColumn} key='value' dataIndex='value' title='value'
-                              align='center'
+                <Table.Column className={styles.metadataColumn} key='value' dataIndex='value' title='VALUE'
                               render={(text: string, record: any, index: number) => {
                                   return <InputWrapper metadata={record}
                                                        onChange={metadata => onEdit({...metadata, key: record.key})}/>

@@ -1,5 +1,5 @@
 import React from "react";
-import {Dropdown, Menu, Table, Tabs} from "antd";
+import {Col, Dropdown, Input, Menu, Row, Select, Table, Tabs} from "antd";
 import AceEditor from "react-ace";
 import "ace-builds/src-noconflict/mode-json";
 import "ace-builds/src-noconflict/ext-language_tools"
@@ -16,26 +16,44 @@ interface responseProps {
 
 export default ({method, responseCache, onChange}: responseProps) => {
     const handleChange = (id: number, key: string, parseType: number) => {
+        console.log(' response mds: ', method.responseMds)
         if (method.responseMds == null) {
             method.responseMds = [];
+        } else {
+            for (let i = 0; i < method.responseMds.length; i++) {
+                if (method.responseMds[i].id == id) {
+                    method.responseMds.splice(i, 1);
+                }
+            }
         }
-        method.requestMds?.push({id: id, key: key, parseType: parseType})
+
+        method.responseMds.push({id: id, key: key, parseType: parseType});
         onChange({...method});
     }
 
+    const getParseType = (id: number) => {
+        if (method.responseMds == undefined) return 0;
+        for (let md of method.responseMds) {
+            if (md.id == id) {
+                return md.parseType;
+            }
+        }
+        return 0;
+    }
+
     const columns = [
-        {title: 'name', dataIndex: 'name', key: 'name'},
+        {title: 'KEY', dataIndex: 'key', key: 'name', width: '200px'},
         {
-            title: 'Value', dataIndex: 'value', key: 'value', render: function (title: string, record: any) {
+            title: 'VALUE', dataIndex: 'value', key: 'value', render: function (title: string, record: any) {
                 if (/-bin$/.test(record.key)) {
-                    return <BufferValue id={record.id} value={record.value} parseType={record.parseType}
+                    return <BufferValue id={record.id} value={record.value} parseType={getParseType(record.id)}
                                         onChange={(id, parseType) => handleChange(id, record.key, parseType)}/>
                 }
                 return title;
             }
         }
     ];
-    
+
     const tab = method.mode == Mode.ServerStream || method.mode == Mode.BidirectionalStream ?
         {key: 'response', label: 'Response Stream', children: <Stream value={responseCache?.streams}/>} : {
             key: ' response', label: 'Response',
@@ -82,12 +100,18 @@ interface BufferValueProp {
 }
 
 const BufferValue = ({id, value, parseType, onChange}: BufferValueProp) => {
-    let menus: any[] = [];
-    parseTypeMap.forEach((value, key, map) => {
-        menus.push({key: key.toString(), label: value})
-    });
-    return (<Dropdown overlay={<Menu onClick={(item) => onChange(id, Number.parseInt(item.key))} items={menus}/>}>
-            <a>{decode(value, parseType)}</a>
-        </Dropdown>
-    );
+    let items: any[] = [];
+    parseTypeMap.forEach((value, key) => items.push(<Select.Option key={key}
+                                                                   value={key.toString()}>{value}</Select.Option>))
+
+    return <Row>
+        <Col flex='auto' style={{display: 'flex', alignItems: 'center'}}>{decode(value, parseType)}</Col>
+        <Col flex='100px'><Select key={'s1' + id} defaultValue={parseType.toString()} bordered={false}
+                                  onChange={value => onChange(id, Number.parseInt(value))}
+                                  style={{width: 140}}>
+            {items}
+        </Select></Col>
+    </Row>
 }
+
+
