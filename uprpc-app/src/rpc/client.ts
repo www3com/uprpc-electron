@@ -1,18 +1,20 @@
 import { loadSync } from "@grpc/proto-loader";
-import { credentials, GrpcObject, loadPackageDefinition, Metadata, ServiceError } from "@grpc/grpc-js";
+import { credentials, GrpcObject, loadPackageDefinition, StatusObject, ServiceError } from "@grpc/grpc-js";
 import { RequestData, ResponseData, Mode } from "../types";
 import { parseMetadata, parseMds } from "./metadata";
 
-let aliveClient = {};
-let aliveSessions = {};
-
+const clientCaches = {};
+const callCache = {};
 export declare function Callback(
     response: ResponseData | null,
     metadata?: any,
     err?: Error,
     closeStream?: boolean
 ): void;
-interface CallOptions {
+
+interface ClientStub {
+    service: any;
+    call: Function;
     onData?: Function;
     onEnd?: Function;
     onError?: Function;
@@ -47,10 +49,10 @@ export async function send(request: RequestData, callback: typeof Callback) {
 }
 
 export async function stop(id: string, callback: (response: ResponseData | null, err?: Error) => void) {
-    let { call, methodMode } = aliveSessions[id];
+    let { call, methodMode } = callCache[id];
     if (!!call) {
         isWriteable(methodMode) ? call.end() : call.cancel();
-        delete aliveSessions[id];
+        delete callCache[id];
     } else {
         callback(null, new Error("This request not exist: " + id));
     }
@@ -58,124 +60,61 @@ export async function stop(id: string, callback: (response: ResponseData | null,
 
 function invokeUnary(request: RequestData, callback: typeof Callback) {
     let metadata = parseMds(request.mds || []);
-    let call = getCallStub(request, {
-        onData: (response: any) => {
-            console.log("客户端receive:", response);
-            callback(response);
-        },
-        onError: (err: any) => {
-            console.log("客户端receive:", err);
-            callback(null, parseMetadata(err.metadata), err);
-        },
+    let client: ClientStub = getCallStub(request);
+    client.call(request, (err: ServiceError, response: any) => {
+        console.log("收到服务端返回数据：", err, response);
+        callback(response, parseMetadata(err.metadata), err);
     });
-
     return;
 }
 
 function invokeServerStream(request: RequestData, callback: typeof Callback) {
-    let call = getCallStub(request, {
-        onData: (response: any) => {
-            console.log("客户端receive:", response);
-            callback(response);
-        },
-        onEnd: (s: any) => callback(null, null, undefined, true),
-        onError: (err: any, response: any) => callback(response, parseMetadata(err.metadata), err, true),
-        onMetadata: (metadata: any) => callback(null),
-        // onStatus: (status: any) => callback(null),
+    let client: ClientStub = getCallStub(request);
+    let call = client.call(request);
+    call.on("data", (data: any) => {
+        console.log("data收到数据：", data);
+        callback(data);
+    });
+    // call.on("error", (err: Error) => {
+    //     console.log("err收到数据：", err);
+    //     delete callCache[request.id];
+    //     callback(null, null, undefined, true);
+    // });
+    call.on("status", (status: StatusObject) => {
+        console.log("status收到数据：", status);
+        if (status.code === 0) {
+            callback(null, parseMetadata(status.metadata), undefined, true);
+        } else {
+            callback(null, null, new Error(status.details), true);
+        }
+        delete callCache[request.id];
     });
 }
 
 function invokeClientStream(request: RequestData, callback: typeof Callback) {
-    let call = getCallStub(request, {
-        onEnd: (response: any) => {
-            console.log("客户端receive:", response);
-            callback(response);
-        },
-        onError: (err: any, response: any) => callback(response, parseMetadata(err.metadata), err, true),
-    });
+    let client: ClientStub = getCallStub(request);
+    let call = client.call(request);
+    call.on("end", (data: any) => callback(data));
+    call.on("error", (err: any) => callback(null, parseMetadata(err.metadata), err));
     call.write(JSON.parse(request.body));
 }
 
 function invokeBidirectionalStream(request: RequestData, callback: typeof Callback) {
-    let call = getCallStub(request, {
-        onData: (response: any) => {
-            console.log("客户端receive:", response);
-            callback(response);
-        },
-        onEnd: () => callback(null, null, undefined, true),
-        onError: (err: any, response: any) => callback(response, parseMetadata(err.metadata), err, true),
-        onMetadata: (metadata: any) => callback(null),
-        onStatus: (status: any) => callback(null),
-    });
+    let client: ClientStub = getCallStub(request);
+    let call = client.call(request);
+    call.on("data", (data: any) => callback(data));
+    call.on("end", (data: any) => callback(null, null, undefined, true));
+    call.on("error", (err: any) => callback(null, parseMetadata(err.metadata), err, true));
+    call.on("data", (data: any) => callback(data));
     call.write(JSON.parse(request.body));
 }
 
-function getCallStub(request: RequestData, callOptions: CallOptions) {
-    let client = getClient(request);
-    return getOrCreateSession(client, request, callOptions);
-}
-
-function getOrCreateSession(client: any, request: RequestData, callOptions: CallOptions) {
-    if (request.methodMode === Mode.Unary) {
-        try {
-            client[request.methodName](JSON.parse(request.body), (err: ServiceError, response: any) => {
-                console.log("收到服务端返回数据：", err, response);
-                if (err != null) {
-                    callOptions.onError ? callOptions.onError(err, response) : void 0;
-                } else {
-                    callOptions.onData ? callOptions.onData(response) : void 0;
-                }
-            });
-        } catch (err) {
-            callOptions.onError ? callOptions.onError(err, null) : void 0;
-        }
-        return;
+function getCallStub(request: RequestData): ClientStub {
+    let clientKey = request.serviceName;
+    if (clientCaches[clientKey] && request.host == clientCaches[clientKey].host) {
+        return clientCaches[clientKey];
     }
 
-    let call = null;
-    if (!!aliveSessions[request.id]) {
-        call = aliveSessions[request.id].call;
-    }
-
-    call =
-        request.methodMode === Mode.BidirectionalStream
-            ? client[request.methodName]()
-            : client[request.methodName](JSON.parse(request.body));
-
-    if (callOptions?.onData) {
-        call.on("data", callOptions.onData);
-    }
-    if (callOptions?.onEnd) {
-        call.on("end", (data: any) => {
-            console.log("服务器发送end,客户端关闭", data);
-            delete aliveSessions[request.id];
-            callOptions.onEnd ? callOptions.onEnd() : void 0;
-        });
-    }
-    if (callOptions?.onError) {
-        call.on("error", (e: Error) => {
-            console.log("发生异常,客户端关闭");
-            delete aliveSessions[request.id];
-            callOptions.onError ? callOptions.onError(e) : void 0;
-        });
-    }
-    if (callOptions?.onMetadata) {
-        call.on("metadata", callOptions.onMetadata);
-    }
-    if (callOptions?.onStatus) {
-        call.on("status", (s: any) => {
-            console.log("连接状态发生变化：", s);
-            callOptions.onStatus ? callOptions.onStatus(s) : void 0;
-        });
-    }
-    aliveSessions[request.id] = {
-        call: call,
-        methodMode: request.methodMode,
-    };
-    return call;
-}
-
-function getClient(request: RequestData) {
     let packageDefinition = loadSync([request.protoPath], {
         keepCase: true,
         longs: String,
@@ -186,7 +125,6 @@ function getClient(request: RequestData) {
     });
 
     let grpcObject: GrpcObject = loadPackageDefinition(packageDefinition);
-
     let service = null;
     if (request.namespace == "") {
         service = grpcObject[request.namespace];
@@ -194,20 +132,31 @@ function getClient(request: RequestData) {
         service = grpcObject[request.namespace][request.serviceName];
     }
 
-    if (request.methodMode === Mode.Unary) {
-        return new service(request.host, credentials.createInsecure());
-    }
-
-    let client = null;
-    if (!aliveClient[request.serviceName]) {
-        client = new service(request.host, credentials.createInsecure());
-        aliveClient[request.serviceName] = client;
-    } else {
-        client = aliveClient[request.serviceName];
-    }
-    return client;
+    let serviceImpl = new service(request.host, credentials.createInsecure());
+    let clientStub = {
+        host: request.host,
+        service: serviceImpl,
+        call: (request: RequestData, callback?: Function) => {
+            let call: any = null;
+            if (request.methodMode === Mode.BidirectionalStream) {
+                call = serviceImpl[request.methodName]();
+            } else {
+                call = serviceImpl[request.methodName](JSON.parse(request.body), callback);
+            }
+            if (isStream(request.methodMode)) {
+                callCache[request.id] = { methodMode: request.methodMode, call: call };
+            }
+            return call;
+        },
+    };
+    clientCaches[clientKey] = clientStub;
+    return clientStub;
 }
 
 function isWriteable(mode: Mode): boolean {
     return mode === Mode.BidirectionalStream || mode === Mode.ClientStream;
+}
+
+function isStream(mode: Mode): boolean {
+    return mode === Mode.BidirectionalStream || mode === Mode.ClientStream || mode === Mode.ServerStream;
 }

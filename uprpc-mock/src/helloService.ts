@@ -20,6 +20,7 @@ export class HelloWorldService {
     registerService(server: Server) {
         server.addService(this.grpcDefinition.helloworld.Greeter.service, {
             sayHelloSimple: this.sayHelloSimple,
+            sayHelloSimpleError: this.sayHelloSimpleError,
             sayHelloServer: this.sayHelloServer,
             sayHelloClient: this.sayHelloClient,
             sayHelloDouble: this.sayHelloDouble,
@@ -27,16 +28,18 @@ export class HelloWorldService {
     }
     // 简单gRPC调用
     sayHelloSimple(call: any, callback: any) {
+        console.log("sayHelloSimple 收到客户端请求：", call.request.name);
+        callback({ message: "Hello " + call.request.name });
+    }
+    // 简单gRPC调用
+    sayHelloSimpleError(call: any, callback: any) {
+        console.log("sayHelloSimpleError 收到客户端请求：", call.request.name);
         // parse request metadata
         let callId = call.metadata.get("callId");
         console.log("callId=", callId);
-
         let s = 233;
         let code1: Buffer = Buffer.alloc(8);
-        // code1.writeBigInt64LE(BigInt(12345));
-        // code1.writeBigInt64LE(BigInt(200002002));
         code1.writeIntLE(s, 0, 2);
-        // code1.writeUInt8(s);
 
         let code2: Buffer = Buffer.alloc(32);
         code2.writeDoubleLE(23333333.00002);
@@ -53,12 +56,18 @@ export class HelloWorldService {
     }
     // 简单gRPC调用
     sayHelloServer(call: any, callback: any) {
+        console.log("sayHelloServer 收到客户端请求：", call.request.name);
         let count = 0;
         let s = setInterval(() => {
-            call.write({ message: "sayHelloServer: now time is:" + new Date() });
+            call.write({
+                message: call.request.name + "sayHelloServer: now time is:" + new Date(),
+            });
             count++;
             if (count > 10) {
-                call.end();
+                let metadata = new Metadata();
+                // keys that end with '-bin' must have Buffer values
+                metadata.add("status", "complete");
+                call.end(metadata);
                 clearInterval(s);
             }
         }, 1000);
@@ -80,7 +89,7 @@ export class HelloWorldService {
     // 简单gRPC调用
     sayHelloDouble(call: any, callback: any) {
         call.on("data", (data: any) => {
-            console.log("sayHelloDouble: 客户端receive:", data);
+            console.log("sayHelloDouble: receive客户端:", data);
             call.write({ message: "sayHelloDouble: you send to me:" + data.name });
         });
         call.on("end", function () {
