@@ -194,14 +194,14 @@ const file = () => {
                     switcherIcon={<DownOutlined/>}
                     defaultExpandedKeys={['0-0-0']}
                     treeData={datasource}/>}</>
-    }, {
+    }/*, {
         label: (<Space direction='vertical' size={0}>
             <SettingOutlined style={{fontSize: 20, marginRight: 0}}/>
             <div style={{fontSize: 10}}>ENV</div>
         </Space>),
         key: '2',
         children: 'Please look forward to it!'
-    }];
+    }*/];
 
     return (
         <Layout style={{height: '100%'}}>

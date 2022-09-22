@@ -14,7 +14,7 @@ import {context} from "@/stores/context";
 import {observer} from "mobx-react-lite";
 import Response from "@/pages/components/Response";
 import Request from "@/pages/components/Request";
-import {Service, Method, Mode, modeMap, Proto,} from "@/types/types";
+import {Service, Method, Mode, modeMap, Proto, Metadata,} from "@/types/types";
 import {encode} from "@/utils/metadata";
 
 interface EditorProp {
@@ -29,26 +29,35 @@ const editor = ({proto, service, method: initMethod}: EditorProp) => {
     const [host, setHost] = useState(proto.host);
     const [method, setMethod] = useState(initMethod);
 
-    const onRequestChange = (method: Method) => {
-        tabStore.setDot(method.id)
-        setMethod({...method, requestBody: method.requestBody, requestMds: method.requestMds});
-    }
-
     const onHostChange = (host: string) => {
         tabStore.setDot(method.id)
         setHost(host);
     }
 
+    const onRequestChange = (method: Method) => {
+        tabStore.setDot(method.id)
+        setMethod({...method, requestBody: method.requestBody, requestMds: method.requestMds});
+    }
+
+    const onResponseChange = (method: Method) => {
+        tabStore.setDot(method.id);
+        setMethod({...method, responseMds: method.responseMds});
+    }
+
     const getRequestData = () => {
+        let requestMds: Metadata[] = [];
         if (method.requestMds != null && method.requestMds.length > 0) {
-            method.requestMds = method.requestMds.map((value, index) => {
-                return {...value, key: value.key, value: encode(value.value, value.parseType)}
+            requestMds = method.requestMds.map((md, index) => {
+                if (md.key.endsWith('-bin')) {
+                    return {...md, key: md.key, value: encode(md.value, md.parseType)}
+                }
+                return {...md, key: md.key, value: md.value}
             })
         }
         return {
             id: method.id,
             body: method.requestBody,
-            metadata: method.requestMds,
+            mds: requestMds,
             methodMode: method.mode,
             methodName: method.name,
             namespace: service.namespace,
@@ -77,6 +86,11 @@ const editor = ({proto, service, method: initMethod}: EditorProp) => {
         await protoStore.stopStream(method.id);
     }
 
+    const onSave = () => {
+        protoStore.save(proto.id, service.id, method);
+        tabStore.setDot(method.id, false)
+    }
+
     let requestCache = protoStore.requestCaches.get(method.id);
     let responseCache = protoStore.responseCaches.get(method.id);
     // @ts-ignore
@@ -99,9 +113,9 @@ const editor = ({proto, service, method: initMethod}: EditorProp) => {
                                     : <Button type='primary' icon={<PlayCircleOutlined/>}
                                               onClick={onSend}>Start</Button>)}
                             <Button icon={<SaveOutlined/>}
-                                    onClick={() => protoStore.save(method)}>Save</Button>
-                            <Button icon={<FilePptOutlined/>}
-                                    onClick={() => protoStore.save(method)}>View Proto</Button>
+                                    onClick={onSave}>Save</Button>
+                            {/*<Button icon={<FilePptOutlined/>}*/}
+                            {/*        onClick={onSave}>View Proto</Button>*/}
                         </Space>
                     </Col>
                 </Row>
@@ -113,7 +127,7 @@ const editor = ({proto, service, method: initMethod}: EditorProp) => {
                              requestCache={requestCache}
                              onChange={onRequestChange}
                              onPush={onPush}/>
-                    <Response method={method} responseCache={responseCache} onChange={method1 => setMethod(method1)}/>
+                    <Response method={method} responseCache={responseCache} onChange={onResponseChange}/>
                 </Allotment>
             </Layout.Content>
         </Layout>

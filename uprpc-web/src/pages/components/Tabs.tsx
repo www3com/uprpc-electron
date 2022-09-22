@@ -51,7 +51,7 @@ const tabs = () => {
         <Tabs hideAdd type="editable-card" onEdit={onEdit} style={{height: "100%"}} size='small' items={items}
               onTabClick={(key: string) => tabStore.selectTab(key)}
               activeKey={tabStore.selectedTab}
-              tabBarExtraContent={extra}/>)
+              /*tabBarExtraContent={extra}*//>)
 }
 
 export default observer(tabs)

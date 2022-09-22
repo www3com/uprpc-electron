@@ -100,8 +100,9 @@ export default class ProtoStore {
         this.runningCaches.set(methodId, false);
     }
 
-    * save(method: Method) {
+    * save(protoId: string, serviceId: string, method: Method) {
         console.log("save method", method);
-        yield window.rpc.save(method);
+        storage.updateMethod(protoId, serviceId, method);
+        this.reloadProto();
     }
 }
