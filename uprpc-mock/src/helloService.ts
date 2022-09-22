@@ -29,7 +29,7 @@ export class HelloWorldService {
     // 简单gRPC调用
     sayHelloSimple(call: any, callback: any) {
         console.log("sayHelloSimple 收到客户端请求：", call.request.name);
-        callback({ message: "Hello " + call.request.name });
+        callback(null, { message: "Hello " + call.request.name });
     }
     // 简单gRPC调用
     sayHelloSimpleError(call: any, callback: any) {
@@ -83,7 +83,9 @@ export class HelloWorldService {
         });
         call.on("close", function () {
             console.log("sayHelloClient:服务器发送end,客户端关闭");
-            callback(null, { message: "Hello sayHelloClient" });
+            let metadata = new Metadata();
+            metadata.add("status", "complete");
+            callback(null, { message: "Hello sayHelloClient" }, metadata);
         });
     }
     // 简单gRPC调用
@@ -91,9 +93,12 @@ export class HelloWorldService {
         call.on("data", (data: any) => {
             console.log("sayHelloDouble: receive客户端:", data);
             call.write({ message: "sayHelloDouble: you send to me:" + data.name });
+            if (data.name === "exit") {
+                let metadata = new Metadata();
+                metadata.add("status", "exited");
+                call.end(metadata);
+            }
         });
-        call.on("end", function () {
-            console.log("sayHelloDouble: 客户端发送end,客户端关闭");
-        });
+        call.on("end", function () {});
     }
 }

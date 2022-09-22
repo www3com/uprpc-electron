@@ -51,7 +51,7 @@ export async function send(request: RequestData, callback: typeof Callback) {
 export async function stop(id: string, callback: (response: ResponseData | null, err?: Error) => void) {
     let { call, methodMode } = callCache[id];
     if (!!call) {
-        isWriteable(methodMode) ? call.end() : call.cancel();
+        Mode.isWriteStream(methodMode) ? call.end() : call.cancel();
         delete callCache[id];
     } else {
         callback(null, new Error("This request not exist: " + id));
@@ -61,51 +61,24 @@ export async function stop(id: string, callback: (response: ResponseData | null,
 function invokeUnary(request: RequestData, callback: typeof Callback) {
     let metadata = parseMds(request.mds || []);
     let client: ClientStub = getCallStub(request);
-    client.call(request, (err: ServiceError, response: any) => {
-        console.log("收到服务端返回数据：", err, response);
-        callback(response, parseMetadata(err.metadata), err);
-    });
+    client.call(request, callback);
     return;
 }
 
 function invokeServerStream(request: RequestData, callback: typeof Callback) {
     let client: ClientStub = getCallStub(request);
-    let call = client.call(request);
-    call.on("data", (data: any) => {
-        console.log("data收到数据：", data);
-        callback(data);
-    });
-    // call.on("error", (err: Error) => {
-    //     console.log("err收到数据：", err);
-    //     delete callCache[request.id];
-    //     callback(null, null, undefined, true);
-    // });
-    call.on("status", (status: StatusObject) => {
-        console.log("status收到数据：", status);
-        if (status.code === 0) {
-            callback(null, parseMetadata(status.metadata), undefined, true);
-        } else {
-            callback(null, null, new Error(status.details), true);
-        }
-        delete callCache[request.id];
-    });
+    let call = client.call(request, callback);
 }
 
 function invokeClientStream(request: RequestData, callback: typeof Callback) {
     let client: ClientStub = getCallStub(request);
-    let call = client.call(request);
-    call.on("end", (data: any) => callback(data));
-    call.on("error", (err: any) => callback(null, parseMetadata(err.metadata), err));
+    let call = client.call(request, callback);
     call.write(JSON.parse(request.body));
 }
 
 function invokeBidirectionalStream(request: RequestData, callback: typeof Callback) {
     let client: ClientStub = getCallStub(request);
-    let call = client.call(request);
-    call.on("data", (data: any) => callback(data));
-    call.on("end", (data: any) => callback(null, null, undefined, true));
-    call.on("error", (err: any) => callback(null, parseMetadata(err.metadata), err, true));
-    call.on("data", (data: any) => callback(data));
+    let call = client.call(request, callback);
     call.write(JSON.parse(request.body));
 }
 
@@ -136,27 +109,68 @@ function getCallStub(request: RequestData): ClientStub {
     let clientStub = {
         host: request.host,
         service: serviceImpl,
-        call: (request: RequestData, callback?: Function) => {
-            let call: any = null;
-            if (request.methodMode === Mode.BidirectionalStream) {
-                call = serviceImpl[request.methodName]();
-            } else {
-                call = serviceImpl[request.methodName](JSON.parse(request.body), callback);
-            }
-            if (isStream(request.methodMode)) {
-                callCache[request.id] = { methodMode: request.methodMode, call: call };
-            }
-            return call;
-        },
+        call: (request: RequestData, callback?: Function) => createCall(serviceImpl)(request, callback),
     };
     clientCaches[clientKey] = clientStub;
     return clientStub;
 }
 
-function isWriteable(mode: Mode): boolean {
-    return mode === Mode.BidirectionalStream || mode === Mode.ClientStream;
+function createCall(serviceImpl: any): Function {
+    return (request: RequestData, callback: CallableFunction) => {
+        let call: any = callCache[request.id];
+        if (call) {
+            return call.call;
+        }
+        let matadata = parseMds(request.mds || []);
+
+        if (Mode.isGrpcCallback(request.methodMode)) {
+            let grpcCallback = (err: ServiceError, response: any) => {
+                console.log("收到服务端返回数据：", err, response);
+                callback(response, parseMetadata(err?.metadata), err);
+            };
+            if (request.methodMode === Mode.Unary) {
+                call = serviceImpl[request.methodName](JSON.parse(request.body), matadata, grpcCallback);
+            } else {
+                call = serviceImpl[request.methodName](matadata, grpcCallback);
+            }
+        } else {
+            if (request.methodMode === Mode.BidirectionalStream) {
+                call = serviceImpl[request.methodName]();
+            } else {
+                call = serviceImpl[request.methodName](matadata, JSON.parse(request.body));
+            }
+        }
+
+        if (Mode.isStream(request.methodMode)) {
+            listenStatusAndCallback(request.id, call, callback);
+            if (Mode.isReadStream(request.methodMode)) {
+                listenDataAndCallback(request.id, call, callback);
+            }
+            callCache[request.id] = { methodMode: request.methodMode, call: call };
+        }
+        return call;
+    };
 }
 
-function isStream(mode: Mode): boolean {
-    return mode === Mode.BidirectionalStream || mode === Mode.ClientStream || mode === Mode.ServerStream;
+function listenDataAndCallback(reqId: any, call: any, callback?: CallableFunction) {
+    call.on("data", (data: any) => {
+        console.log("data收到数据：", data);
+        if (callback) {
+            callback(data);
+        }
+    });
+}
+function listenStatusAndCallback(reqId: any, call: any, callback?: CallableFunction) {
+    call.on("error", (e: Error) => {
+        console.log("发生异常,客户端关闭");
+    });
+    call.on("status", (status: StatusObject) => {
+        console.log("status收到数据：", status);
+        if (callback) {
+            status.code === 0
+                ? callback(null, parseMetadata(status.metadata), undefined, true)
+                : callback(null, null, new Error(status.details), true);
+        }
+        delete callCache[reqId];
+    });
 }
