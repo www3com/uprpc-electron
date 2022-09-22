@@ -15,7 +15,7 @@ export default class ProtoStore {
     runningCaches: Map<string, boolean> = new Map<string, boolean>();
 
     init(): void {
-        this.reloadProto();
+        this.protos = storage.listProto();
         this.onEndStream();
         this.onResponse();
     }
@@ -50,13 +50,20 @@ export default class ProtoStore {
         let res = yield window.rpc.openProto();
         if (!res.success) return res;
 
-        res = yield  window.rpc.parseProto(res.data, storage.listIncludeDir());
+        res = yield window.rpc.parseProto(res.data, storage.listIncludeDir());
         storage.addProto(res.data);
-        this.reloadProto();
         return {success: true}
     }
 
-    reloadProto(): void {
+    * reloadProto(): any {
+        let paths: string[] = [];
+        storage.listProto().forEach(value => paths.push(value.path))
+        let res = yield window.rpc.parseProto(paths, storage.listIncludeDir());
+        if (!res.success) {
+            console.log('error')
+            return
+        }
+        storage.addProto(res.data);
         this.protos = storage.listProto();
     }
 

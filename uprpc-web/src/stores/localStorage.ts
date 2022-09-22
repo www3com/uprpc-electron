@@ -1,4 +1,4 @@
-import {Method, Proto} from "@/types/types";
+import {FlatMethod, Method, Proto} from "@/types/types";
 
 const INCLUDE_DIRS_KEY = "includeDirs";
 const PROTOS_KEY = "protos";
@@ -46,19 +46,66 @@ export function listProto(): Proto[] {
     return protos == null ? [] : JSON.parse(protos);
 }
 
-export function addProto(protos: Proto[]): void {
+export function addProto(protos: Proto[], isMerge: boolean = true): void {
     let localProtos = listProto();
-    for (let proto of protos) {
-        for (let i = 0; i < localProtos.length; i++) {
-            if (localProtos[i].path === proto.path) {
-                localProtos.splice(i, 1);
+    for (let i = 0; i < protos.length; i++) {
+        for (let j = 0; j < localProtos.length; i++) {
+            let proto = protos[i];
+            if (localProtos[j].path === proto.path) {
+                if (isMerge) {
+                    protos.splice(i, 1, mergeProto(proto, localProtos[j]));
+                }
+                localProtos.splice(j, 1);
                 break;
             }
         }
     }
-
     localProtos.push(...protos);
     localStorage.setItem(PROTOS_KEY, JSON.stringify(localProtos));
+}
+
+function mergeProto(newProto: Proto, origProto: Proto): Proto {
+    let mergedProto = {...newProto, host: origProto.host, id: origProto.id};
+    for (let service of mergedProto.services) {
+        for (let method of service.methods) {
+            let origMethod = getFullMethod(origProto, service.name, method.name);
+            if (origMethod == null) {
+                continue;
+            }
+            service.id = origMethod.serviceId;
+            method.id = origMethod.id;
+            method.requestMds = origMethod.requestMds;
+            method.responseMds = origMethod.responseMds;
+            method.requestBody = mergeParams(JSON.parse(method.requestBody), JSON.parse(origMethod.requestBody))
+        }
+    }
+    return mergedProto;
+}
+
+function mergeParams(newParams: any, origParams: any): string {
+    if (newParams == null) {
+        return JSON.stringify("{}")
+    }
+
+    for (let key in newParams) {
+        if (origParams[key] != null) {
+            newParams[key] = origParams[key]
+        }
+    }
+    return JSON.stringify(newParams, null, '\t');
+}
+
+function getFullMethod(proto: Proto, serviceName: string, methodName: string): FlatMethod | null {
+    for (let service of proto.services) {
+        if (service.name == serviceName) {
+            for (let method of service.methods) {
+                if (method.name == methodName) {
+                    return {...method, namespace: service.namespace, serviceId: service.id, serviceName: service.name};
+                }
+            }
+        }
+    }
+    return null;
 }
 
 export function removeProto(id: string): void {
@@ -102,5 +149,5 @@ export function updateMethod(protoId: string, serviceId: string, method: Method)
             proto.services.splice(i, 1, service);
         }
     }
-    addProto([proto])
+    addProto([proto], false)
 }
