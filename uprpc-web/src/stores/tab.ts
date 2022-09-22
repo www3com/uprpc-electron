@@ -1,5 +1,5 @@
-import { makeAutoObservable } from "mobx";
-import { Tab } from "@/types/types";
+import {makeAutoObservable} from "mobx";
+import {Tab} from "@/types/types";
 
 export default class TabStore {
     constructor() {
@@ -14,10 +14,10 @@ export default class TabStore {
         this.selectedTab = key;
     }
 
-    setDot(key: string) {
+    setDot(key: string, dot: boolean = true) {
         this.openTabs.forEach((item, index) => {
             if (item.key == key) {
-                item.dot = true;
+                item.dot = dot;
                 this.openTabs.splice(index, 1, item);
             }
         });

@@ -1,9 +1,11 @@
-import { ParseType } from "../types/types";
+import {ParseType} from "../types/types";
 
 export function encode(value: any, parseType: number) {
-    let buffer = new ArrayBuffer(16);
-    let view = new DataView(buffer);
+    if (ParseType.Text == parseType) {
+        return new TextEncoder().encode(value);
+    }
 
+    let view = new DataView(new ArrayBuffer(16));
     switch (parseType) {
         // case ParseType.IntLE:
         // case ParseType.IntBE:

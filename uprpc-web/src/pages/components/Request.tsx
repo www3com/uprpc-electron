@@ -44,6 +44,9 @@ export default ({running, method, requestCache, onChange, onPush}: requestProps)
     const onDelete = (index: number) => {
         mds.splice(index, 1);
         setMds([...mds]);
+        if (onChange) {
+            onChange({...method, requestMds: mds});
+        }
     }
 
     let isStream = method.mode == Mode.ClientStream || method.mode == Mode.BidirectionalStream;
@@ -80,7 +83,7 @@ export default ({running, method, requestCache, onChange, onPush}: requestProps)
                    dataSource={mds}>
                 <Table.Column className={styles.metadataColumn} key='key' dataIndex='key' title='KEY' width={'30%'}
                               render={(text: string, record: any, index: number) => {
-                                  return <Input key={'key' + record.id} defaultValue={record.name}
+                                  return <Input key={'key' + record.id} defaultValue={record.key}
                                                 onChange={(e) => onEdit({...record, key: e.target.value})}/>
                               }}/>
                 <Table.Column className={styles.metadataColumn} key='value' dataIndex='value' title='VALUE'
@@ -140,7 +143,6 @@ const InputWrapper = ({metadata, onChange}: InputWrapperProp) => {
             <Select key={'s' + metadataState.id} defaultValue={metadataState.parseType.toString()} bordered={false}
                     onChange={value => handleChange({...metadataState, parseType: Number.parseInt(value)})}
                     style={{width: 140}}>
-                <Select.Option key={0} value='0'>Empty</Select.Option>
                 {items}
             </Select> : ''}
     </div>

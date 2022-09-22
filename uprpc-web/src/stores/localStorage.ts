@@ -31,6 +31,16 @@ export function removeIncludeDir(path: string): void {
     localStorage.setItem(INCLUDE_DIRS_KEY, JSON.stringify(includeDirs));
 }
 
+function getProto(protoId: string): Proto | null {
+    let protos = listProto();
+    for (let proto of protos) {
+        if (proto.id == protoId) {
+            return proto;
+        }
+    }
+    return null;
+}
+
 export function listProto(): Proto[] {
     let protos = localStorage.getItem(PROTOS_KEY);
     return protos == null ? [] : JSON.parse(protos);
@@ -74,12 +84,23 @@ export function listMethod(protoId: string): Method[] {
     return methods;
 }
 
-function getProto(protoId: string): Proto | null {
-    let protos = listProto();
-    for (let proto of protos) {
-        if (proto.id == protoId) {
-            return proto;
+export function updateMethod(protoId: string, serviceId: string, method: Method) {
+    let proto = getProto(protoId);
+    if (proto?.services == null) {
+        return;
+    }
+
+    for (let i = 0; i < proto?.services.length; i++) {
+        let service = proto.services[i];
+        if (service.id == serviceId) {
+            for (let j = 0; j < service.methods.length; j++) {
+                let m = service.methods[j];
+                if (m.id == method.id) {
+                    service.methods.splice(j, 1, method);
+                }
+            }
+            proto.services.splice(i, 1, service);
         }
     }
-    return null;
+    addProto([proto])
 }
