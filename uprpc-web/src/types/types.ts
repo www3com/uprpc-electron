@@ -114,6 +114,12 @@ export interface Method {
     responseMds?: Metadata[];
 }
 
+export interface FlatMethod extends Method {
+    namespace: string,
+    serviceId: string,
+    serviceName: string,
+}
+
 export interface Service {
     id: string;
     name: string;
