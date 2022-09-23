@@ -1,5 +1,6 @@
 import { RequestData, ResponseData, Mode } from "../types";
 import { Callback, ClientStub, getCallStub, closeCall } from "./calls";
+
 export async function send(request: RequestData, callback: typeof Callback) {
     let reqId: string = request.id;
     switch (request.methodMode) {
