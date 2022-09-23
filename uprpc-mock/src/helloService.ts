@@ -99,6 +99,8 @@ export class HelloWorldService {
                 call.end(metadata);
             }
         });
-        call.on("end", function () {});
+        call.on("end", (d: any) => {
+            console.log("sayHelloDouble: end:", d);
+        });
     }
 }
