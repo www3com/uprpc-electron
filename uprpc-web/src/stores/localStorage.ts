@@ -46,13 +46,13 @@ export function addProto(proto: Proto): void {
     localStorage.setItem(PROTOS_KEY, JSON.stringify(localProtos));
 }
 
-export function refreshProtos(protos: Proto[]): void {
+export function reloadProtos(protos: Proto[]): void {
     for (let proto of protos) {
-        refreshProto(proto);
+        reloadProto(proto);
     }
 }
 
-export function refreshProto(proto: Proto): void {
+export function reloadProto(proto: Proto): void {
     let origProto = getProto(proto.path);
     if (origProto == null) {
         return;

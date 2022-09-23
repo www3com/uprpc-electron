@@ -15,9 +15,13 @@ export default class ProtoStore {
     runningCaches: Map<string, boolean> = new Map<string, boolean>();
 
     init(): void {
-        this.protos = storage.listProto();
+        this.initProto();
         this.onEndStream();
         this.onResponse();
+    }
+
+    initProto(): void {
+        this.protos = storage.listProto();
     }
 
     onEndStream() {
@@ -52,7 +56,7 @@ export default class ProtoStore {
 
         res = yield window.rpc.parseProto(res.data, storage.listIncludeDir());
         storage.addProtos(res.data);
-        this.protos = storage.listProto();
+        this.initProto();
         return {success: true}
     }
 
@@ -64,13 +68,26 @@ export default class ProtoStore {
             console.log('reload proto error')
             return
         }
-        storage.refreshProtos(res.data);
-        this.protos = storage.listProto();
+        storage.reloadProtos(res.data);
+        this.initProto();
     }
 
     * deleteProto(id: string): any {
         storage.removeProto(id);
-        this.reloadProto();
+        this.initProto();
+    }
+
+    * saveProto(proto: Proto, host: string, method: Method) {
+        console.log("save proto method", method);
+        proto.host = host;
+        for (let i = 0; i < proto.methods.length; i++) {
+            let origMethod = proto.methods[i];
+            if (origMethod.id == method.id) {
+                proto.methods[i] = method;
+            }
+        }
+        storage.addProto(proto);
+        this.initProto();
     }
 
     * send(requestData: RequestData): any {
@@ -106,18 +123,5 @@ export default class ProtoStore {
         console.log("request stop stream");
         yield window.rpc.stopStream(methodId);
         this.runningCaches.set(methodId, false);
-    }
-
-    * save(proto: Proto, host: string, method: Method) {
-        console.log("save method", method);
-        proto.host = host;
-        for (let i = 0; i < proto.methods.length; i++) {
-            let origMethod = proto.methods[i];
-            if (origMethod.id == method.id) {
-                proto.methods[i] = method;
-            }
-        }
-        storage.addProto(proto);
-        this.reloadProto();
     }
 }

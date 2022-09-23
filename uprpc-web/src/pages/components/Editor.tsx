@@ -86,7 +86,7 @@ const editor = ({proto, method: initMethod}: EditorProp) => {
     }
 
     const onSave = () => {
-        protoStore.save(proto, host, method);
+        protoStore.saveProto(proto, host, method);
         tabStore.setDot(method.id, false)
     }
 
