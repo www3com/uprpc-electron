@@ -114,7 +114,7 @@ export default ({running, method, requestCache, onChange, onPush}: requestProps)
             <Tabs style={{height: "100%"}} animated={false} items={items}
                   tabBarExtraContent={<div style={{paddingRight: 10}}>{pushButton}</div>}/>
             <Allotment.Pane visible={isStream} className={styles.requestStreamHeight}>
-                <Card title='Request Stream' size={"small"} bordered={false} style={{height: '100%'}}
+                <Card title='Request Stream' size={"small"} bordered={false} style={{height: '100%',marginTop: '3px'}}
                       bodyStyle={{height: 'calc(100% - 40px)', overflow: "auto", padding: 0}}>
                     <Stream value={requestCache?.streams}/>
                 </Card>

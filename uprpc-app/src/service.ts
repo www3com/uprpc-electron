@@ -1,6 +1,6 @@
 import { BrowserWindow, ipcMain } from "electron";
 import * as electron from "electron";
-import * as client from "./rpc/client";
+import * as client from "./grpc/client";
 import { RequestData, ResponseData } from "./types";
 
 const { loadProto } = require("./proto/parser");
