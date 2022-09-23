@@ -62,10 +62,7 @@ function returnResponse(
     e?: Error,
     closeStream?: boolean
 ): void {
-    if (closeStream) {
-        console.log("endStream ", req.id);
-        window.webContents.send("endStream", req.id);
-    } else {
+    if (res || md) {
         let resData: ResponseData = {
             id: req.id,
             body: JSON.stringify(res ? res : e?.message, null, "\t"),
@@ -73,5 +70,10 @@ function returnResponse(
         };
         console.log("return response data: ", resData);
         window.webContents.send("updateResponse", resData);
+    }
+
+    if (closeStream) {
+        console.log("endStream ", req.id);
+        window.webContents.send("endStream", req.id);
     }
 }

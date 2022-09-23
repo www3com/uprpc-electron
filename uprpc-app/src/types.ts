@@ -49,6 +49,21 @@ export enum Mode {
     ServerStream = 2,
     BidirectionalStream = 3,
 }
+export namespace Mode {
+    export function isGrpcCallback(mode: Mode) {
+        return mode === Mode.Unary || mode === Mode.ClientStream;
+    }
+    export function isWriteStream(mode: Mode): boolean {
+        return mode === Mode.BidirectionalStream || mode === Mode.ClientStream;
+    }
+    export function isReadStream(mode: Mode): boolean {
+        return mode === Mode.BidirectionalStream || mode === Mode.ServerStream;
+    }
+
+    export function isStream(mode: Mode): boolean {
+        return mode === Mode.BidirectionalStream || mode === Mode.ServerStream || mode === Mode.ClientStream;
+    }
+}
 
 export interface Method {
     id: string;
