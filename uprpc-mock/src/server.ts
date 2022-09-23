@@ -1,5 +1,4 @@
-import { loadSync } from "@grpc/proto-loader";
-import { loadPackageDefinition, Server, ServerCredentials } from "@grpc/grpc-js";
+import { Server, ServerCredentials } from "@grpc/grpc-js";
 import { HelloWorldService } from "./helloService";
 
 const host = "0.0.0.0:9000";

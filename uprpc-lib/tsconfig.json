@@ -1,8 +1,0 @@
-{
-  "extends": "../tsconfig.json",
-  "compilerOptions": {
-    "outDir": "dist",
-    "composite": true, // 使用 composite, 它意味着工程可以被引用, 并支持增量编译
-    "declaration": true // 使用 composite 选项必须开启 declaration
-  }
-}
