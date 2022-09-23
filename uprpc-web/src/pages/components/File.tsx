@@ -20,8 +20,8 @@ import IncludeDir from "@/pages/components/IncludeDir";
 import * as storage from '@/stores/localStorage';
 
 interface DeleteProto {
-    id: string,
-    name: string
+    id: string;
+    name: string;
 }
 
 const file = () => {
@@ -46,23 +46,21 @@ const file = () => {
     };
 
     const getExpandedKeys = (value: string): string[] => {
-        let keys = [];
+        let keys: Set<string> = new Set<string>();
         for (let proto of protoStore.protos) {
             if (proto.name.toLowerCase().indexOf(value.toLowerCase()) > -1) {
-                keys.push(proto.id);
+                keys.add(proto.path);
             }
-            for (let service of proto.services) {
-                if (service.name.toLowerCase().indexOf(value.toLowerCase()) > -1) {
-                    keys.push(service.id);
+            for (let method of proto.methods) {
+                if (method.serviceName.toLowerCase().indexOf(value.toLowerCase()) > -1) {
+                    keys.add(proto.path + method.serviceName);
                 }
-                for (let method of service.methods) {
-                    if (method.name.toLowerCase().indexOf(value.toLowerCase()) > -1) {
-                        keys.push(method.id);
-                    }
+                if (method.name.toLowerCase().indexOf(value.toLowerCase()) > -1) {
+                    keys.add(method.id);
                 }
             }
         }
-        return keys;
+        return Array.from(keys);
     }
 
     const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -90,24 +88,31 @@ const file = () => {
         let treeData = [];
         for (let proto of protos) {
             let item: any = {
-                key: proto.id,
+                key: proto.path,
                 title: <span style={{width: '100%'}}>{getTitle(proto.name, searchValue)}</span>,
                 icon: <FileOutlined/>,
                 children: []
             };
-            for (let service of proto.services) {
-                let methods = [];
-                for (let m of service.methods) {
-                    methods.push({key: m.id, title: getTitle(m.name, searchValue), icon: <BlockOutlined/>})
-                }
 
+            let serviceMap: Map<any, any[]> = new Map<any, any[]>();
+            proto.methods.forEach((method, index, array) => {
+                let methods = serviceMap.get(method.serviceName);
+                if (methods == null) {
+                    methods = [];
+                }
+                methods.push({key: method.id, title: getTitle(method.name, searchValue), icon: <BlockOutlined/>});
+                serviceMap.set(method.serviceName, methods);
+            })
+
+            serviceMap.forEach((value, key, map) => {
                 item.children.push({
-                    key: service.id,
-                    title: getTitle(service.name, searchValue),
+                    key: proto.path + key,
+                    title: getTitle(key, searchValue),
                     icon: <DatabaseOutlined/>,
-                    children: methods
-                })
-            }
+                    children: value
+                });
+            });
+
             treeData.push(item)
         }
         return treeData;
@@ -119,7 +124,7 @@ const file = () => {
         let pos = e.node.pos.split('-');
         if (pos.length == 2) {
             let proto = protoStore.protos[pos[1]];
-            setDeleteProto({id: proto.id, name: proto.name})
+            setDeleteProto({id: proto.path, name: proto.name})
         } else if (pos.length == 4) {
             tabStore.openTab({
                 key: selectedKeys[0].toString(),

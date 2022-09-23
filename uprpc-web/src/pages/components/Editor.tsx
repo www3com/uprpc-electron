@@ -14,16 +14,15 @@ import {context} from "@/stores/context";
 import {observer} from "mobx-react-lite";
 import Response from "@/pages/components/Response";
 import Request from "@/pages/components/Request";
-import {Service, Method, Mode, modeMap, Proto, Metadata,} from "@/types/types";
+import {Method, Mode, modeMap, Proto, Metadata,} from "@/types/types";
 import {encode} from "@/utils/metadata";
 
 interface EditorProp {
     proto: Proto,
-    service: Service,
     method: Method
 }
 
-const editor = ({proto, service, method: initMethod}: EditorProp) => {
+const editor = ({proto, method: initMethod}: EditorProp) => {
     let {protoStore, tabStore} = useContext(context)
 
     const [host, setHost] = useState(proto.host);
@@ -60,8 +59,8 @@ const editor = ({proto, service, method: initMethod}: EditorProp) => {
             mds: requestMds,
             methodMode: method.mode,
             methodName: method.name,
-            namespace: service.namespace,
-            serviceName: service.name,
+            namespace: method.namespace,
+            serviceName: method.serviceName,
             protoPath: proto.path,
             host: host,
         };
@@ -87,7 +86,7 @@ const editor = ({proto, service, method: initMethod}: EditorProp) => {
     }
 
     const onSave = () => {
-        protoStore.save(proto.id, service.id, method);
+        protoStore.save(proto, host, method);
         tabStore.setDot(method.id, false)
     }
 
@@ -100,7 +99,7 @@ const editor = ({proto, service, method: initMethod}: EditorProp) => {
             <Layout.Header className={styles.header} style={{paddingBottom: 10}}>
                 <Row gutter={5}>
                     <Col flex="auto" style={{paddingTop: 5}}>
-                        <Input addonBefore={<Space><ApiOutlined/>{modeMap[method.mode]}</Space>}
+                        <Input addonBefore={<Space style={{width: 110}}><ApiOutlined/>{modeMap[method.mode]}</Space>}
                                defaultValue={host}
                                onChange={e => onHostChange(e.target.value)}/>
                     </Col>

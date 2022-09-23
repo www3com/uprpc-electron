@@ -1,11 +1,10 @@
 import React from "react";
-import {Col, Dropdown, Input, Menu, Row, Select, Table, Tabs} from "antd";
+import {Col, Row, Select, Table, Tabs} from "antd";
 import AceEditor from "react-ace";
 import "ace-builds/src-noconflict/mode-json";
 import "ace-builds/src-noconflict/ext-language_tools"
 import Stream from "@/pages/components/Stream";
-import {Method, Mode, ParseType, parseTypeMap, ResponseCache} from "@/types/types";
-import fatherrc from "@umijs/did-you-know/.fatherrc";
+import {Method, Mode, parseTypeMap, ResponseCache} from "@/types/types";
 import {decode} from "@/utils/metadata";
 
 interface responseProps {
@@ -54,6 +53,11 @@ export default ({method, responseCache, onChange}: responseProps) => {
         }
     ];
 
+    let mdTitle = <></>;
+    if (responseCache?.mds != null) {
+        mdTitle = <> ({responseCache.mds.length})</>
+    }
+
     const tab = method.mode == Mode.ServerStream || method.mode == Mode.BidirectionalStream ?
         {key: 'response', label: 'Response Stream', children: <Stream value={responseCache?.streams}/>} : {
             key: ' response', label: 'Response',
@@ -82,8 +86,10 @@ export default ({method, responseCache, onChange}: responseProps) => {
             />
         }
 
+    console.log("responseCache: ", responseCache)
+
     const tabItems = [tab, {
-        label: 'Metadata', key: 'matadata',
+        label: <>Metadata{mdTitle}</>, key: 'matadata',
         children: <Table size='small' bordered={true} pagination={false} columns={columns} rowKey='id'
                          dataSource={responseCache?.mds}/>
     }];
@@ -101,8 +107,8 @@ interface BufferValueProp {
 
 const BufferValue = ({id, value, parseType, onChange}: BufferValueProp) => {
     let items: any[] = [];
-    parseTypeMap.forEach((value, key) => items.push(<Select.Option key={key}
-                                                                   value={key.toString()}>{value}</Select.Option>))
+    parseTypeMap.forEach((value, key) =>
+        items.push(<Select.Option key={key} value={key.toString()}>{value}</Select.Option>))
 
     return <Row>
         <Col flex='auto' style={{display: 'flex', alignItems: 'center'}}>{decode(value, parseType)}</Col>

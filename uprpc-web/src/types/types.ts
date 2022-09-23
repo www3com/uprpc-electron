@@ -92,10 +92,10 @@ export enum Mode {
 }
 
 export const modeMap = {
-    [Mode.Unary]: "Unary",
+    [Mode.Unary]: "Unary Call",
     [Mode.ClientStream]: "Client Stream",
     [Mode.ServerStream]: "Server Stream",
-    [Mode.BidirectionalStream]: "Bidirectional Stream",
+    [Mode.BidirectionalStream]: "Bi-Directional",
 };
 
 export interface Method {
@@ -111,7 +111,6 @@ export interface Method {
 
 
 export interface Proto {
-    id: string;
     name: string;
     path: string;
     host: string;

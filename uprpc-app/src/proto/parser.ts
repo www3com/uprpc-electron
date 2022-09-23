@@ -42,7 +42,6 @@ export async function loadProto(file: string, includeDirs: string[]) {
     }
     let methods = parse(root, EMPTY, root.nested);
     return {
-        id: v4(),
         name: path.basename(file),
         path: file,
         host: "127.0.0.1:9000",
@@ -57,7 +56,7 @@ function parse(root: Root, namespaceName: string, children: any): any {
         if (isNamespace(node)) {
             methods.push(...parse(root, namespaceName == EMPTY ? key : namespaceName.concat(".", key), node.nested));
         } else if (node instanceof Service) {
-            methods.push(parseMethod(root, namespaceName, node));
+            methods.push(...parseMethod(root, namespaceName, node));
         }
     }
     return methods;

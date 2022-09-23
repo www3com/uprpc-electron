@@ -28,21 +28,20 @@ const tabs = () => {
         return <Welcome/>
     }
 
-    const items = tabStore.openTabs.map((value) => {
+    const items = tabStore.openTabs.map((tab) => {
         let children = <></>;
-        let label = value.title;
-        if (value.type == TabType.Proto) {
-            let posArr = value.params.split('-').map(Number);
+        let label = tab.title;
+        if (tab.type == TabType.Proto) {
+            let posArr = tab.params.split('-').map(Number);
             let proto = protoStore.protos[posArr[1]];
-            let service = proto.services[posArr[2]]
-            let method = service.methods[posArr[3]];
+            let method = proto.methods[posArr[3]];
             label = method.name;
-            children = <Editor proto={proto} service={service} method={method}/>
+            children = <Editor proto={proto} method={method}/>
         }
         return {
-            label: <Badge dot={value.dot} offset={[5, 8]}>{label}</Badge>,
-            key: value.key,
-            closeable: value.closable,
+            label: <Badge dot={tab.dot} offset={[5, 8]}>{label}</Badge>,
+            key: tab.key,
+            closeable: tab.closable,
             children: children
         };
     });
