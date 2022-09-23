@@ -1,6 +1,8 @@
 import * as router from "./router";
 
 const { app, BrowserWindow } = require("electron");
+const isDev = require("electron-is-dev");
+
 const path = require("path");
 
 function createWindow() {
@@ -13,8 +15,12 @@ function createWindow() {
         },
     });
 
-    mainWindow.loadFile("./dist/index.html");
-    // mainWindow.loadURL("http://localhost:8000");
+    if (isDev) {
+        mainWindow.loadURL("http://localhost:8000");
+    } else {
+        mainWindow.loadFile("./dist/index.html");
+    }
+
     // mainWindow.webContents.openDevTools();
     router.register(mainWindow);
 }
