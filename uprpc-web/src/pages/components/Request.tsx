@@ -49,6 +49,10 @@ export default ({running, method, requestCache, onChange, onPush}: requestProps)
         }
     }
 
+    let mdTitle = <></>;
+    if (mds !== null && mds.length > 0) {
+        mdTitle = <> ({mds.length})</>
+    }
     let isStream = method.mode == Mode.ClientStream || method.mode == Mode.BidirectionalStream;
     let pushButton = running && isStream ?
         <Button size='small' type='primary' icon={<CloudUploadOutlined/>}
@@ -75,7 +79,7 @@ export default ({running, method, requestCache, onChange, onPush}: requestProps)
                 tabSize={2}
             />
     }, {
-        label: 'Metadata', key: 'metadata', children:
+        label: <>Metadata{mdTitle}</>, key: 'metadata', children:
             <Table rowKey='id'
                    size={'small'}
                    bordered={true}
@@ -133,8 +137,9 @@ const InputWrapper = ({metadata, onChange}: InputWrapperProp) => {
         onChange(md);
     }
 
-    let items:any[] = [];
-    parseTypeMap.forEach((value, key) => items.push(<Select.Option key={key} value={key.toString()}>{value}</Select.Option>))
+    let items: any[] = [];
+    parseTypeMap.forEach((value, key) => items.push(<Select.Option key={key}
+                                                                   value={key.toString()}>{value}</Select.Option>))
 
     return <div style={{display: 'flex'}}>
         <Input key={'v' + metadataState.id} defaultValue={metadataState.value}

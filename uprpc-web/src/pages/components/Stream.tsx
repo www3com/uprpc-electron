@@ -15,6 +15,9 @@ export default ({value}: StreamProps) => {
     // @ts-ignore
     return (<Collapse activeKey={selectedKey} accordion onChange={key => setSelectedKey(key)}>
         {value?.map(function (item, index) {
+            if (item == null || item == '') {
+                return true
+            }
             return <Collapse.Panel header={'stream-' + (value?.length - index)} key={index + 1}>
                 <pre style={{padding: 0}}>
                     {item}

@@ -1,6 +1,5 @@
 import {
     Root,
-    load,
     ReflectionObject,
     Namespace,
     Method,
@@ -41,50 +40,46 @@ export async function loadProto(file: string, includeDirs: string[]) {
     } catch (e) {
         throw  e;
     }
-    let services = parse(root, EMPTY, root.nested);
+    let methods = parse(root, EMPTY, root.nested);
     return {
-        id: v4(),
         name: path.basename(file),
         path: file,
         host: "127.0.0.1:9000",
-        services: services,
+        methods: methods,
     };
 }
 
 function parse(root: Root, namespaceName: string, children: any): any {
-    let services = [];
+    let methods = [];
     for (let key in children) {
         let node = children[key];
         if (isNamespace(node)) {
-            services.push(...parse(root, namespaceName == EMPTY ? key : namespaceName.concat(".", key), node.nested));
+            methods.push(...parse(root, namespaceName == EMPTY ? key : namespaceName.concat(".", key), node.nested));
         } else if (node instanceof Service) {
-            services.push(parseService(root, namespaceName, node));
+            methods.push(...parseMethod(root, namespaceName, node));
         }
     }
-    return services;
+    return methods;
 }
 
-function parseService(root: Root, namespaceName: string, service: Service) {
-    let parsedMethods = [];
+function parseMethod(root: Root, namespaceName: string, service: Service) {
+    let methods = [];
     for (let methodName in service.methods) {
         let method = service.methods[methodName];
         let reqType = root.lookupType(method.requestType);
 
-        parsedMethods.push({
+        methods.push({
             id: v4(),
             name: methodName,
+            namespace: namespaceName,
+            serviceName: service.name,
             // @ts-ignore
             mode: (method.responseStream << 1) | method.requestStream,
             requestBody: JSON.stringify(parseTypeFields(reqType), null, "\t"),
         });
     }
 
-    return {
-        id: v4(),
-        name: service.name,
-        namespace: namespaceName,
-        methods: parsedMethods,
-    };
+    return methods;
 }
 
 function parseTypeFields(type: Type): any {

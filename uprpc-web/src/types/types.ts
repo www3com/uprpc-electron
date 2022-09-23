@@ -6,8 +6,6 @@ declare global {
 
 export enum ParseType {
     Text = 0,
-    IntLE,
-    IntBE,
     Int8,
     Int16LE,
     Int16BE,
@@ -20,8 +18,6 @@ export enum ParseType {
     DoubleLE,
     DoubleBE,
 
-    UintLE,
-    UintBE,
     Uint8,
     Uint16LE,
     Uint16BE,
@@ -36,8 +32,6 @@ export enum ParseType {
 
 export const parseTypeMap: Map<number, string> = new Map([
     [ParseType.Text, "Text"],
-    // [ParseType.IntLE, "IntLE"],
-    // [ParseType.IntBE, "IntBE"],
     [ParseType.Int8, "Int8"],
     [ParseType.Int16LE, "Int16LE"],
     [ParseType.Int16BE, "Int16BE"],
@@ -50,13 +44,12 @@ export const parseTypeMap: Map<number, string> = new Map([
     [ParseType.DoubleLE, "DoubleLE"],
     [ParseType.DoubleBE, "DoubleBE"],
 
-    // [ParseType.UintLE, "UintLE"],
-    // [ParseType.UintBE, "UintBE"],
     [ParseType.Uint8, "UInt8"],
     [ParseType.Uint16LE, "Uint16LE"],
     [ParseType.Uint16BE, "Uint16BE"],
     [ParseType.Uint32LE, "Uint32LE"],
     [ParseType.Uint32BE, "Uint32BE"],
+
     [ParseType.BigInt64BE, "BigInt64BE"],
     [ParseType.BigInt64LE, "BigInt64LE"],
     [ParseType.BigUint64BE, "BigUint64BE"],
@@ -99,14 +92,16 @@ export enum Mode {
 }
 
 export const modeMap = {
-    [Mode.Unary]: "Unary",
+    [Mode.Unary]: "Unary Call",
     [Mode.ClientStream]: "Client Stream",
     [Mode.ServerStream]: "Server Stream",
-    [Mode.BidirectionalStream]: "Bidirectional Stream",
+    [Mode.BidirectionalStream]: "Bi-Directional",
 };
 
 export interface Method {
     id: string;
+    namespace: string,
+    serviceName: string,
     name: string;
     mode: Mode;
     requestBody: string;
@@ -114,25 +109,12 @@ export interface Method {
     responseMds?: Metadata[];
 }
 
-export interface FlatMethod extends Method {
-    namespace: string,
-    serviceId: string,
-    serviceName: string,
-}
-
-export interface Service {
-    id: string;
-    name: string;
-    namespace: string;
-    methods: Method[];
-}
 
 export interface Proto {
-    id: string;
     name: string;
     path: string;
     host: string;
-    services: Service[];
+    methods: Method[];
 }
 
 export interface RequestCache {
