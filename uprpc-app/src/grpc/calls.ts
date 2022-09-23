@@ -104,9 +104,9 @@ function makeUnaryCall(serviceImpl: any) {
 function makeServerStreamCall(serviceImpl: any) {
     return (request: RequestData, callback: typeof Callback) => {
         let matadata = parseMds(request.mds || []);
-        let call = serviceImpl[request.methodName](matadata, JSON.parse(request.body), grpcCallback(callback));
-        listenStatusAndCallback(request.id, call, callback);
-        listenDataAndCallback(request.id, call, callback);
+        let call = serviceImpl[request.methodName](JSON.parse(request.body), matadata, grpcCallback(callback));
+        listenStatusAndCallback(request, call, callback);
+        listenDataAndCallback(call, callback);
         return call;
     };
 }
@@ -120,7 +120,7 @@ function makeClientStreamCall(serviceImpl: any) {
 
         let matadata = parseMds(request.mds || []);
         call = serviceImpl[request.methodName](matadata, grpcCallback(callback));
-        listenStatusAndCallback(request.id, call, callback);
+        listenStatusAndCallback(request, call, callback);
         callCache[request.id] = { methodMode: request.methodMode, call: call };
         return call;
     };
@@ -132,16 +132,16 @@ function makeBidirectionalStreamCall(serviceImpl: any) {
         if (call) {
             return call.call;
         }
-
-        call = serviceImpl[request.methodName]();
-        listenStatusAndCallback(request.id, call, callback);
-        listenDataAndCallback(request.id, call, callback);
+        let matadata = parseMds(request.mds || []);
+        call = serviceImpl[request.methodName](matadata);
+        listenStatusAndCallback(request, call, callback);
+        listenDataAndCallback(call, callback);
         callCache[request.id] = { methodMode: request.methodMode, call: call };
         return call;
     };
 }
 
-function listenDataAndCallback(reqId: any, call: any, callback?: CallableFunction) {
+function listenDataAndCallback(call: any, callback?: typeof Callback) {
     call.on("data", (data: any) => {
         console.log("data收到数据：", data);
         if (callback) {
@@ -150,7 +150,7 @@ function listenDataAndCallback(reqId: any, call: any, callback?: CallableFunctio
     });
 }
 
-function listenStatusAndCallback(reqId: any, call: any, callback?: CallableFunction) {
+function listenStatusAndCallback(request: RequestData, call: any, callback?: typeof Callback) {
     call.on("error", (e: Error) => {
         console.log("发生异常,客户端关闭");
     });
@@ -161,6 +161,7 @@ function listenStatusAndCallback(reqId: any, call: any, callback?: CallableFunct
                 ? callback(null, parseMetadata(status.metadata), undefined, true)
                 : callback(null, null, new Error(status.details), true);
         }
-        delete callCache[reqId];
+        Mode.isWriteStream(request.methodMode) ? call.end() : call.cancel();
+        delete callCache[request.id];
     });
 }
