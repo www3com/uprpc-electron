@@ -1,0 +1,80 @@
+# This is a basic workflow to help you get started with Actions
+
+name: release-ci
+
+# Controls when the workflow will run
+on:
+    # Triggers the workflow on push or pull request events but only for the "main" branch
+    push:
+        tags:
+            - "v*.*.*"
+
+    # Allows you to run this workflow manually from the Actions tab
+    workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+    # This workflow contains a single job called "build"
+    release:
+        runs-on: ${{ matrix.os }}
+
+        strategy:
+            matrix:
+                os: [macos-latest, windows-latest]
+
+        # build and release electron app
+        steps:
+            - name: Check out Git repository
+              uses: actions/checkout@v3
+
+            - name: Install Node.js, NPM and Yarn
+              uses: actions/setup-node@v1
+              with:
+                  node-version: 16.13.1
+                  cache: "yarn"
+
+            - name: Install yarn
+              run: npm install --global yarn
+
+            - name: Install Dependencies
+              run: cd ./uprpc-app && yarn
+
+            - name: Install Dependencies
+              run: cd ./uprpc-web && yarn
+
+            - name: Build Electron App for Windows
+              run: cd ./uprpc-app && yarn run package
+              env:
+                  GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+
+            - name: Cleanup Artifacts for Windows
+              if: matrix.os == 'windows-latest'
+              run: |
+                  npx rimraf "uprpc-app/release/!(uprpc*)"
+
+            - name: Build Electron App for MacOS
+              run: |
+                  cd ./uprpc-app 
+                  yarn run package
+                  yarn run package:arm
+              env:
+                  GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+
+            - name: Cleanup Artifacts for MacOS
+              if: matrix.os == 'macos-latest'
+              run: |
+                  npx rimraf "uprpc-app/release/!(*.dmg|*.zip)"
+
+            - name: upload artifacts
+              uses: actions/upload-artifact@v3.0.0
+              with:
+                  name: ${{ matrix.os }}
+                  path: uprpc-app/release/
+
+            - name: release
+              uses: softprops/action-gh-release@v0.1.14
+              if: startsWith(github.ref, 'refs/tags/')
+              with:
+                  files: "uprpc-app/release/**"
+              env:
+                  GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}

@@ -9,3 +9,4 @@ uprpc-lib/node_modules
 uprpc-mock/.DS_Store
 .vscode/launch.json
 uprpc-app/release/
+uprpc-app/static/
