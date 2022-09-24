@@ -1,4 +1,4 @@
-const { contextBridge, ipcRenderer } = require("electron");
+import { contextBridge, ipcRenderer } from "electron";
 
 contextBridge.exposeInMainWorld("rpc", {
     send: (params: any) => ipcRenderer.invoke("send", params),
@@ -7,7 +7,7 @@ contextBridge.exposeInMainWorld("rpc", {
     handleEndStream: (callback: any) => ipcRenderer.on("endStream", callback),
 
     // Import File
-    parseProto: (paths:string[], includeDirs: string[]) => ipcRenderer.invoke("parseProto", paths, includeDirs),
+    parseProto: (paths: string[], includeDirs: string[]) => ipcRenderer.invoke("parseProto", paths, includeDirs),
     openProto: () => ipcRenderer.invoke("openProto"),
 
     // Paths

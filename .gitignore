@@ -8,3 +8,4 @@ uprpc-lib/node_modules
 .DS_Store
 uprpc-mock/.DS_Store
 .vscode/launch.json
+uprpc-app/release/
