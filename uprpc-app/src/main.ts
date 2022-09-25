@@ -18,7 +18,7 @@ function createWindow() {
     if (isDev) {
         mainWindow.loadURL("http://localhost:8000");
     } else {
-        mainWindow.loadFile("./dist/index.html");
+        mainWindow.loadFile("./static/index.html");
     }
 
     // mainWindow.webContents.openDevTools();

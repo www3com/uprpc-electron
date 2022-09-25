@@ -7,9 +7,15 @@
 		"license": "MIT",
 		"scripts": {
 				"dev": "tsc -b && electron dist/main.js",
-				"pack": "tsc && electron-builder",
-				"electron:build:debug": "DEBUG=electron-builder electron-builder",
-				"prepack": "cd ../uprpc-web/ && yarn build && cp ./dist/* ../uprpc-app/dist/",
+				"package": "tsc && electron-builder -p always",
+        "package:arm": "tsc && electron-builder --arm64 -p always",
+				"package-all": "tsc && electron-builder build -mwl",
+				"package-linux": "tsc && electron-builder build --linux",
+				"package-win": "tsc && electron-builder build --win",
+				"prepackage": "cd ../uprpc-web/ && yarn build",
+				"prepackage-all": "cd ../uprpc-web/ && yarn build",
+        "prepackage-linux": "cd ../uprpc-web/ && yarn build",
+        "prepackage-win": "cd ../uprpc-web/ && yarn build",
 				"start": "npm run dev"
 		},
 		"devDependencies": {
@@ -34,8 +40,7 @@
 				"productName": "uprpc",
 				"files": [
 						"dist/",
-						"node_modules/",
-						"../uprpc-web/dist/",
+						"static/",
 						"package.json"
 				],
 				"directories": {
@@ -52,6 +57,8 @@
 						]
 				},
 				"dmg": {
+            "background": "assets/appdmg.png",
+            "icon": "assets/icon.icns",
 						"iconSize": 100,
 						"contents": [
 								{
@@ -79,7 +86,7 @@
 						],
 						"verifyUpdateCodeSignature": false,
 						"icon": "assest/icon.ico",
-						"artifactName": "${productName}-Web-Setup-${version}.${ext}"
+						"artifactName": "${productName}-setup-${version}.${ext}"
 				},
 				"nsis": {
 						"allowToChangeInstallationDirectory": true,
