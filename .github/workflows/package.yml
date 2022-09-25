@@ -53,6 +53,7 @@ jobs:
                   npx rimraf "uprpc-app/release/!(uprpc*)"
 
             - name: Build Electron App for MacOS
+              if: matrix.os == 'macos-latest'
               run: |
                   cd ./uprpc-app 
                   yarn run package
