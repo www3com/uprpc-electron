@@ -13,13 +13,9 @@ export declare function Callback(
 ): void;
 
 export interface ClientStub {
+    host: string;
     service: any;
     call: Function;
-    onData?: Function;
-    onEnd?: Function;
-    onError?: Function;
-    onMetadata?: Function;
-    onStatus?: Function;
 }
 
 export function getCallStub(request: RequestData): ClientStub {
